@@ -1,4 +1,8 @@
 apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.jakewharton.butterknife'
+//apply from: 'tinker-support.gradle'
+//apply from: 'multiple-channel.gradle'
 
 android {
     compileSdkVersion 25
@@ -10,21 +14,77 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
+
+    // 签名配置
+    signingConfigs {
+        release {
+            try {
+                storeFile file("./keystore/release.jks")
+                storePassword "123456"
+                keyAlias "user"
+                keyPassword "123456"
+                //zipAlignEnabled true
+                //shrinkResources true
+                //v1SigningEnabled true
+                //v2SigningEnabled true
+            } catch (ex) {
+                throw new InvalidUserDataException(ex.toString())
+            }
+        }
+
+        debug {
+
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            //signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
         }
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:multidex:1.0.1'
+
+    compile "org.greenrobot:eventbus:${rootProject.ext.eventbusLibVersion}"
+    compile "com.google.code.gson:gson:${rootProject.ext.gsonLibVersion}"
+    compile "com.github.bumptech.glide:glide:${rootProject.ext.glideLibVersion}"
+    compile "io.reactivex.rxjava2:rxjava:${rootProject.ext.rxjava2LibVersion}"
+    compile "io.reactivex.rxjava2:rxandroid:${rootProject.ext.rxandroidLibVersion}"
+    compile "com.tbruyelle.rxpermissions2:rxpermissions:${rootProject.ext.rxpermissions2LibVersion}"
+    compile "com.squareup.retrofit2:retrofit:${rootProject.ext.retrofit2LibVersion}"
+    compile "com.squareup.retrofit2:converter-scalars:${rootProject.ext.retrofit2LibVersion}"
+    compile "com.squareup.retrofit2:converter-gson:${rootProject.ext.retrofit2LibVersion}"
+    compile "com.squareup.retrofit2:adapter-rxjava2:${rootProject.ext.retrofit2LibVersion}"
+    compile "com.squareup.okhttp3:logging-interceptor:${rootProject.ext.okhttp3LogLibVersion}"
+    compile "com.jakewharton:butterknife:${rootProject.ext.butterknifeLibVersion}"
+    compile "com.tencent.bugly:crashreport_upgrade:${rootProject.ext.crashreportLibVersion}"
+    compile "com.meituan.android.walle:library:${rootProject.ext.walleLibVersion}"
+    compile 'com.tencent.bugly:nativecrashreport:latest.release'
+    annotationProcessor "com.jakewharton:butterknife-compiler:${rootProject.ext.butterknifeLibVersion}"
+
 }

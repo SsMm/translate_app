@@ -4,20 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.zgy.translate.MainActivity"
+    tools:context="com.zgy.translate.activitys.DeviceManagerActivity"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/share"
+    <Button
+        android:id="@+id/start_blue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:layout_marginBottom="50dp"/>
+        android:text="开启蓝牙"/>
 
-    <TextView
-        android:id="@+id/device"
+    <Button
+        android:id="@+id/stop_blue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="关闭蓝牙"/>
 
 </LinearLayout>

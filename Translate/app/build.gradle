@@ -17,13 +17,18 @@ android {
         multiDexEnabled true
     }
 
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
     // 签名配置
     signingConfigs {
         release {
             try {
                 storeFile file("./keystore/release.jks")
                 storePassword "123456"
-                keyAlias "user"
+                keyAlias "apollo"
                 keyPassword "123456"
                 //zipAlignEnabled true
                 //shrinkResources true
@@ -42,7 +47,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            //signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -65,11 +70,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:multidex:1.0.1'
-
     compile "org.greenrobot:eventbus:${rootProject.ext.eventbusLibVersion}"
     compile "com.google.code.gson:gson:${rootProject.ext.gsonLibVersion}"
     compile "com.github.bumptech.glide:glide:${rootProject.ext.glideLibVersion}"
@@ -84,7 +84,11 @@ dependencies {
     compile "com.jakewharton:butterknife:${rootProject.ext.butterknifeLibVersion}"
     compile "com.tencent.bugly:crashreport_upgrade:${rootProject.ext.crashreportLibVersion}"
     compile "com.meituan.android.walle:library:${rootProject.ext.walleLibVersion}"
-    compile 'com.tencent.bugly:nativecrashreport:latest.release'
     annotationProcessor "com.jakewharton:butterknife-compiler:${rootProject.ext.butterknifeLibVersion}"
-
+    compile files('libs/MobCommons-2017.1024.1907.jar')
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.tencent.bugly:nativecrashreport:latest.release'
 }

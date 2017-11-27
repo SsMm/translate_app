@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Translate</string>
+    <string name="app_name">Apollo翻译</string>
+    <string name="share_title">翻译</string>
 </resources>

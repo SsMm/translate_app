@@ -7,6 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.zgy.translate.domains.dtos.BluetoothDeviceDTO;
+import com.zgy.translate.domains.eventbuses.BluetoothDeviceEB;
+
+import org.greenrobot.eventbus.EventBus;
+
 /**
  * Created by zhouguangyue on 2017/11/22.
  */
@@ -19,12 +24,15 @@ public class BluetoothReceiver extends BroadcastReceiver {
         if(BluetoothDevice.ACTION_FOUND.equals(action)){
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if(device.getBondState() != BluetoothDevice.BOND_BONDED){ //绑定过
-                Log.i("device", device.getName() + "---" + device.getAddress());
+                Log.i("绑定过device", device.getName() + "---" + device.getAddress());
             }else if(device.getBondState() != BluetoothDevice.BOND_BONDING){ //正在绑定
-                Log.i("device", device.getName() + "---" + device.getAddress());
+                Log.i("正在绑定device", device.getName() + "---" + device.getAddress());
             }else if(device.getBondState() != BluetoothDevice.BOND_NONE){ //没有绑定过或者取消绑定
-                Log.i("device", device.getName() + "---" + device.getAddress());
+                Log.i("没有绑定过或者取消绑定device", device.getName() + "---" + device.getAddress());
             }
+            BluetoothDeviceEB deviceEB = new BluetoothDeviceEB();
+            deviceEB.setBluetoothDevice(device);
+            EventBus.getDefault().post(deviceEB);
         }else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
             Log.i("搜索完成", "搜索完成");
         }

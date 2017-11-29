@@ -3,6 +3,7 @@ package com.zgy.translate.activitys;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.LinearGradient;
 import android.os.AsyncTask;
@@ -23,6 +24,7 @@ import com.zgy.translate.domains.dtos.BluetoothDeviceDTO;
 import com.zgy.translate.domains.eventbuses.BluetoothConnectEB;
 import com.zgy.translate.domains.eventbuses.BluetoothDeviceEB;
 import com.zgy.translate.global.GlobalSingleThread;
+import com.zgy.translate.global.GlobalUUID;
 import com.zgy.translate.receivers.BluetoothReceiver;
 import com.zgy.translate.utils.ConfigUtil;
 
@@ -44,20 +46,25 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class DeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface{
-    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private static final int REQUEST_ENABLE_BT = 1;  //请求开启蓝牙
 
     @BindView(R.id.adm_rv_deviceList) RecyclerView deviceRv;
     @BindView(R.id.adm_tv_deviceBonded) TextView deviceBondedTv;  //已绑定过得蓝牙设备
 
 
-    private BluetoothAdapter bluetoothAdapter;
-    private BluetoothReceiver bluetoothReceiver = null;
+    private BluetoothAdapter mBluetoothAdapter;
+
+    private BluetoothReceiver mBluetoothReceiver = null;
+    private ConnectThread mConnectThread;
+    private GetInputStreamThread mGetInputStreamThread;
+
     private BluetoothDeviceAdapter mBluetoothDeviceAdapter;  //搜索到设备
     private List<BluetoothDeviceDTO> deviceDTOList;
     private List<BluetoothDeviceEB> deviceEBList;  //存放搜索到的蓝牙设备
 
-    private BluetoothSocket bluetoothSocket;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,44 +130,60 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         super.onStop();
         cancelBltReceiver();
         cancelDiscovery();
-        bluetoothAdapter = null;
+        mBluetoothAdapter = null;
     }
 
     /**注册蓝牙广播*/
     private void registerBlueReceiver(){
-        if(bluetoothReceiver != null){
+        if(mBluetoothReceiver != null){
             return;
         }
-        bluetoothReceiver = new BluetoothReceiver();
+        mBluetoothReceiver = new BluetoothReceiver();
         IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(bluetoothReceiver,intentFilter);
+        registerReceiver(mBluetoothReceiver,intentFilter);
         Log.i("注册", "注册蓝牙广播");
     }
 
     /**判断蓝牙是否已开启*/
     private void checkBluetooth(){
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(bluetoothAdapter == null){
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(mBluetoothAdapter == null){
             ConfigUtil.showToask(this, "不支持蓝牙功能!");
             return;
         }
-        getBondDevice();
-        Log.i("mybuluetooname", bluetoothAdapter.getName() + "--" + bluetoothAdapter.getAddress());
-        if(bluetoothAdapter.isEnabled()){
+        Log.i("mybuluetooname", mBluetoothAdapter.getName() + "--" + mBluetoothAdapter.getAddress());
+        if(mBluetoothAdapter.isEnabled()){
+            getBondDevice();
             startDiscovery();
         }
     }
 
     /**开启蓝牙*/
     private void startBluetooth(){
-        if(!bluetoothAdapter.isEnabled()){
-            registerBlueReceiver();
-            bluetoothAdapter.enable();
-            Log.i("kaiqi", "开启蓝牙");
-            getBondDevice();
-            startDiscovery();
+        if(mBluetoothAdapter == null){
+            ConfigUtil.showToask(this, "不支持蓝牙功能!");
+            return;
+        }
+        if(!mBluetoothAdapter.isEnabled()){
+            //bluetoothAdapter.enable();  //弹出蓝牙开启确认框
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(intent, REQUEST_ENABLE_BT);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_ENABLE_BT){
+            if(resultCode == RESULT_OK){
+                Log.i("kaiqi", "开启蓝牙");
+                getBondDevice();
+                startDiscovery();
+            }else{
+                ConfigUtil.showToask(this, "蓝牙开启失败，重新开启");
+            }
         }
     }
 
@@ -170,60 +193,48 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             deviceDTOList.clear();
             deviceEBList.clear();
         }
-        if(bluetoothAdapter != null){
-            bluetoothAdapter.startDiscovery();
+        if(mBluetoothAdapter != null){
+            mBluetoothAdapter.startDiscovery();
         }
     }
 
     /**关闭蓝牙*/
     private void stopBluetooth(){
-        if(bluetoothAdapter != null && bluetoothAdapter.isEnabled()){
-            cancelBltReceiver();
+        if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
             cancelDiscovery();
-            bluetoothAdapter.disable();
+            mBluetoothAdapter.disable();
             Log.i("guanbi", "关闭蓝牙");
-            if(bluetoothSocket != null){
-                try {
-                    bluetoothSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(GlobalSingleThread.bltInputStreamExecutorService != null){
-                GlobalSingleThread.bltInputStreamExecutorService.shutdown();
-            }
         }
     }
 
     /**取消蓝牙搜索*/
     private void cancelDiscovery(){
-        if(bluetoothAdapter != null){
-            bluetoothAdapter.cancelDiscovery();
+        if(mBluetoothAdapter != null){
+            mBluetoothAdapter.cancelDiscovery();
         }
     }
 
     /**取消蓝牙广播注册*/
     private void cancelBltReceiver(){
-        if(bluetoothReceiver != null){
-            unregisterReceiver(bluetoothReceiver);
-            bluetoothReceiver = null;
+        if(mBluetoothReceiver != null){
+            unregisterReceiver(mBluetoothReceiver);
+            mBluetoothReceiver = null;
         }
     }
 
     /**获取已绑定过得蓝牙信息*/
     private void getBondDevice(){
-        if(bluetoothAdapter != null){
-            Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
+        if(mBluetoothAdapter != null){
+            Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
             if(devices.size() > 0){
-
-                for (Iterator<BluetoothDevice> it = devices.iterator() ; it.hasNext() ; ){
-                    BluetoothDevice device = it.next();
+                for (BluetoothDevice device : devices){
                     if(device.getName().isEmpty()){
                         deviceBondedTv.setText(device.getAddress());
                     }else{
                         deviceBondedTv.setText(device.getName());
                     }
-                    createConnect(device);
+                    mConnectThread = new ConnectThread(device);
+                    mConnectThread.start();
                     Log.i("已绑定蓝牙", device.getName() + device.getAddress());
                 }
             }
@@ -258,50 +269,126 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         Log.i("选择蓝牙设备", position + deviceDTO.getDevice_name() + deviceDTO.getDevice_address());
     }
 
-
     /**与蓝牙耳机建立连接*/
-    private void createConnect(BluetoothDevice device){
-        GlobalSingleThread.bltConnectExecutorService = Executors.newSingleThreadScheduledExecutor();
-        GlobalSingleThread.bltConnectExecutorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                BluetoothConnectEB connectEB = new BluetoothConnectEB();
-                try {
-                    bluetoothSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
-                    if(bluetoothSocket.isConnected()){
-                        Log.i("蓝牙已连接", "蓝牙已连接");
-                        return;
-                    }
-                    bluetoothSocket.connect();
-                    connectEB.setFlag(true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    if(e.getMessage().contains("closed") || e.getMessage().contains("timeout")){
-                        Log.i("连接失败日志", "连接关闭或超时，重新连接");
-                    }
-                    try {
-                        bluetoothSocket.close();
-                        connectEB.setFlag(false);
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-                EventBus.getDefault().post(connectEB);
+    private class ConnectThread extends Thread{
+        private final BluetoothSocket mSocket;
+
+        public ConnectThread(BluetoothDevice device){
+            BluetoothSocket socket = null;
+            try {
+                socket = device.createRfcommSocketToServiceRecord(MY_UUID);
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        });
+            mSocket = socket;
+        }
+
+        @Override
+        public void run() {
+            mBluetoothAdapter.cancelDiscovery();
+            BluetoothConnectEB connectEB = new BluetoothConnectEB();
+            try {
+                if(mSocket.isConnected()){
+                    Log.i("蓝牙已连接", "蓝牙已连接");
+                    return;
+                }
+                mSocket.connect();
+                connectEB.setFlag(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+                if(e.getMessage().contains("closed") || e.getMessage().contains("timeout")){
+                    Log.i("连接失败日志", "连接关闭或超时，重新连接");
+                }else{
+                    Log.i("连接失败日志", "连接失败，重新连接");
+                }
+                try {
+                    mSocket.close();
+                    connectEB.setFlag(false);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            connected(mSocket);
+
+            EventBus.getDefault().post(connectEB);
+        }
+
+        public void cancel(){
+            try {
+                mSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private synchronized void connected(BluetoothSocket socket){
+        if(mConnectThread != null){
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+
+        if(mGetInputStreamThread != null){
+            mGetInputStreamThread.cancel();
+            mGetInputStreamThread = null;
+        }
+
+        mGetInputStreamThread = new GetInputStreamThread(socket);
+        mGetInputStreamThread.start();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void returnConnectResult(BluetoothConnectEB connectEB){
-        cancelDiscovery();
         if(connectEB.isFlag()){
             Log.i("连接成功", "连接成功");
-            if(GlobalSingleThread.bltConnectExecutorService != null){
-                GlobalSingleThread.bltConnectExecutorService.shutdown();
-            }
-            getBluetoothInputStream();
         }else{
             Log.i("连接失败", "连接失败");
+        }
+    }
+
+    /**获取蓝牙输入流线程*/
+    private class GetInputStreamThread extends Thread{
+        private final BluetoothSocket mSocket;
+        private final InputStream mInputStream;
+
+        private GetInputStreamThread(BluetoothSocket socket){
+            mSocket = socket;
+            InputStream is = null;
+
+            try {
+                is = socket.getInputStream();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mInputStream = is;
+        }
+
+        @Override
+        public void run() {
+            byte[] buffer = new byte[1024];
+            int bytes;
+            while (true){
+                try {
+                    bytes = mInputStream.read(buffer);
+                    Log.i("bytes--", bytes + "");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    if(e.getMessage().contains("closed")){
+                        Log.i("耳机关闭", "请检查蓝牙耳机是否开启");
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void cancel(){
+            try {
+                mSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -313,23 +400,25 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         GlobalSingleThread.bltInputStreamExecutorService.submit(new Runnable() {
             @Override
             public void run() {
-                while (bluetoothSocket != null){
+               /* while (mBluetoothSocket != null){
                     byte[] buff = new byte[1024];
+                    int bytes;
                     InputStream inputStream;
                     try {
-                        inputStream = bluetoothSocket.getInputStream();
-                        inputStream.read(buff);
+                        inputStream = mBluetoothSocket.getInputStream();
+                        bytes = inputStream.read(buff);
+                        Log.i("bytes", bytes + "");
                         processBuffer(buff, 1024);
                     } catch (IOException e) {
                         e.printStackTrace();
                         try {
-                            bluetoothSocket.close();
+                            mBluetoothSocket.close();
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
                     }
 
-                }
+                }*/
             }
         });
     }

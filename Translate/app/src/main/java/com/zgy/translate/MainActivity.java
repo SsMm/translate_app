@@ -88,13 +88,12 @@ public class MainActivity extends BaseActivity {
     private void showPermission(){
         RxPermissions rxPermissions = new RxPermissions(this);
 
-        rxPermissions.request(Manifest.permission.CAMERA,
+        rxPermissions.request(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_COARSE_LOCATION)
                 .subscribe(granted -> {
-                    Log.i("granted", granted+"");
                     if(!granted){
                         ConfigUtil.showToask(this, "请在手机设置中打开相应权限！");
                     }

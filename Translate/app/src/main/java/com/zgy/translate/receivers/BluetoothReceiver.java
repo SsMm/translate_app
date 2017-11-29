@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.zgy.translate.domains.dtos.BluetoothDeviceDTO;
 import com.zgy.translate.domains.eventbuses.BluetoothDeviceEB;
+import com.zgy.translate.receivers.interfaces.BluetoothReceiverInterface;
 import com.zgy.translate.utils.ConfigUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -19,6 +20,13 @@ import org.greenrobot.eventbus.EventBus;
  */
 
 public class BluetoothReceiver extends BroadcastReceiver {
+
+    private BluetoothReceiverInterface receiverInterface;
+
+    public BluetoothReceiver(BluetoothReceiverInterface receiverInterface){
+        this.receiverInterface = receiverInterface;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -36,11 +44,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
             }else if(device.getBondState() == BluetoothDevice.BOND_NONE){ //没有绑定过或者取消绑定
                 Log.i("没有绑定过或者取消绑定device", device.getName() + "---" + device.getAddress());
             }
-            BluetoothDeviceEB deviceEB = new BluetoothDeviceEB();
-            deviceEB.setBluetoothDevice(device);
-            EventBus.getDefault().post(deviceEB);
+            receiverInterface.receiverDevice(device);
         }else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
-            Log.i("搜索完成", "搜索完成");
+            ConfigUtil.showToask(context, "搜索完成");
         }
     }
 }

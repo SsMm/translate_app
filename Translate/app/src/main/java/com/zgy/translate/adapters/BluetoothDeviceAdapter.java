@@ -2,6 +2,7 @@ package com.zgy.translate.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,6 @@ import java.util.List;
 public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDeviceAdapter.DeviceViewHolder> {
 
     private Context mContext;
-    private DeviceViewHolder deviceViewHolder = null;
     private List<BluetoothDeviceDTO> deviceDTOList;
     private BluetoothDeviceAdapterInterface adapterInterface;
 
@@ -32,7 +32,7 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
 
     @Override
     public DeviceViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new DeviceViewHolder(LayoutInflater.from(mContext.getApplicationContext())
+        return new DeviceViewHolder(LayoutInflater.from(mContext)
                 .inflate(R.layout.item_bluetooth_device, parent, false));
     }
 

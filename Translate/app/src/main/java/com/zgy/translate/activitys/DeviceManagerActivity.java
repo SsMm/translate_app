@@ -26,6 +26,7 @@ import com.zgy.translate.domains.eventbuses.BluetoothDeviceEB;
 import com.zgy.translate.global.GlobalSingleThread;
 import com.zgy.translate.global.GlobalUUID;
 import com.zgy.translate.receivers.BluetoothReceiver;
+import com.zgy.translate.receivers.interfaces.BluetoothReceiverInterface;
 import com.zgy.translate.utils.ConfigUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -45,7 +46,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class DeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface{
+public class DeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface,
+        BluetoothReceiverInterface{
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final int REQUEST_ENABLE_BT = 1;  //请求开启蓝牙
@@ -62,7 +64,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
 
     private BluetoothDeviceAdapter mBluetoothDeviceAdapter;  //搜索到设备
     private List<BluetoothDeviceDTO> deviceDTOList;
-    private List<BluetoothDeviceEB> deviceEBList;  //存放搜索到的蓝牙设备
+    private List<BluetoothDevice> deviceEBList;  //存放搜索到的蓝牙设备
 
 
 
@@ -138,7 +140,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         if(mBluetoothReceiver != null){
             return;
         }
-        mBluetoothReceiver = new BluetoothReceiver();
+        mBluetoothReceiver = new BluetoothReceiver(this);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -194,6 +196,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             deviceEBList.clear();
         }
         if(mBluetoothAdapter != null){
+            registerBlueReceiver();
             mBluetoothAdapter.startDiscovery();
         }
     }
@@ -210,6 +213,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     /**取消蓝牙搜索*/
     private void cancelDiscovery(){
         if(mBluetoothAdapter != null){
+            cancelBltReceiver();
             mBluetoothAdapter.cancelDiscovery();
         }
     }
@@ -233,8 +237,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
                     }else{
                         deviceBondedTv.setText(device.getName());
                     }
-                    mConnectThread = new ConnectThread(device);
-                    mConnectThread.start();
+                    connect(device);
                     Log.i("已绑定蓝牙", device.getName() + device.getAddress());
                 }
             }
@@ -246,27 +249,41 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         startDiscovery();
     }
 
+    /**初始化搜索到设备列表*/
     private void initDeviceAdapter(){
-        deviceDTOList = new ArrayList<BluetoothDeviceDTO>();
+        deviceDTOList = new ArrayList<>();
         deviceEBList = new ArrayList<>();
         deviceRv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mBluetoothDeviceAdapter = new BluetoothDeviceAdapter(this, deviceDTOList, this);
         deviceRv.setAdapter(mBluetoothDeviceAdapter);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void discoveryDevice(BluetoothDeviceEB deviceEB){
-        deviceEBList.add(deviceEB);
+    @Override
+    public void receiverDevice(BluetoothDevice device) {
+        deviceEBList.add(device);
         BluetoothDeviceDTO deviceDTO = new BluetoothDeviceDTO();
-        deviceDTO.setDevice_name(deviceEB.getBluetoothDevice().getName());
-        deviceDTO.setDevice_address(deviceEB.getBluetoothDevice().getAddress());
+        deviceDTO.setDevice_name(device.getName());
+        deviceDTO.setDevice_address(device.getAddress());
         deviceDTOList.add(deviceDTO);
-        mBluetoothDeviceAdapter.notifyItemRangeChanged(0,deviceDTOList.size() - 1);
+        mBluetoothDeviceAdapter.notifyItemInserted(deviceDTOList.size() - 1);
     }
 
     @Override
     public void bongDevice(BluetoothDeviceDTO deviceDTO, int position) {
         Log.i("选择蓝牙设备", position + deviceDTO.getDevice_name() + deviceDTO.getDevice_address());
+        connect(deviceEBList.get(position));
+    }
+
+    /**进行蓝牙耳机连接*/
+    private synchronized void connect(BluetoothDevice device){
+        cancelDiscovery();
+        if(mConnectThread != null){
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+
+        mConnectThread = new ConnectThread(device);
+        mConnectThread.start();
     }
 
     /**与蓝牙耳机建立连接*/
@@ -286,7 +303,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
 
         @Override
         public void run() {
-            mBluetoothAdapter.cancelDiscovery();
             BluetoothConnectEB connectEB = new BluetoothConnectEB();
             try {
                 if(mSocket.isConnected()){
@@ -324,6 +340,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         }
     }
 
+    /**连接成功监听蓝牙耳机输入流*/
     private synchronized void connected(BluetoothSocket socket){
         if(mConnectThread != null){
             mConnectThread.cancel();

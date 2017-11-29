@@ -35,8 +35,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
             ConfigUtil.showToask(context,"开始搜索");
         }else if(BluetoothDevice.ACTION_FOUND.equals(action)){
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            BluetoothClass deviceClass = intent.getParcelableExtra(BluetoothDevice.EXTRA_CLASS);
-            Log.i("其它信息", deviceClass + "");
             if(device.getBondState() == BluetoothDevice.BOND_BONDED){ //绑定过
                 Log.i("绑定过device", device.getName() + "---" + device.getAddress());
             }else if(device.getBondState() == BluetoothDevice.BOND_BONDING){ //正在绑定

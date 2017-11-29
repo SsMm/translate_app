@@ -65,6 +65,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     private BluetoothDeviceAdapter mBluetoothDeviceAdapter;  //搜索到设备
     private List<BluetoothDeviceDTO> deviceDTOList;
     private List<BluetoothDevice> deviceEBList;  //存放搜索到的蓝牙设备
+    private int devicePosition;  //选择蓝牙设备坐标
 
 
 
@@ -113,7 +114,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     protected void onStart() {
         super.onStart();
-        registerBlueReceiver();
         checkBluetooth();
     }
 
@@ -232,12 +232,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
             if(devices.size() > 0){
                 for (BluetoothDevice device : devices){
-                    if(device.getName().isEmpty()){
-                        deviceBondedTv.setText(device.getAddress());
-                    }else{
-                        deviceBondedTv.setText(device.getName());
-                    }
-                    connect(device);
+                    autoConnectDevice(device);
                     Log.i("已绑定蓝牙", device.getName() + device.getAddress());
                 }
             }
@@ -271,7 +266,19 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     public void bongDevice(BluetoothDeviceDTO deviceDTO, int position) {
         Log.i("选择蓝牙设备", position + deviceDTO.getDevice_name() + deviceDTO.getDevice_address());
-        connect(deviceEBList.get(position));
+        deviceEBList.remove(position);
+        mBluetoothDeviceAdapter.notifyItemRemoved(position);
+        autoConnectDevice(deviceEBList.get(position));
+    }
+
+    /**显示当前连接设备*/
+    private void autoConnectDevice(BluetoothDevice device){
+        if(device.getName().isEmpty()){
+            deviceBondedTv.setText(device.getAddress());
+        }else{
+            deviceBondedTv.setText(device.getName());
+        }
+        connect(device);
     }
 
     /**进行蓝牙耳机连接*/
@@ -364,6 +371,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             Log.i("连接失败", "连接失败");
         }
     }
+
 
     /**获取蓝牙输入流线程*/
     private class GetInputStreamThread extends Thread{

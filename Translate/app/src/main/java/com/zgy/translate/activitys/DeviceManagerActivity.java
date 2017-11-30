@@ -192,6 +192,9 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             deviceDTOList.clear();
             deviceEBList.clear();
         }
+        if(mBluetoothDeviceAdapter != null){
+            mBluetoothDeviceAdapter.notifyDataSetChanged();
+        }
         if(mBluetoothAdapter != null){
             registerBlueReceiver();
             mBluetoothAdapter.startDiscovery();
@@ -233,6 +236,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
                     Log.i("已绑定蓝牙", device.getName() + device.getAddress());
                 }
             }else{
+                deviceBondedTv.setText("");
                 startDiscovery();
             }
         }

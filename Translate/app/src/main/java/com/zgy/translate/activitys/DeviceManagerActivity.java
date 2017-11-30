@@ -24,10 +24,13 @@ import com.zgy.translate.domains.dtos.BluetoothDeviceDTO;
 import com.zgy.translate.domains.eventbuses.BluetoothConnectEB;
 import com.zgy.translate.domains.eventbuses.BluetoothDeviceEB;
 import com.zgy.translate.global.GlobalSingleThread;
+import com.zgy.translate.global.GlobalStateCode;
 import com.zgy.translate.global.GlobalUUID;
 import com.zgy.translate.receivers.BluetoothReceiver;
 import com.zgy.translate.receivers.interfaces.BluetoothReceiverInterface;
+import com.zgy.translate.utils.ClsUtils;
 import com.zgy.translate.utils.ConfigUtil;
+import com.zgy.translate.utils.StringUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -47,17 +50,18 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class DeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface,
-        BluetoothReceiverInterface{
+        BluetoothReceiverInterface, ConfigUtil.AlertDialogInterface{
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final int REQUEST_ENABLE_BT = 1;  //请求开启蓝牙
 
     @BindView(R.id.adm_rv_deviceList) RecyclerView deviceRv;
     @BindView(R.id.adm_tv_deviceBonded) TextView deviceBondedTv;  //已绑定过得蓝牙设备
+    @BindView(R.id.adm_tv_deviceBondState) TextView deviceBondStateTv; //显示绑定设备状态
 
 
     private BluetoothAdapter mBluetoothAdapter;
-
+    private BluetoothDevice mBluetoothDeviceBonded; //已配对设备
     private BluetoothReceiver mBluetoothReceiver = null;
     private ConnectThread mConnectThread;
     private GetInputStreamThread mGetInputStreamThread;
@@ -143,6 +147,8 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        //intentFilter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mBluetoothReceiver,intentFilter);
         Log.i("注册", "注册蓝牙广播");
@@ -237,6 +243,8 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
                 }
             }else{
                 deviceBondedTv.setText("");
+                deviceBondedTv.setVisibility(View.GONE);
+                deviceBondStateTv.setText("");
                 startDiscovery();
             }
         }
@@ -256,6 +264,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         deviceRv.setAdapter(mBluetoothDeviceAdapter);
     }
 
+    /**返回搜索到的设备*/
     @Override
     public void receiverDevice(BluetoothDevice device) {
         deviceEBList.add(device);
@@ -269,20 +278,80 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     public void bongDevice(BluetoothDeviceDTO deviceDTO, int position) {
         Log.i("选择蓝牙设备", position + deviceDTO.getDevice_name() + deviceDTO.getDevice_address());
-        autoConnectDevice(deviceEBList.get(position));
-        deviceEBList.remove(position);
-        mBluetoothDeviceAdapter.notifyItemRemoved(position);
+        devicePosition = position;
+        BluetoothDevice device = deviceEBList.get(position);
+        try {
+            ClsUtils.createBond(device.getClass(), device);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**返回设备状态*/
+    @Override
+    public void receiverDeviceState(int state, BluetoothDevice device) {
+        switch (state){
+            case GlobalStateCode.BONDED:
+                Log.i("绑定状态", "已绑定");
+                autoConnectDevice(deviceEBList.get(devicePosition));
+                deviceEBList.remove(devicePosition);
+                mBluetoothDeviceAdapter.notifyItemRemoved(devicePosition);
+                break;
+            case GlobalStateCode.BONDING:
+                Log.i("绑定状态", "绑定中");
+                break;
+            case GlobalStateCode.BONDNONE:
+                Log.i("绑定状态", "没有绑定");
+                break;
+        }
+    }
+
+    /**返回配对结果*/
+    @Override
+    public void receiverDevicePinState(boolean pin, BluetoothDevice device) {
+        if(pin){
+            autoConnectDevice(deviceEBList.get(devicePosition));
+            deviceEBList.remove(devicePosition);
+            mBluetoothDeviceAdapter.notifyItemRemoved(devicePosition);
+        }else{
+            Log.i("配对", "配对失败");
+        }
     }
 
     /**显示当前连接设备*/
     private void autoConnectDevice(BluetoothDevice device){
+        mBluetoothDeviceBonded = device;
         cancelDiscovery();
-        if(device.getName().isEmpty()){
+        deviceBondedTv.setVisibility(View.VISIBLE);
+        if(StringUtil.isEmpty(device.getName())){
             deviceBondedTv.setText(device.getAddress());
         }else{
             deviceBondedTv.setText(device.getName());
         }
+        deviceBondStateTv.setText("正在连接...");
         connect(device);
+    }
+
+    @OnClick(R.id.adm_tv_deviceBonded) void deviceBonded(){
+        ConfigUtil.showAlertDialog(this, "取消连接", "是否取消已连接设备", this);
+    }
+
+    /**点击配对设备取消连接*/
+    @Override
+    public void confirmDialog() {
+        if(mConnectThread != null){
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+        if(mGetInputStreamThread != null){
+            mGetInputStreamThread.cancel();
+            mGetInputStreamThread = null;
+        }
+        deviceBondStateTv.setText("");
+    }
+
+    @Override
+    public void cancelDialog() {
     }
 
     /**进行蓝牙耳机连接*/
@@ -370,11 +439,12 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     public void returnConnectResult(BluetoothConnectEB connectEB){
         if(connectEB.isFlag()){
             Log.i("连接成功", "连接成功");
+            deviceBondStateTv.setText("连接成功");
         }else{
             Log.i("连接失败", "连接失败");
+            deviceBondStateTv.setText("");
         }
     }
-
 
     /**获取蓝牙输入流线程*/
     private class GetInputStreamThread extends Thread{

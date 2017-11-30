@@ -29,6 +29,10 @@
         android:id="@+id/adm_tv_deviceBonded"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/adm_tv_deviceBondState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/adm_rv_deviceList"

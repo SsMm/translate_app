@@ -10,7 +10,9 @@ import android.util.Log;
 
 import com.zgy.translate.domains.dtos.BluetoothDeviceDTO;
 import com.zgy.translate.domains.eventbuses.BluetoothDeviceEB;
+import com.zgy.translate.global.GlobalStateCode;
 import com.zgy.translate.receivers.interfaces.BluetoothReceiverInterface;
+import com.zgy.translate.utils.ClsUtils;
 import com.zgy.translate.utils.ConfigUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -30,11 +32,14 @@ public class BluetoothReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        BluetoothDevice device;
+        String pin = "1234"; //或是0000
+
         Log.i("action", action);
         if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)){
             ConfigUtil.showToask(context,"开始搜索");
         }else if(BluetoothDevice.ACTION_FOUND.equals(action)){
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if(device.getBondState() == BluetoothDevice.BOND_BONDED){ //绑定过
                 Log.i("绑定过device", device.getName() + "---" + device.getAddress());
             }else if(device.getBondState() == BluetoothDevice.BOND_BONDING){ //正在绑定
@@ -45,6 +50,30 @@ public class BluetoothReceiver extends BroadcastReceiver {
             receiverInterface.receiverDevice(device);
         }else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
             ConfigUtil.showToask(context, "搜索完成");
+        }else if(BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)){
+            device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            int status = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, 0);
+            switch (status){
+                case BluetoothDevice.BOND_BONDED:
+                    receiverInterface.receiverDeviceState(GlobalStateCode.BONDED, device);
+                    break;
+                case BluetoothDevice.BOND_BONDING:
+                    receiverInterface.receiverDeviceState(GlobalStateCode.BONDING, device);
+                    break;
+                case BluetoothDevice.BOND_NONE:
+                    receiverInterface.receiverDeviceState(GlobalStateCode.BONDNONE, device);
+                    break;
+            }
+        }else if(BluetoothDevice.ACTION_PAIRING_REQUEST.equals(action)){
+            device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            try {
+                ClsUtils.setPairingConfirmation(device.getClass(), device, true);
+                abortBroadcast();
+                boolean ret = ClsUtils.setPin(device.getClass(), device, pin);
+                receiverInterface.receiverDevicePinState(ret, device);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -85,7 +85,7 @@ public class GlobalUUID {
     GenericTelephonyServiceClass_UUID = '{00001204-0000-1000-8000-00805F9B34FB}'*/
 
     public static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    public static final UUID MY_UUID2 = UUID.fromString("85cd6bc56ae9e30b7cac4db2e0dad51a");
+    public static final UUID MY_UUID2 = UUID.fromString("85cd6bc5-6ae9-e30b-7cac-4db2e0dad51a");
 
 
 }

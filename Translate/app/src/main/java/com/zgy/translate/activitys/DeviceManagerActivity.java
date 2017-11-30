@@ -2,6 +2,8 @@ package com.zgy.translate.activitys;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -53,6 +55,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         BluetoothReceiverInterface, ConfigUtil.AlertDialogInterface{
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private static final UUID MY_UUID2 = UUID.fromString("00001102-0000-1000-8000-00805F9B34FB");
     private static final int REQUEST_ENABLE_BT = 1;  //请求开启蓝牙
 
     @BindView(R.id.adm_rv_deviceList) RecyclerView deviceRv;
@@ -237,6 +240,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         if(mBluetoothAdapter != null){
             Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
             if(devices.size() > 0){
+                //getBluetoothHeadset();
                 for (BluetoothDevice device : devices){
                     autoConnectDevice(device);
                     Log.i("已绑定蓝牙", device.getName() + device.getAddress());
@@ -282,6 +286,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         BluetoothDevice device = deviceEBList.get(position);
         try {
             ClsUtils.createBond(device.getClass(), device);
+            //device.createBond();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -310,9 +315,9 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     public void receiverDevicePinState(boolean pin, BluetoothDevice device) {
         if(pin){
-            autoConnectDevice(deviceEBList.get(devicePosition));
-            deviceEBList.remove(devicePosition);
-            mBluetoothDeviceAdapter.notifyItemRemoved(devicePosition);
+            //autoConnectDevice(deviceEBList.get(devicePosition));
+            //deviceEBList.remove(devicePosition);
+            //mBluetoothDeviceAdapter.notifyItemRemoved(devicePosition);
         }else{
             Log.i("配对", "配对失败");
         }
@@ -353,6 +358,50 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     public void cancelDialog() {
     }
+
+    private BluetoothHeadset mBluetoothHeadset;
+
+    private BluetoothProfile.ServiceListener mProfileListener = new BluetoothProfile.ServiceListener() {
+        @Override
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            if(profile == BluetoothProfile.HEADSET){
+                mBluetoothHeadset = (BluetoothHeadset) proxy;
+                for (BluetoothDevice device : mBluetoothHeadset.getConnectedDevices()){
+                    Log.i("mBluetoothHeadset", device.getName() + device.getAddress());
+                }
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(int profile) {
+            if(profile == BluetoothProfile.HEADSET){
+                mBluetoothHeadset = null;
+                Log.i("mBluetoothHeadset", "没有连接");
+            }
+        }
+    };
+
+    private void getBluetoothHeadset(){
+        int flag = -1;
+        int a2dp = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP);
+        int headset = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET);
+        int health = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEALTH);
+
+        if(BluetoothProfile.STATE_CONNECTED == a2dp){
+            flag = a2dp;
+        }else if(BluetoothProfile.STATE_CONNECTED == headset){
+            flag = headset;
+        }else if(BluetoothProfile.STATE_CONNECTED == health){
+            flag = health;
+        }
+
+        Log.i("flag--", flag + a2dp + headset + health +"");
+
+        if(flag != -1){
+            mBluetoothAdapter.getProfileProxy(this, mProfileListener, BluetoothProfile.HEADSET);
+        }
+    }
+
 
     /**进行蓝牙耳机连接*/
     private synchronized void connect(BluetoothDevice device){

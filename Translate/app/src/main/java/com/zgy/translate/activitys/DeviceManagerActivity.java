@@ -130,7 +130,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     protected void onStop() {
         super.onStop();
-        cancelBltReceiver();
         cancelDiscovery();
         mBluetoothAdapter = null;
     }
@@ -159,7 +158,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         Log.i("mybuluetooname", mBluetoothAdapter.getName() + "--" + mBluetoothAdapter.getAddress());
         if(mBluetoothAdapter.isEnabled()){
             getBondDevice();
-            startDiscovery();
         }
     }
 
@@ -182,7 +180,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             if(resultCode == RESULT_OK){
                 Log.i("kaiqi", "开启蓝牙");
                 getBondDevice();
-                startDiscovery();
             }else{
                 ConfigUtil.showToask(this, "蓝牙开启失败，重新开启");
             }
@@ -212,7 +209,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
 
     /**取消蓝牙搜索*/
     private void cancelDiscovery(){
-        if(mBluetoothAdapter != null){
+        if(mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering()){
             cancelBltReceiver();
             mBluetoothAdapter.cancelDiscovery();
         }
@@ -235,6 +232,8 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
                     autoConnectDevice(device);
                     Log.i("已绑定蓝牙", device.getName() + device.getAddress());
                 }
+            }else{
+                startDiscovery();
             }
         }
     }
@@ -266,13 +265,14 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     public void bongDevice(BluetoothDeviceDTO deviceDTO, int position) {
         Log.i("选择蓝牙设备", position + deviceDTO.getDevice_name() + deviceDTO.getDevice_address());
+        autoConnectDevice(deviceEBList.get(position));
         deviceEBList.remove(position);
         mBluetoothDeviceAdapter.notifyItemRemoved(position);
-        autoConnectDevice(deviceEBList.get(position));
     }
 
     /**显示当前连接设备*/
     private void autoConnectDevice(BluetoothDevice device){
+        cancelDiscovery();
         if(device.getName().isEmpty()){
             deviceBondedTv.setText(device.getAddress());
         }else{
@@ -283,7 +283,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
 
     /**进行蓝牙耳机连接*/
     private synchronized void connect(BluetoothDevice device){
-        cancelDiscovery();
         if(mConnectThread != null){
             mConnectThread.cancel();
             mConnectThread = null;

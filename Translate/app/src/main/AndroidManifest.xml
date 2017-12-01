@@ -4,6 +4,10 @@
 
     <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
     <!-- <uses-permission android:name="android.permission.CAMERA"/> -->
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -85,8 +89,14 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity android:name=".activitys.DeviceManagerActivity" />
-        <activity android:name=".activitys.VoiceTranslateActivity"/>
+        <activity android:name=".activitys.VoiceTranslateActivity" />
+        <activity android:name=".activitys.BleBluetoothDeviceManagerActivity" />
 
+        <service
+            android:name=".services.BluetoothLeService"
+            android:enabled="true"
+            android:exported="true"></service>
+        <receiver android:name=".receivers.BluetoothLeGattUpdateReceiver" />
     </application>
 
 </manifest>

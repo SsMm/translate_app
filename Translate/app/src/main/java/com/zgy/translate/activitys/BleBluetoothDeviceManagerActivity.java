@@ -1,0 +1,284 @@
+package com.zgy.translate.activitys;
+
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.os.IBinder;
+import android.print.PageRange;
+import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.zgy.translate.R;
+import com.zgy.translate.adapters.BluetoothDeviceAdapter;
+import com.zgy.translate.adapters.interfaces.BluetoothDeviceAdapterInterface;
+import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.global.GlobalConstants;
+import com.zgy.translate.receivers.BluetoothLeGattUpdateReceiver;
+import com.zgy.translate.services.BluetoothLeService;
+import com.zgy.translate.utils.ConfigUtil;
+import com.zgy.translate.utils.StringUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public class BleBluetoothDeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface{
+
+    @BindView(R.id.abldm_tv_deviceBonded) TextView tv_deviceBonded; //绑定设备
+    @BindView(R.id.abldm_tv_deviceBondState) TextView tv_deviceBondedState; //绑定状态
+    @BindView(R.id.abldm_rv_deviceList) RecyclerView rv_scanDeviceList; //搜索到设备列表
+
+    private final static String TAG = BleBluetoothDeviceManagerActivity.class.getSimpleName();
+    private static final int REQUEST_ENABLE_BT = 1;
+    private static final long SCAN_PERIOD = 10000;
+
+    private BluetoothAdapter mBluetoothAdapter;
+
+    private boolean mScanning;
+    private ScheduledExecutorService autoCloseScanExecutorService;
+    private List<BluetoothDevice> mBluetoothDeviceList;
+    private BluetoothDeviceAdapter mBluetoothDeviceAdapter;
+    private BluetoothLeService mBluetoothLeService;
+    private String mDeviceAddress;
+    private BluetoothLeGattUpdateReceiver mGattUpdateReceiver;
+
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if(!mBluetoothLeService.initialize()){
+                Log.i(TAG, "Unable to initialize Bluetooth");
+                finish();
+            }
+
+            mBluetoothLeService.connect(mDeviceAddress);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBluetoothLeService = null;
+        }
+    };
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_ble_bluetooth_device_manager);
+        ButterKnife.bind(this);
+        super.init();
+    }
+
+    @Override
+    public void initView() {
+        baseInit();
+    }
+
+    @Override
+    public void initEvent() {
+
+    }
+
+    @Override
+    public void initData() {
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    /**开启蓝牙*/
+    @OnClick(R.id.abldm_start_blue) void startBle(){
+        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(intent, REQUEST_ENABLE_BT);
+    }
+
+    /**关闭蓝牙*/
+    @OnClick(R.id.abldm_stop_blue) void stopBle(){
+        if(mBluetoothAdapter != null){
+            mBluetoothAdapter.disable();
+        }
+        if(mBluetoothDeviceList != null && mBluetoothDeviceList.size() != 0){
+            mBluetoothDeviceList.clear();
+            mBluetoothDeviceAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**重新搜索*/
+    @OnClick(R.id.abldm_refresh) void refreshBle(){
+        isHave = false;
+        if(mBluetoothDeviceList != null && mBluetoothDeviceList.size() != 0){
+            mBluetoothDeviceList.clear();
+            mBluetoothDeviceAdapter.notifyDataSetChanged();
+        }
+        scanLeDevice(true);
+    }
+
+
+    @Override
+    public void bongDevice(BluetoothDevice device, int position) {
+        mDeviceAddress = device.getAddress();
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+        mGattUpdateReceiver = new BluetoothLeGattUpdateReceiver(mBluetoothLeService);
+        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        if (mBluetoothLeService != null) {
+            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
+            Log.i(TAG, "Connect request result=" + result);
+        }
+    }
+
+    private void baseInit(){
+        if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
+            ConfigUtil.showToask(this, GlobalConstants.NO_BLE);
+            finish();
+        }
+
+        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        if(mBluetoothAdapter == null){
+            ConfigUtil.showToask(this, GlobalConstants.NO_BLUETOOTH);
+            finish();
+        }
+
+        //初始化设备列表
+        mBluetoothDeviceList = new ArrayList<>();
+        mBluetoothDeviceAdapter = new BluetoothDeviceAdapter(this, mBluetoothDeviceList, this);
+        rv_scanDeviceList.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        rv_scanDeviceList.setAdapter(mBluetoothDeviceAdapter);
+
+        getLeBondedDevice();
+
+        autoCloseScanExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+        //检测蓝牙是否开启
+        if(mBluetoothAdapter.enable()){
+            scanLeDevice(true);
+        }
+
+    }
+
+    /**得到已绑定设备*/
+    private void getLeBondedDevice(){
+        if(mBluetoothAdapter != null){
+            for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()){
+                showLeBondedDevice(device);
+                scanLeDevice(false);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_ENABLE_BT){
+            if(resultCode == RESULT_OK){
+                scanLeDevice(true);
+            }
+        }
+    }
+
+    /**操作开始关闭搜索*/
+    private void scanLeDevice(final boolean enable){
+        if(enable){
+            autoCloseScanExecutorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    mScanning = false;
+                    mBluetoothAdapter.stopLeScan(mScanCallback);
+                }
+            }, SCAN_PERIOD, TimeUnit.MILLISECONDS);
+
+            mScanning = true;
+            mBluetoothAdapter.startLeScan(mScanCallback);
+        }else{
+            mScanning = false;
+            mBluetoothAdapter.stopLeScan(mScanCallback);
+        }
+    }
+
+    private void showLeBondedDevice(BluetoothDevice device){
+        tv_deviceBonded.setVisibility(View.VISIBLE);
+        tv_deviceBondedState.setVisibility(View.VISIBLE);
+
+        if(StringUtil.isEmpty(device.getName())){
+            tv_deviceBonded.setText(device.getAddress());
+        }else{
+            tv_deviceBonded.setText(device.getName());
+        }
+    }
+
+    private boolean isHave = false;
+
+    private BluetoothAdapter.LeScanCallback mScanCallback = new BluetoothAdapter.LeScanCallback() {
+        @Override
+        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(mBluetoothDeviceList != null && mBluetoothDeviceList.size() != 0){
+                        for (BluetoothDevice device2 : mBluetoothDeviceList){
+                            if(device.getAddress().equals(device2.getAddress())){
+                               isHave = true;
+                                break;
+                            }else{
+                                isHave = false;
+                            }
+                        }
+                    }
+
+                    if(!isHave){
+                        mBluetoothDeviceList.add(device);
+                        mBluetoothDeviceAdapter.notifyItemRangeChanged(0, mBluetoothDeviceList.size() - 1);
+                    }
+                }
+            });
+        }
+    };
+
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
+        unregisterReceiver(mGattUpdateReceiver);
+        autoCloseScanExecutorService.shutdown();
+    }
+}

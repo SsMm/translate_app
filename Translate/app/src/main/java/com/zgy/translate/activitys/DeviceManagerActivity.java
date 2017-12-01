@@ -264,7 +264,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         deviceDTOList = new ArrayList<>();
         deviceEBList = new ArrayList<>();
         deviceRv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        mBluetoothDeviceAdapter = new BluetoothDeviceAdapter(this, deviceDTOList, this);
+        mBluetoothDeviceAdapter = new BluetoothDeviceAdapter(this, deviceEBList, this);
         deviceRv.setAdapter(mBluetoothDeviceAdapter);
     }
 
@@ -272,20 +272,15 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     public void receiverDevice(BluetoothDevice device) {
         deviceEBList.add(device);
-        BluetoothDeviceDTO deviceDTO = new BluetoothDeviceDTO();
-        deviceDTO.setDevice_name(device.getName());
-        deviceDTO.setDevice_address(device.getAddress());
-        deviceDTOList.add(deviceDTO);
-        mBluetoothDeviceAdapter.notifyItemInserted(deviceDTOList.size() - 1);
+        mBluetoothDeviceAdapter.notifyItemInserted(deviceEBList.size() - 1);
     }
 
     @Override
-    public void bongDevice(BluetoothDeviceDTO deviceDTO, int position) {
-        Log.i("选择蓝牙设备", position + deviceDTO.getDevice_name() + deviceDTO.getDevice_address());
+    public void bongDevice(BluetoothDevice deviceDTO, int position) {
+        Log.i("选择蓝牙设备", position + deviceDTO.getName() + deviceDTO.getAddress());
         devicePosition = position;
-        BluetoothDevice device = deviceEBList.get(position);
         try {
-            ClsUtils.createBond(device.getClass(), device);
+            ClsUtils.createBond(deviceDTO.getClass(), deviceDTO);
             //device.createBond();
         } catch (Exception e) {
             e.printStackTrace();

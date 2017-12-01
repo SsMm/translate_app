@@ -1,5 +1,6 @@
 package com.zgy.translate.adapters;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -21,10 +22,10 @@ import java.util.List;
 public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDeviceAdapter.DeviceViewHolder> {
 
     private Context mContext;
-    private List<BluetoothDeviceDTO> deviceDTOList;
+    private List<BluetoothDevice> deviceDTOList;
     private BluetoothDeviceAdapterInterface adapterInterface;
 
-    public BluetoothDeviceAdapter(Context context, List<BluetoothDeviceDTO> deviceDTOs, BluetoothDeviceAdapterInterface adapterInterface){
+    public BluetoothDeviceAdapter(Context context, List<BluetoothDevice> deviceDTOs, BluetoothDeviceAdapterInterface adapterInterface){
         mContext = context;
         deviceDTOList = deviceDTOs;
         this.adapterInterface = adapterInterface;
@@ -38,17 +39,17 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
 
     @Override
     public void onBindViewHolder(DeviceViewHolder holder, int position) {
-        BluetoothDeviceDTO deviceDTO = deviceDTOList.get(position);
-        if(deviceDTO.getDevice_name() == null){
-            holder.name.setText(deviceDTO.getDevice_address());
+        BluetoothDevice device = deviceDTOList.get(position);
+        if(device.getName() == null){
+            holder.name.setText(device.getAddress());
         }else{
-            holder.name.setText(deviceDTO.getDevice_name());
+            holder.name.setText(device.getName());
         }
 
         holder.name.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapterInterface.bongDevice(deviceDTO, holder.getAdapterPosition());
+                adapterInterface.bongDevice(device, holder.getAdapterPosition());
             }
         });
 

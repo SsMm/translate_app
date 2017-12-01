@@ -510,6 +510,8 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
                 e.printStackTrace();
             }
             mInputStream = is;
+            Log.i("mScoket---", mSocket +"");
+            Log.i("mInputStream---", mInputStream +"");
         }
 
         @Override
@@ -518,8 +520,12 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             int bytes;
             while (true){
                 try {
-                    bytes = mInputStream.read(buffer);
-                    Log.i("bytes--", bytes + "");
+                    int bytesAvailable = mInputStream.available();
+                    Log.i("bytesAvailable", bytesAvailable + "");
+                    if(bytesAvailable > 0){
+                        bytes = mInputStream.read(buffer);
+                        Log.i("bytes--", bytes + "");
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     if(e.getMessage().contains("closed")){

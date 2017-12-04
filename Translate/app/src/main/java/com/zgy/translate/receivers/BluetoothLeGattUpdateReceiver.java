@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+
+import com.zgy.translate.receivers.interfaces.BluetoothLeGattUpdateReceiverInterface;
 import com.zgy.translate.services.BluetoothLeService;
 
 import java.util.List;
@@ -16,10 +18,10 @@ import java.util.List;
 
 public class BluetoothLeGattUpdateReceiver extends BroadcastReceiver{
 
-    private final BluetoothLeService mBluetoothLeService;
+    private final BluetoothLeGattUpdateReceiverInterface receiverInterface;
 
-    public BluetoothLeGattUpdateReceiver(BluetoothLeService mBluetoothLeService){
-        this.mBluetoothLeService = mBluetoothLeService;
+    public BluetoothLeGattUpdateReceiver(BluetoothLeGattUpdateReceiverInterface receiverInterface){
+        this.receiverInterface = receiverInterface;
     }
 
     @Override
@@ -27,34 +29,21 @@ public class BluetoothLeGattUpdateReceiver extends BroadcastReceiver{
         String action = intent.getAction();
         switch (action){
             case BluetoothLeService.ACTION_GATT_CONNECTED:
-                Log.i("LeGattUpdateReceiver", "连接成功");
+                receiverInterface.gattConnected();
                 break;
             case BluetoothLeService.ACTION_GATT_DISCONNECTED:
-                Log.i("LeGattUpdateReceiver", "连接失败");
+                receiverInterface.gattDisconnected();
                 break;
             case BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED:
-                displayGattServices(mBluetoothLeService.getSupportedGattServices());
+                receiverInterface.gattServicesDiscovered();
                 break;
             case BluetoothLeService.ACTION_DATA_AVAILABLE:
-                displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+                receiverInterface.gattDataAvailable(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
                 break;
         }
 
     }
 
-    private void displayGattServices(List<BluetoothGattService> gattServices){
-        if(gattServices == null){
-            return;
-        }
-        for (BluetoothGattService gattService : gattServices){
-            Log.i("gattService", gattService.getUuid()+"");
-        }
-    }
 
-    private void displayData(String data){
-        if(data != null){
-            Log.i("data---", data);
-        }
-    }
 
 }

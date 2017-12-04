@@ -2,6 +2,7 @@ package com.zgy.translate.activitys;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import com.zgy.translate.adapters.interfaces.BluetoothDeviceAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.receivers.BluetoothLeGattUpdateReceiver;
+import com.zgy.translate.receivers.interfaces.BluetoothLeGattUpdateReceiverInterface;
 import com.zgy.translate.services.BluetoothLeService;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.StringUtil;
@@ -41,7 +43,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class BleBluetoothDeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface{
+public class BleBluetoothDeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface,
+        BluetoothLeGattUpdateReceiverInterface{
 
     @BindView(R.id.abldm_tv_deviceBonded) TextView tv_deviceBonded; //绑定设备
     @BindView(R.id.abldm_tv_deviceBondState) TextView tv_deviceBondedState; //绑定状态
@@ -71,7 +74,7 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
                 finish();
             }
 
-            mBluetoothLeService.connect(mDeviceAddress);
+            //mBluetoothLeService.connect(mDeviceAddress);
         }
 
         @Override
@@ -141,21 +144,16 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
         scanLeDevice(true);
     }
 
-
     @Override
     public void bongDevice(BluetoothDevice device, int position) {
         mDeviceAddress = device.getAddress();
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-
-        mGattUpdateReceiver = new BluetoothLeGattUpdateReceiver(mBluetoothLeService);
-        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         if (mBluetoothLeService != null) {
             final boolean result = mBluetoothLeService.connect(mDeviceAddress);
             Log.i(TAG, "Connect request result=" + result);
         }
     }
 
+    /**初始化参数*/
     private void baseInit(){
         if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
             ConfigUtil.showToask(this, GlobalConstants.NO_BLE);
@@ -176,9 +174,19 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
         rv_scanDeviceList.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rv_scanDeviceList.setAdapter(mBluetoothDeviceAdapter);
 
-        getLeBondedDevice();
-
+        //定时线程
         autoCloseScanExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+        //初始化服务
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+        //注册
+        mGattUpdateReceiver = new BluetoothLeGattUpdateReceiver(this);
+        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+
+        //获取已绑定设备
+        getLeBondedDevice();
 
         //检测蓝牙是否开启
         if(mBluetoothAdapter.enable()){
@@ -214,6 +222,12 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
                 public void run() {
                     mScanning = false;
                     mBluetoothAdapter.stopLeScan(mScanCallback);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ConfigUtil.showToask(BleBluetoothDeviceManagerActivity.this, "扫描完成");
+                        }
+                    });
                 }
             }, SCAN_PERIOD, TimeUnit.MILLISECONDS);
 
@@ -255,7 +269,7 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
                         }
                     }
 
-                    if(!isHave){
+                    if(mBluetoothDeviceList != null && !isHave){
                         mBluetoothDeviceList.add(device);
                         mBluetoothDeviceAdapter.notifyItemRangeChanged(0, mBluetoothDeviceList.size() - 1);
                     }
@@ -272,6 +286,42 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
+
+    @Override
+    public void gattConnected() {
+        Log.i("LeGattUpdateReceiver", "连接成功");
+    }
+
+    @Override
+    public void gattDisconnected() {
+        Log.i("LeGattUpdateReceiver", "连接失败");
+    }
+
+    @Override
+    public void gattServicesDiscovered() {
+        displayGattServices(mBluetoothLeService.getSupportedGattServices());
+    }
+
+    @Override
+    public void gattDataAvailable(String data) {
+        displayData(data);
+    }
+
+    private void displayGattServices(List<BluetoothGattService> gattServices){
+        if(gattServices == null){
+            return;
+        }
+        for (BluetoothGattService gattService : gattServices){
+            Log.i("gattService", gattService.getUuid()+"");
+        }
+    }
+
+    private void displayData(String data){
+        if(data != null){
+            Log.i("data---", data);
+        }
+    }
+
 
     @Override
     protected void onDestroy() {

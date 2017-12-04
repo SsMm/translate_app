@@ -2,6 +2,8 @@ package com.zgy.translate.activitys;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
@@ -63,6 +65,7 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
     private BluetoothLeService mBluetoothLeService;
     private String mDeviceAddress;
     private BluetoothLeGattUpdateReceiver mGattUpdateReceiver;
+    private BluetoothGattCharacteristic mNotifyCharacteristic;
 
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -148,6 +151,10 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
     public void bongDevice(BluetoothDevice device, int position) {
         mDeviceAddress = device.getAddress();
         if (mBluetoothLeService != null) {
+            if(mScanning){
+                scanLeDevice(false);
+            }
+            ConfigUtil.showToask(this, "开始连接...");
             final boolean result = mBluetoothLeService.connect(mDeviceAddress);
             Log.i(TAG, "Connect request result=" + result);
         }
@@ -198,7 +205,9 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
     /**得到已绑定设备*/
     private void getLeBondedDevice(){
         if(mBluetoothAdapter != null){
+            Log.i("mybluetooth--", mBluetoothAdapter.getName() + mBluetoothAdapter.getAddress());
             for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()){
+                Log.i("BondedDevices--", device.getName() + device.getAddress());
                 showLeBondedDevice(device);
                 scanLeDevice(false);
             }
@@ -233,9 +242,11 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
 
             mScanning = true;
             mBluetoothAdapter.startLeScan(mScanCallback);
+            ConfigUtil.showToask(BleBluetoothDeviceManagerActivity.this, "开始扫描");
         }else{
             mScanning = false;
             mBluetoothAdapter.stopLeScan(mScanCallback);
+            ConfigUtil.showToask(BleBluetoothDeviceManagerActivity.this, "扫描完成");
         }
     }
 
@@ -289,12 +300,12 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
 
     @Override
     public void gattConnected() {
-        Log.i("LeGattUpdateReceiver", "连接成功");
+        ConfigUtil.showToask(this, "连接成功");
     }
 
     @Override
     public void gattDisconnected() {
-        Log.i("LeGattUpdateReceiver", "连接失败");
+        ConfigUtil.showToask(this, "连接失败");
     }
 
     @Override
@@ -312,7 +323,29 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
             return;
         }
         for (BluetoothGattService gattService : gattServices){
-            Log.i("gattService", gattService.getUuid()+"");
+            Log.e("------", "-----------------------------");
+            Log.i("gattService--id", gattService.getUuid().toString());
+            List<BluetoothGattCharacteristic> characteristics = gattService.getCharacteristics();
+            for (BluetoothGattCharacteristic characteristic : characteristics){
+                Log.i("characteristic--id", characteristic.getUuid().toString());
+                int charaProp = characteristic.getProperties();
+                Log.i("flag---", charaProp + "--" + characteristic.getPermissions());
+                if((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0){
+                    Log.i("可读", "可读");
+                    Log.i("可读", (charaProp | BluetoothGattCharacteristic.PROPERTY_READ) + "");
+                    if(mNotifyCharacteristic != null){
+                        //mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
+                        mNotifyCharacteristic = null;
+                    }
+                    mBluetoothLeService.readCharacteristic(characteristic);
+                }
+                if((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0){
+                    Log.i("可通知", "可通知");
+                    Log.i("可通知", (charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) + "");
+                    //mNotifyCharacteristic = characteristic;
+                    //mBluetoothLeService.setCharacteristicNotification(characteristic, true);
+                }
+            }
         }
     }
 

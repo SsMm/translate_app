@@ -32,7 +32,9 @@ public class MainActivity extends BaseActivity {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showShare();
+                //showShare();
+                Intent intent = new Intent(MainActivity.this, DeviceManagerActivity.class);
+                startActivity(intent);
             }
         });
         TextView device = (TextView) findViewById(R.id.device);

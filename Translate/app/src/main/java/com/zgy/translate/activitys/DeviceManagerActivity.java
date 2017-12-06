@@ -434,6 +434,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
                 }
                 mSocket.connect();
                 connectEB.setFlag(true);
+                connected(mSocket);
             } catch (IOException e) {
                 e.printStackTrace();
                 if(e.getMessage().contains("closed") || e.getMessage().contains("timeout")){
@@ -449,8 +450,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
                 }
             }
 
-            connected(mSocket);
-
             EventBus.getDefault().post(connectEB);
         }
 
@@ -465,10 +464,10 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
 
     /**连接成功监听蓝牙耳机输入流*/
     private synchronized void connected(BluetoothSocket socket){
-        if(mConnectThread != null){
+        /*if(mConnectThread != null){
             mConnectThread.cancel();
             mConnectThread = null;
-        }
+        }*/
 
         if(mGetInputStreamThread != null){
             mGetInputStreamThread.cancel();

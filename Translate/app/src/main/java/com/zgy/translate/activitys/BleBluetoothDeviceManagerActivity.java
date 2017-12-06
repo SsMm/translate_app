@@ -190,7 +190,7 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
 
         //初始化服务
         Intent gattServiceIntent = new Intent(getApplicationContext(), BluetoothLeService.class);
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        getApplicationContext().bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         GlobalInit.mServiceConnection = mServiceConnection;
 
         //注册

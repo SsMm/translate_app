@@ -345,7 +345,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         Log.i("flag--", flag + a2dp + headset + health +"");
 
         if(flag != -1){
-            mBluetoothAdapter.getProfileProxy(this, mProfileListener, BluetoothProfile.HEADSET);
+            mBluetoothAdapter.getProfileProxy(this, mProfileListener, flag);
         }
     }
 

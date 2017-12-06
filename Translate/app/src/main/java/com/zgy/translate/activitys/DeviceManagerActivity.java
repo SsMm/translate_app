@@ -70,7 +70,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     private GetInputStreamThread mGetInputStreamThread;
 
     private BluetoothDeviceAdapter mBluetoothDeviceAdapter;  //搜索到设备
-    private List<BluetoothDeviceDTO> deviceDTOList;
     private List<BluetoothDevice> deviceEBList;  //存放搜索到的蓝牙设备
     private int devicePosition;  //选择蓝牙设备坐标
 
@@ -197,13 +196,11 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
 
     /**开启蓝牙搜索*/
     private void startDiscovery(){
-        if(deviceDTOList != null && deviceDTOList.size() != 0){
-            deviceDTOList.clear();
+        if(deviceEBList != null && deviceEBList.size() != 0){
             deviceEBList.clear();
-        }
-        if(mBluetoothDeviceAdapter != null){
             mBluetoothDeviceAdapter.notifyDataSetChanged();
         }
+
         if(mBluetoothAdapter != null){
             registerBlueReceiver();
             mBluetoothAdapter.startDiscovery();
@@ -261,7 +258,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
 
     /**初始化搜索到设备列表*/
     private void initDeviceAdapter(){
-        deviceDTOList = new ArrayList<>();
         deviceEBList = new ArrayList<>();
         deviceRv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mBluetoothDeviceAdapter = new BluetoothDeviceAdapter(this, deviceEBList, this);
@@ -515,7 +511,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             while (true){
                 try {
                     int bytesAvailable = mInputStream.available();
-                    Log.i("bytesAvailable", bytesAvailable + "");
                     if(bytesAvailable > 0){
                         bytes = mInputStream.read(buffer);
                         Log.i("bytes--", bytes + "");
@@ -592,9 +587,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        if(deviceDTOList != null && deviceDTOList.size() != 0){
-            deviceDTOList.clear();
-            deviceDTOList = null;
+        if(deviceEBList != null && deviceEBList.size() != 0){
             deviceEBList.clear();
             deviceEBList = null;
         }

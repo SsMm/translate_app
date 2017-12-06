@@ -14,6 +14,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ import com.zgy.translate.domains.eventbuses.BluetoothDeviceEB;
 import com.zgy.translate.global.GlobalSingleThread;
 import com.zgy.translate.global.GlobalStateCode;
 import com.zgy.translate.global.GlobalUUID;
+import com.zgy.translate.managers.inst.ComUpdateReceiverManager;
 import com.zgy.translate.receivers.BluetoothReceiver;
 import com.zgy.translate.receivers.interfaces.BluetoothReceiverInterface;
 import com.zgy.translate.utils.ClsUtils;
@@ -51,7 +53,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class DeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface,
+public class BluetoothDeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface,
         BluetoothReceiverInterface, ConfigUtil.AlertDialogInterface{
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -66,6 +68,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothDevice mBluetoothDeviceBonded; //已配对设备
     private BluetoothReceiver mBluetoothReceiver = null;
+    private ComUpdateReceiverManager receiverManager;
     private ConnectThread mConnectThread;
     private GetInputStreamThread mGetInputStreamThread;
 
@@ -85,26 +88,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
 
     @Override
     public void initView() {
-        initDeviceAdapter();
-
-        Button start = (Button) findViewById(R.id.start_blue);
-        Button stop = (Button) findViewById(R.id.stop_blue);
-
-        start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startBluetooth();
-            }
-        });
-
-        stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopBluetooth();
-            }
-        });
-
-
+        baseInit();
     }
 
     @Override
@@ -120,7 +104,6 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     protected void onStart() {
         super.onStart();
-        checkBluetooth();
     }
 
     @Override
@@ -136,50 +119,37 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     @Override
     protected void onStop() {
         super.onStop();
-        cancelDiscovery();
-        mBluetoothAdapter = null;
     }
 
-    /**注册蓝牙广播*/
-    private void registerBlueReceiver(){
-        if(mBluetoothReceiver != null){
-            return;
-        }
-        mBluetoothReceiver = new BluetoothReceiver(this);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        //intentFilter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
-        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(mBluetoothReceiver,intentFilter);
-        Log.i("注册", "注册蓝牙广播");
-    }
 
-    /**判断蓝牙是否已开启*/
-    private void checkBluetooth(){
+    private void baseInit(){
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(mBluetoothAdapter == null){
             ConfigUtil.showToask(this, "不支持蓝牙功能!");
+            finish();
             return;
         }
         Log.i("mybuluetooname", mBluetoothAdapter.getName() + "--" + mBluetoothAdapter.getAddress());
+
+        deviceEBList = new ArrayList<>();
+        deviceRv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        mBluetoothDeviceAdapter = new BluetoothDeviceAdapter(this, deviceEBList, this);
+        deviceRv.setAdapter(mBluetoothDeviceAdapter);
+
+        //注册
+        receiverManager = new ComUpdateReceiverManager(this);
+        receiverManager.register(this);
+
         if(mBluetoothAdapter.isEnabled()){
             getBondDevice();
         }
     }
 
     /**开启蓝牙*/
-    private void startBluetooth(){
-        if(mBluetoothAdapter == null){
-            ConfigUtil.showToask(this, "不支持蓝牙功能!");
-            return;
-        }
-        if(!mBluetoothAdapter.isEnabled()){
-            //bluetoothAdapter.enable();  //弹出蓝牙开启确认框
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, REQUEST_ENABLE_BT);
-        }
+    @OnClick(R.id.start_blue) void startBle(){
+        //bluetoothAdapter.enable();  //弹出蓝牙开启确认框
+        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(intent, REQUEST_ENABLE_BT);
     }
 
     @Override
@@ -194,42 +164,36 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
         }
     }
 
-    /**开启蓝牙搜索*/
-    private void startDiscovery(){
-        if(deviceEBList != null && deviceEBList.size() != 0){
-            deviceEBList.clear();
-            mBluetoothDeviceAdapter.notifyDataSetChanged();
-        }
-
-        if(mBluetoothAdapter != null){
-            registerBlueReceiver();
-            mBluetoothAdapter.startDiscovery();
-        }
-    }
-
-    /**关闭蓝牙*/
-    private void stopBluetooth(){
+    @OnClick(R.id.stop_blue) void stopBle(){
         if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
-            cancelDiscovery();
+            scanDevice(false);
             mBluetoothAdapter.disable();
             Log.i("guanbi", "关闭蓝牙");
         }
     }
 
-    /**取消蓝牙搜索*/
-    private void cancelDiscovery(){
-        if(mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering()){
-            cancelBltReceiver();
-            mBluetoothAdapter.cancelDiscovery();
+    /**开启蓝牙搜索*/
+    private void scanDevice(boolean enable){
+        if(!mBluetoothAdapter.isEnabled()){
+            ConfigUtil.showToask(this, "开启蓝牙");
+            return;
         }
-    }
 
-    /**取消蓝牙广播注册*/
-    private void cancelBltReceiver(){
-        if(mBluetoothReceiver != null){
-            unregisterReceiver(mBluetoothReceiver);
-            mBluetoothReceiver = null;
+        if(enable){
+            if(deviceEBList != null && deviceEBList.size() != 0){
+                deviceEBList.clear();
+                mBluetoothDeviceAdapter.notifyDataSetChanged();
+            }
+
+            if(mBluetoothAdapter != null){
+                mBluetoothAdapter.startDiscovery();
+            }
+        }else{
+            if(mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering()){
+                mBluetoothAdapter.cancelDiscovery();
+            }
         }
+
     }
 
     /**获取已绑定过得蓝牙信息*/
@@ -246,22 +210,14 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
                 deviceBondedTv.setText("");
                 deviceBondedTv.setVisibility(View.GONE);
                 deviceBondStateTv.setText("");
-                startDiscovery();
+                scanDevice(true);
             }
         }
     }
 
     /**重新搜索*/
     @OnClick(R.id.refresh) void refreshDiscovery(){
-        startDiscovery();
-    }
-
-    /**初始化搜索到设备列表*/
-    private void initDeviceAdapter(){
-        deviceEBList = new ArrayList<>();
-        deviceRv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        mBluetoothDeviceAdapter = new BluetoothDeviceAdapter(this, deviceEBList, this);
-        deviceRv.setAdapter(mBluetoothDeviceAdapter);
+        scanDevice(true);
     }
 
     /**返回搜索到的设备*/
@@ -317,7 +273,7 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     /**显示当前连接设备*/
     private void autoConnectDevice(BluetoothDevice device){
         mBluetoothDeviceBonded = device;
-        cancelDiscovery();
+        scanDevice(false);
         deviceBondedTv.setVisibility(View.VISIBLE);
         if(StringUtil.isEmpty(device.getName())){
             deviceBondedTv.setText(device.getAddress());
@@ -401,7 +357,9 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             mConnectThread = null;
         }
 
-        mConnectThread = new ConnectThread(device);
+        BluetoothDevice netDevice = mBluetoothAdapter.getRemoteDevice(device.getAddress());
+
+        mConnectThread = new ConnectThread(netDevice);
         mConnectThread.start();
     }
 
@@ -584,6 +542,26 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(event.getAction() == KeyEvent.ACTION_DOWN){
+            if(keyCode == KeyEvent.KEYCODE_MEDIA_PLAY){
+                Log.i("按下", "按下按钮");
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if(event.getAction() == KeyEvent.ACTION_UP){
+            if(keyCode == KeyEvent.KEYCODE_MEDIA_PLAY){
+                Log.i("抬起", "抬起按钮");
+            }
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
@@ -595,6 +573,12 @@ public class DeviceManagerActivity extends BaseActivity implements BluetoothDevi
             mBluetoothDeviceAdapter = null;
             deviceRv.setAdapter(null);
             deviceRv.setLayoutManager(null);
+        }
+        if(receiverManager != null){
+            receiverManager.unRegister();
+        }
+        if(mBluetoothAdapter != null){
+            mBluetoothAdapter = null;
         }
     }
 }

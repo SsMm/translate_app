@@ -87,7 +87,7 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity android:name=".activitys.DeviceManagerActivity" />
+        <activity android:name=".activitys.BluetoothDeviceManagerActivity" />
         <activity android:name=".activitys.VoiceTranslateActivity" />
         <activity android:name=".activitys.BleBluetoothDeviceManagerActivity" />
 
@@ -95,7 +95,7 @@
             android:name=".services.BluetoothLeService"
             android:enabled="true"
             android:exported="true"></service>
-        <receiver android:name=".receivers.BluetoothLeGattUpdateReceiver" />
+
     </application>
 
 </manifest>

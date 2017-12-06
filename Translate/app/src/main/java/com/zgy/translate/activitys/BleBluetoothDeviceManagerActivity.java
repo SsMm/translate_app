@@ -28,6 +28,8 @@ import com.zgy.translate.adapters.BluetoothDeviceAdapter;
 import com.zgy.translate.adapters.interfaces.BluetoothDeviceAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.global.GlobalConstants;
+import com.zgy.translate.global.GlobalInit;
+import com.zgy.translate.managers.inst.GattUpdateReceiverManager;
 import com.zgy.translate.receivers.BluetoothLeGattUpdateReceiver;
 import com.zgy.translate.receivers.interfaces.BluetoothLeGattUpdateReceiverInterface;
 import com.zgy.translate.services.BluetoothLeService;
@@ -66,6 +68,7 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
     private String mDeviceAddress;
     private BluetoothLeGattUpdateReceiver mGattUpdateReceiver;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
+    private GattUpdateReceiverManager gattUpdateReceiverManager;
 
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -76,13 +79,14 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
                 Log.i(TAG, "Unable to initialize Bluetooth");
                 finish();
             }
-
+            GlobalInit.mBluetoothLeService = mBluetoothLeService;
             //mBluetoothLeService.connect(mDeviceAddress);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mBluetoothLeService = null;
+            GlobalInit.mBluetoothLeService = null;
         }
     };
 
@@ -185,18 +189,19 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
         autoCloseScanExecutorService = Executors.newSingleThreadScheduledExecutor();
 
         //初始化服务
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        Intent gattServiceIntent = new Intent(getApplicationContext(), BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        GlobalInit.mServiceConnection = mServiceConnection;
 
         //注册
-        mGattUpdateReceiver = new BluetoothLeGattUpdateReceiver(this);
-        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        gattUpdateReceiverManager = new GattUpdateReceiverManager(this);
+        gattUpdateReceiverManager.register(this);
 
         //获取已绑定设备
         getLeBondedDevice();
 
         //检测蓝牙是否开启
-        if(mBluetoothAdapter.enable()){
+        if(mBluetoothAdapter.isEnabled()){
             scanLeDevice(true);
         }
 
@@ -225,6 +230,10 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
 
     /**操作开始关闭搜索*/
     private void scanLeDevice(final boolean enable){
+        if(!mBluetoothAdapter.isEnabled()){
+            ConfigUtil.showToask(this, "请开启蓝牙");
+            return;
+        }
         if(enable){
             autoCloseScanExecutorService.schedule(new Runnable() {
                 @Override
@@ -289,15 +298,6 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
         }
     };
 
-    private static IntentFilter makeGattUpdateIntentFilter() {
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
-        return intentFilter;
-    }
-
     @Override
     public void gattConnected() {
         ConfigUtil.showToask(this, "连接成功");
@@ -359,9 +359,11 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(mServiceConnection);
-        mBluetoothLeService = null;
-        unregisterReceiver(mGattUpdateReceiver);
+        //unbindService(mServiceConnection);
+        //mBluetoothLeService = null;
+        if(gattUpdateReceiverManager != null){
+            gattUpdateReceiverManager.unRegister();
+        }
         autoCloseScanExecutorService.shutdown();
     }
 }

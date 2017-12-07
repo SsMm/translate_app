@@ -21,6 +21,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -28,14 +29,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".activitys.BluetoothActivity" />
 
         <!-- ShareSdk -->
         <meta-data
@@ -87,6 +80,27 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <!--baidu 语音识别-->
+        <meta-data android:name="com.baidu.speech.APP_ID"
+            android:value="10308735" />
+        <meta-data
+            android:name="com.baidu.speech.API_KEY"
+            android:value="tgPciIeIhrHVBu6DiNn7YTdD" />
+        <meta-data
+            android:name="com.baidu.speech.SECRET_KEY"
+            android:value="c743fcb3b3d30ddb58b9bd0b816d4e25" />
+        <service android:name="com.baidu.speech.VoiceRecognitionService" android:exported="false" />
+
+
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activitys.BluetoothActivity" />
         <activity android:name=".activitys.BluetoothDeviceManagerActivity" />
         <activity android:name=".activitys.VoiceTranslateActivity" />
         <activity android:name=".activitys.BleBluetoothDeviceManagerActivity" />

@@ -91,4 +91,5 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.tencent.bugly:nativecrashreport:latest.release'
+    compile files('libs/bdasr_V3_20170929_c8984af.jar')
 }

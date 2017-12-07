@@ -32,3 +32,5 @@
 -dontwarn com.mob.**
 -dontwarn cn.sharesdk.**
 -dontwarn **.R$*
+
+-keep class com.baidu.speech.**{*;}

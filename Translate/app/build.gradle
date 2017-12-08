@@ -85,11 +85,9 @@ dependencies {
     compile "com.tencent.bugly:crashreport_upgrade:${rootProject.ext.crashreportLibVersion}"
     compile "com.meituan.android.walle:library:${rootProject.ext.walleLibVersion}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${rootProject.ext.butterknifeLibVersion}"
-    compile files('libs/MobCommons-2017.1024.1907.jar')
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.tencent.bugly:nativecrashreport:latest.release'
-    compile files('libs/bdasr_V3_20170929_c8984af.jar')
 }

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zgy.translate.activitys.BleBluetoothDeviceManagerActivity;
 import com.zgy.translate.activitys.BluetoothDeviceManagerActivity;
+import com.zgy.translate.activitys.VoiceTranslateActivity;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.utils.ConfigUtil;
 import cn.sharesdk.onekeyshare.OnekeyShare;
@@ -41,7 +42,7 @@ public class MainActivity extends BaseActivity {
         device.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, BleBluetoothDeviceManagerActivity.class);
+                Intent intent = new Intent(MainActivity.this, VoiceTranslateActivity.class);
                 startActivity(intent);
             }
         });

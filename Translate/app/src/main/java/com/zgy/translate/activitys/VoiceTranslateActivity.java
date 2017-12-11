@@ -13,10 +13,16 @@ import com.zgy.translate.R;
 
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.base.BaseResponseObject;
+import com.zgy.translate.domains.RecogResult;
+import com.zgy.translate.managers.sing.SpeechAsrStartParamManager;
 import com.zgy.translate.utils.ConfigUtil;
 
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -28,6 +34,7 @@ public class VoiceTranslateActivity extends BaseActivity {
     private EventManager mAsr; //识别
     private EventListener asrEventListener;
 
+    private String inputResult = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +59,6 @@ public class VoiceTranslateActivity extends BaseActivity {
 
     }
 
-    @OnClick(R.id.start_speech) void startSpeech(){
-        mAsr.send(SpeechConstant.ASR_START, "{}", null, 0, 0);
-    }
-
-
     /**初始化*/
     private void baseInit(){
         mAsr = EventManagerFactory.create(this, "asr");
@@ -74,10 +76,28 @@ public class VoiceTranslateActivity extends BaseActivity {
                         Log.i("speech--END", "停止说话");
                         break;
                     case SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL: // 临时识别结果, 长语音模式需要从此消息中取出结果
+                        RecogResult recogResult = RecogResult.parseJson(params);
                         Log.i("speech--PARTIAL", params);
+                        String[] results = recogResult.getResultsRecognition();
+                        if(recogResult.isFinalResult()){
+                            List<String> list = new ArrayList<>();
+                            list.addAll(Arrays.asList(results));
+                            if(list.size() > 0){
+                                inputResult += list.get(0);
+                            }
+                        }
                         break;
                     case SpeechConstant.CALLBACK_EVENT_ASR_FINISH: // 识别结束， 最终识别结果或可能的错误
+                        RecogResult recogResult2 = RecogResult.parseJson(params);
                         Log.i("speech--FINISH", params);
+                        break;
+                    case SpeechConstant.CALLBACK_EVENT_ASR_LONG_SPEECH:
+                        Log.i("长语音结束", "长语音结束");
+                        Log.i("结束后录音结果", inputResult);
+                        break;
+                    case SpeechConstant.CALLBACK_EVENT_ASR_VOLUME:
+                        Volume vol = parseVolumeJson(params);
+                        Log.i("音量", vol.volumePercent + "");
                         break;
                 }
             }
@@ -86,12 +106,46 @@ public class VoiceTranslateActivity extends BaseActivity {
         mAsr.registerListener(asrEventListener);
     }
 
+    private Volume parseVolumeJson(String jsonStr) {
+        Volume vol = new Volume();
+        vol.origalJson = jsonStr;
+        try {
+            JSONObject json = new JSONObject(jsonStr);
+            vol.volumePercent = json.getInt("volume-percent");
+            vol.volume = json.getInt("volume");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return vol;
+    }
+
+    private class Volume {
+        private int volumePercent = -1;
+        private int volume = -1;
+        private String origalJson;
+    }
+
+    @OnClick(R.id.start_speech) void startSpeech(){
+        String json = new JSONObject(SpeechAsrStartParamManager.getInstance()
+                .createEN()
+                .createVoide()
+                .build()).toString();
+        Log.i("josn", json);
+        mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);
+    }
+
+    @OnClick(R.id.stop_speech) void stopSpeech(){
+        mAsr.send(SpeechConstant.ASR_STOP, "{}", null, 0, 0);
+    }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if(mAsr != null){
             mAsr.unregisterListener(asrEventListener);
+            mAsr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
+            mAsr = null;
         }
     }
 }

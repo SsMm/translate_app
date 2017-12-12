@@ -6,29 +6,21 @@ import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.LinearGradient;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.zgy.translate.R;
 import com.zgy.translate.adapters.BluetoothDeviceAdapter;
 import com.zgy.translate.adapters.interfaces.BluetoothDeviceAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
-import com.zgy.translate.domains.dtos.BluetoothDeviceDTO;
 import com.zgy.translate.domains.eventbuses.BluetoothConnectEB;
-import com.zgy.translate.domains.eventbuses.BluetoothDeviceEB;
-import com.zgy.translate.global.GlobalSingleThread;
+import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.global.GlobalStateCode;
-import com.zgy.translate.global.GlobalUUID;
 import com.zgy.translate.managers.inst.ComUpdateReceiverManager;
 import com.zgy.translate.receivers.BluetoothReceiver;
 import com.zgy.translate.receivers.interfaces.BluetoothReceiverInterface;
@@ -43,7 +35,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -493,11 +484,11 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     }
 
     private void getBluetoothInputStream(){
-        if(GlobalSingleThread.bltInputStreamExecutorService == null){
-            GlobalSingleThread.bltInputStreamExecutorService = Executors.newSingleThreadScheduledExecutor();
+        if(GlobalParams.bltInputStreamExecutorService == null){
+            GlobalParams.bltInputStreamExecutorService = Executors.newSingleThreadScheduledExecutor();
         }
 
-        GlobalSingleThread.bltInputStreamExecutorService.submit(new Runnable() {
+        GlobalParams.bltInputStreamExecutorService.submit(new Runnable() {
             @Override
             public void run() {
                /* while (mBluetoothSocket != null){

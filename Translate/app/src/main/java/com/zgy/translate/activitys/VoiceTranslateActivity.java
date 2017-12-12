@@ -21,6 +21,7 @@ import com.zgy.translate.base.BaseResponseObject;
 import com.zgy.translate.domains.RecogResult;
 import com.zgy.translate.domains.response.TransResultResponse;
 import com.zgy.translate.global.GlobalConstants;
+import com.zgy.translate.global.GlobalKey;
 import com.zgy.translate.http.HttpGet;
 import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.sing.SpeechAsrStartParamManager;
@@ -44,12 +45,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class VoiceTranslateActivity extends BaseActivity {
-
-    protected String appId = "8535996";
-
-    protected String appKey = "MxPpf3nF5QX0pndKKhS7IXcB";
-
-    protected String secretKey = "7226e84664474aa098296da5eb2aa434";
 
     private EventManager mAsr; //识别
     private EventListener mAsrEventListener;
@@ -216,8 +211,8 @@ public class VoiceTranslateActivity extends BaseActivity {
         mSpeechSynthesizer = SpeechSynthesizer.getInstance();
         mSpeechSynthesizer.setContext(this);
         mSpeechSynthesizer.setSpeechSynthesizerListener(mSpeechSynthesizerListener);
-        mSpeechSynthesizer.setAppId(appId);
-        mSpeechSynthesizer.setApiKey(appKey, secretKey);
+        mSpeechSynthesizer.setAppId(GlobalKey.TTS_APP_ID);
+        mSpeechSynthesizer.setApiKey(GlobalKey.TTS_APP_KEY, GlobalKey.TTS_SECURITY_KEY);
         mSpeechSynthesizer.auth(TtsMode.ONLINE); //在线混合
         mSpeechSynthesizer.setParam(SpeechSynthesizer.PARAM_SPEAKER, "0");
         mSpeechSynthesizer.initTts(TtsMode.ONLINE); //初始化在线混合

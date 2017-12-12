@@ -2,6 +2,7 @@ package com.zgy.translate.adapters;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.os.ParcelUuid;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,11 +41,18 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
     @Override
     public void onBindViewHolder(DeviceViewHolder holder, int position) {
         BluetoothDevice device = deviceDTOList.get(position);
+        Log.w("---", "---------------");
+        if(device.getUuids() != null){
+            for (ParcelUuid uuid : device.getUuids()){
+                Log.i("device--uuid", uuid.toString());
+            }
+        }
         if(device.getName() == null){
             holder.name.setText(device.getAddress());
         }else{
             holder.name.setText(device.getName());
         }
+        Log.i("name", holder.name.getText().toString());
 
         holder.name.setOnClickListener(new View.OnClickListener() {
             @Override

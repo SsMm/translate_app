@@ -66,7 +66,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     private BluetoothDeviceAdapter mBluetoothDeviceAdapter;  //搜索到设备
     private List<BluetoothDevice> deviceEBList;  //存放搜索到的蓝牙设备
     private int devicePosition;  //选择蓝牙设备坐标
-
+    private volatile BluetoothSocket connectSocket;
 
 
     @Override
@@ -246,6 +246,14 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
             case GlobalStateCode.BONDNONE:
                 Log.i("绑定状态", "没有绑定");
                 break;
+            case GlobalStateCode.CONNECTED:
+                Log.i("STATE_CONNECTED", "STATE_CONNECTED");
+                deviceBondStateTv.setText("连接成功");
+                connected(connectSocket);
+                break;
+            case GlobalStateCode.DISCONNECTED:
+                Log.i("STATE_DISCONNECTED", "STATE_DISCONNECTED");
+                break;
         }
     }
 
@@ -349,7 +357,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         }
 
         BluetoothDevice netDevice = mBluetoothAdapter.getRemoteDevice(device.getAddress());
-
+        mBluetoothDeviceBonded = netDevice;
         mConnectThread = new ConnectThread(netDevice);
         mConnectThread.start();
     }
@@ -379,7 +387,8 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                 }
                 mSocket.connect();
                 connectEB.setFlag(true);
-                connected(mSocket);
+                connectSocket = mSocket;
+                //connected(mSocket);
             } catch (IOException e) {
                 e.printStackTrace();
                 if(e.getMessage().contains("closed") || e.getMessage().contains("timeout")){
@@ -426,8 +435,8 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void returnConnectResult(BluetoothConnectEB connectEB){
         if(connectEB.isFlag()){
-            Log.i("连接成功", "连接成功");
-            deviceBondStateTv.setText("连接成功");
+            Log.i("连接成功", "socket连接成功");
+
         }else{
             Log.i("连接失败", "连接失败");
             deviceBondStateTv.setText("");

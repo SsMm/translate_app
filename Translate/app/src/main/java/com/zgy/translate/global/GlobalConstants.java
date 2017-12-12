@@ -6,7 +6,7 @@ package com.zgy.translate.global;
 
 public class GlobalConstants {
 
-    public static final String ZH = "zh";
+    public static final String CH = "zh";
     public static final String EN = "en";
     public static final String AUTO = "auto";
 

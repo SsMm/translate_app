@@ -34,3 +34,5 @@
 -dontwarn **.R$*
 
 -keep class com.baidu.speech.**{*;}
+-keep class com.baidu.tts.**{*;}
+-keep class com.baidu.speechsynthesizer.**{*;}

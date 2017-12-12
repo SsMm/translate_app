@@ -111,12 +111,12 @@ public class HttpGet {
             i++;
         }*/
 
-        builder.append('q').append('=').append(params.getQ()).append('&');
-        builder.append("from").append('=').append(params.getFrom()).append('&');
-        builder.append("to").append('=').append(params.getTo()).append('&');
-        builder.append("appid").append('=').append(params.getAppid()).append('&');
-        builder.append("salt").append('=').append(params.getSalt()).append('&');
-        builder.append("sign").append('=').append(params.getSign());
+        builder.append('q').append('=').append(encode(params.getQ())).append('&');
+        builder.append("from").append('=').append(encode(params.getFrom())).append('&');
+        builder.append("to").append('=').append(encode(params.getTo())).append('&');
+        builder.append("appid").append('=').append(encode(params.getAppid())).append('&');
+        builder.append("salt").append('=').append(encode(params.getSalt())).append('&');
+        builder.append("sign").append('=').append(encode(params.getSign()));
 
         return builder.toString();
     }

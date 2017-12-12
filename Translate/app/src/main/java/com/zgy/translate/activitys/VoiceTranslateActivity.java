@@ -4,18 +4,25 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Xml;
 
 import com.baidu.speech.EventListener;
 import com.baidu.speech.EventManager;
 import com.baidu.speech.EventManagerFactory;
 import com.baidu.speech.asr.SpeechConstant;
+import com.baidu.tts.client.SpeechError;
+import com.baidu.tts.client.SpeechSynthesizer;
+import com.baidu.tts.client.SpeechSynthesizerListener;
+import com.baidu.tts.client.TtsMode;
 import com.zgy.translate.R;
 
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.base.BaseResponseObject;
 import com.zgy.translate.domains.RecogResult;
+import com.zgy.translate.domains.response.TransResultResponse;
 import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.http.HttpGet;
+import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.sing.SpeechAsrStartParamManager;
 import com.zgy.translate.managers.sing.TransManager;
 import com.zgy.translate.utils.ConfigUtil;
@@ -25,6 +32,9 @@ import com.zgy.translate.utils.StringUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,8 +45,17 @@ import butterknife.OnClick;
 
 public class VoiceTranslateActivity extends BaseActivity {
 
+    protected String appId = "8535996";
+
+    protected String appKey = "MxPpf3nF5QX0pndKKhS7IXcB";
+
+    protected String secretKey = "7226e84664474aa098296da5eb2aa434";
+
     private EventManager mAsr; //识别
-    private EventListener asrEventListener;
+    private EventListener mAsrEventListener;
+
+    private SpeechSynthesizer mSpeechSynthesizer; //合成
+    private SpeechSynthesizerListener mSpeechSynthesizerListener;
 
     private String inputResult = "";
 
@@ -65,8 +84,14 @@ public class VoiceTranslateActivity extends BaseActivity {
 
     /**初始化*/
     private void baseInit(){
+        initSpeech();
+        initTTs();
+    }
+
+    /**初始化语音识别*/
+    private void initSpeech(){
         mAsr = EventManagerFactory.create(this, "asr");
-        asrEventListener =  new EventListener() {
+        mAsrEventListener =  new EventListener() {
             @Override
             public void onEvent(String name, String params, byte[] bytes, int offset, int length) {
                 switch (name){
@@ -103,9 +128,30 @@ public class VoiceTranslateActivity extends BaseActivity {
                                 @Override
                                 public void run() {
                                     String trans = HttpGet.get(TransManager.getInstance()
-                                            .params(inputResult, GlobalConstants.ZH, GlobalConstants.EN)
+                                            .params(inputResult, GlobalConstants.CH, GlobalConstants.EN)
                                             .build());
+                                    if(StringUtil.isEmpty(trans)){
+                                        return;
+                                    }
                                     Log.i("翻译结果", trans);
+                                    String tt = GsonManager.getInstance()
+                                            .fromJson(trans, TransResultResponse.class)
+                                            .getTrans_result()
+                                            .get(0)
+                                            .getDst();
+                                    String t;
+                                    try {
+                                        t = URLDecoder.decode(tt, "utf-8");
+                                        Log.i("合成文本", t);
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mSpeechSynthesizer.speak(t);
+                                            }
+                                        });
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }).start();
                         }else{
@@ -120,7 +166,61 @@ public class VoiceTranslateActivity extends BaseActivity {
             }
 
         };
-        mAsr.registerListener(asrEventListener);
+        mAsr.registerListener(mAsrEventListener);
+    }
+
+    /**初始化语音合成*/
+    private void initTTs(){
+        mSpeechSynthesizerListener = new SpeechSynthesizerListener() {
+            @Override
+            public void onSynthesizeStart(String utteranceId) {
+                //合成过程开始
+                Log.i("合成过程开始", "合成过程开始");
+            }
+
+            @Override
+            public void onSynthesizeDataArrived(String utteranceId, byte[] audioData, int progress) {
+                //合成数据过程中的回调接口，返回合成数据和进度，分多次回调
+                Log.i("合成数据过程中的回调接口", "合成数据过程中的回调接口");
+            }
+
+            @Override
+            public void onSynthesizeFinish(String utteranceId) {
+                //合成正常结束状态
+                Log.i("合成正常结束状态", "合成正常结束状态");
+            }
+
+            @Override
+            public void onSpeechStart(String utteranceId) {
+                //SDK开始控制播放器播放合成的声音。如果使用speak方法会有此回调，使用synthesize没有。
+
+            }
+
+            @Override
+            public void onSpeechProgressChanged(String utteranceId, int progress) {
+                //播放数据过程中的回调接口，分多次回调。如果使用speak方法会有此回调，使用synthesize没有。
+
+            }
+
+            @Override
+            public void onSpeechFinish(String utteranceId) {
+                //播放正常结束状态时的回调方法，如果过程中出错，则回调onError，不再回调此接口。
+
+            }
+
+            @Override
+            public void onError(String utteranceId, SpeechError speechError) {
+
+            }
+        };
+        mSpeechSynthesizer = SpeechSynthesizer.getInstance();
+        mSpeechSynthesizer.setContext(this);
+        mSpeechSynthesizer.setSpeechSynthesizerListener(mSpeechSynthesizerListener);
+        mSpeechSynthesizer.setAppId(appId);
+        mSpeechSynthesizer.setApiKey(appKey, secretKey);
+        mSpeechSynthesizer.auth(TtsMode.ONLINE); //在线混合
+        mSpeechSynthesizer.setParam(SpeechSynthesizer.PARAM_SPEAKER, "0");
+        mSpeechSynthesizer.initTts(TtsMode.ONLINE); //初始化在线混合
     }
 
     private Volume parseVolumeJson(String jsonStr) {
@@ -160,9 +260,16 @@ public class VoiceTranslateActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         if(mAsr != null){
-            mAsr.unregisterListener(asrEventListener);
+            mAsr.unregisterListener(mAsrEventListener);
             mAsr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
             mAsr = null;
+            mAsrEventListener = null;
+        }
+        if(mSpeechSynthesizer != null){
+            mSpeechSynthesizer.setSpeechSynthesizerListener(null);
+            mSpeechSynthesizer.release();
+            mSpeechSynthesizer = null;
+            mSpeechSynthesizerListener = null;
         }
     }
 }

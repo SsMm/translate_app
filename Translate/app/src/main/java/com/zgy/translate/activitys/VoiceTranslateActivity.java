@@ -14,8 +14,12 @@ import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.base.BaseResponseObject;
 import com.zgy.translate.domains.RecogResult;
+import com.zgy.translate.global.GlobalConstants;
+import com.zgy.translate.http.HttpGet;
 import com.zgy.translate.managers.sing.SpeechAsrStartParamManager;
+import com.zgy.translate.managers.sing.TransManager;
 import com.zgy.translate.utils.ConfigUtil;
+import com.zgy.translate.utils.StringUtil;
 
 
 import org.json.JSONException;
@@ -94,6 +98,19 @@ public class VoiceTranslateActivity extends BaseActivity {
                     case SpeechConstant.CALLBACK_EVENT_ASR_LONG_SPEECH:
                         Log.i("长语音结束", "长语音结束");
                         Log.i("结束后录音结果", inputResult);
+                        if(!StringUtil.isEmpty(inputResult)){
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    String trans = HttpGet.get(TransManager.getInstance()
+                                            .params(inputResult, GlobalConstants.ZH, GlobalConstants.EN)
+                                            .build());
+                                    Log.i("翻译结果", trans);
+                                }
+                            }).start();
+                        }else{
+                            Log.i("没有输入", "没有输入");
+                        }
                         break;
                     case SpeechConstant.CALLBACK_EVENT_ASR_VOLUME:
                         Volume vol = parseVolumeJson(params);
@@ -127,7 +144,7 @@ public class VoiceTranslateActivity extends BaseActivity {
 
     @OnClick(R.id.start_speech) void startSpeech(){
         String json = new JSONObject(SpeechAsrStartParamManager.getInstance()
-                .createEN()
+                .createCN()
                 .createVoide()
                 .build()).toString();
         Log.i("josn", json);

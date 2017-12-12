@@ -545,7 +545,9 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(event.getAction() == KeyEvent.ACTION_DOWN){
             if(keyCode == KeyEvent.KEYCODE_MEDIA_PLAY){
-                Log.i("按下", "按下按钮");
+                Log.i("按下", "按下按钮开始");
+            }else if(keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE){
+                Log.i("按下", "按下按钮关闭");
             }
         }
         return super.onKeyDown(keyCode, event);
@@ -555,7 +557,9 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if(event.getAction() == KeyEvent.ACTION_UP){
             if(keyCode == KeyEvent.KEYCODE_MEDIA_PLAY){
-                Log.i("抬起", "抬起按钮");
+                Log.i("抬起", "抬起按钮开始");
+            }else if(keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE){
+                Log.i("抬起", "按下按钮关闭");
             }
         }
         return super.onKeyUp(keyCode, event);

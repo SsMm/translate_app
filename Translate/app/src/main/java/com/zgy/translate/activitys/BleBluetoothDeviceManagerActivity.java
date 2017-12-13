@@ -166,10 +166,6 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
 
     /**初始化参数*/
     private void baseInit(){
-        if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
-            ConfigUtil.showToask(this, GlobalConstants.NO_BLE);
-            finish();
-        }
 
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();

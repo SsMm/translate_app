@@ -1,12 +1,15 @@
 package com.zgy.translate.activitys;
 
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothHealth;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.constraint.solver.Goal;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,10 +18,15 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.zgy.translate.R;
+import com.zgy.translate.adapters.BluetoothBondedDeviceAdapter;
 import com.zgy.translate.adapters.BluetoothDeviceAdapter;
+import com.zgy.translate.adapters.interfaces.BluetoothBondedDeviceAdapterInterface;
 import com.zgy.translate.adapters.interfaces.BluetoothDeviceAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.domains.dtos.BluetoothBondedDeviceDTO;
+import com.zgy.translate.domains.dtos.BluetoothSocketDTO;
 import com.zgy.translate.domains.eventbuses.BluetoothConnectEB;
+import com.zgy.translate.global.GlobalInit;
 import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.global.GlobalStateCode;
 import com.zgy.translate.managers.inst.ComUpdateReceiverManager;
@@ -45,28 +53,29 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class BluetoothDeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface,
-        BluetoothReceiverInterface, ConfigUtil.AlertDialogInterface{
+        BluetoothReceiverInterface, ConfigUtil.AlertDialogInterface, BluetoothBondedDeviceAdapterInterface{
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final UUID MY_UUID2 = UUID.fromString("00001102-0000-1000-8000-00805F9B34FB");
     private static final int REQUEST_ENABLE_BT = 1;  //请求开启蓝牙
 
-    @BindView(R.id.adm_rv_deviceList) RecyclerView deviceRv;
-    @BindView(R.id.adm_tv_deviceBonded) TextView deviceBondedTv;  //已绑定过得蓝牙设备
-    @BindView(R.id.adm_tv_deviceBondState) TextView deviceBondStateTv; //显示绑定设备状态
+    @BindView(R.id.adm_rv_deviceList) RecyclerView deviceRv; //搜索到设备
+    @BindView(R.id.adm_rv_bondeDeviceList) RecyclerView bondedDeviceRv; //绑定设备
 
 
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothDevice mBluetoothDeviceBonded; //已配对设备
-    private BluetoothReceiver mBluetoothReceiver = null;
+
     private ComUpdateReceiverManager receiverManager;
     private ConnectThread mConnectThread;
     private GetInputStreamThread mGetInputStreamThread;
 
+    private BluetoothBondedDeviceAdapter mBluetoothBondedDeviceAdapter; //绑定设备
+    private List<BluetoothBondedDeviceDTO> mBondedDeviceList; //绑定设备列表
+
     private BluetoothDeviceAdapter mBluetoothDeviceAdapter;  //搜索到设备
     private List<BluetoothDevice> deviceEBList;  //存放搜索到的蓝牙设备
     private int devicePosition;  //选择蓝牙设备坐标
-    private volatile BluetoothSocket connectSocket;
 
 
     @Override
@@ -122,6 +131,13 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         }
         Log.i("mybuluetooname", mBluetoothAdapter.getName() + "--" + mBluetoothAdapter.getAddress());
 
+        //绑定设备
+        mBondedDeviceList = new ArrayList<>();
+        bondedDeviceRv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        mBluetoothBondedDeviceAdapter = new BluetoothBondedDeviceAdapter(this, mBondedDeviceList, this);
+        bondedDeviceRv.setAdapter(mBluetoothBondedDeviceAdapter);
+
+        //搜索设备
         deviceEBList = new ArrayList<>();
         deviceRv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mBluetoothDeviceAdapter = new BluetoothDeviceAdapter(this, deviceEBList, this);
@@ -189,19 +205,33 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
 
     /**获取已绑定过得蓝牙信息*/
     private void getBondDevice(){
+        if(GlobalInit.bluetoothSocketDTOList != null && GlobalInit.bluetoothSocketDTOList.size() > 0){
+            for (BluetoothSocketDTO dto : GlobalInit.bluetoothSocketDTOList){
+                BluetoothBondedDeviceDTO d = new BluetoothBondedDeviceDTO();
+                d.setDevice(dto.getmBluetoothDevice());
+                d.setState(BluetoothBondedDeviceAdapter.CON_STATE);
+                d.setmBluetoothSocket(dto.getmBluetoothSocket());
+                showBondedDevice(d);
+            }
+        }
         if(mBluetoothAdapter != null){
             Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
             if(devices.size() > 0){
-                //getBluetoothHeadset();
                 for (BluetoothDevice device : devices){
-                    autoConnectDevice(device);
-                    Log.i("已绑定蓝牙", device.getName() + device.getAddress());
+                    if(mBondedDeviceList.size() == 0){
+                        autoConnectDevice(device);
+                        Log.i("已绑定蓝牙", device.getName() + device.getAddress());
+                    }else {
+                        BluetoothBondedDeviceDTO d = new BluetoothBondedDeviceDTO();
+                        d.setDevice(device);
+                        d.setState(BluetoothBondedDeviceAdapter.Bon_STATE);
+                        showBondedDevice(d);
+                    }
                 }
             }else{
-                deviceBondedTv.setText("");
-                deviceBondedTv.setVisibility(View.GONE);
-                deviceBondStateTv.setText("");
-                scanDevice(true);
+                if(mBondedDeviceList != null && mBondedDeviceList.size() == 0){
+                    scanDevice(true);
+                }
             }
         }
     }
@@ -218,6 +248,13 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         mBluetoothDeviceAdapter.notifyItemInserted(deviceEBList.size() - 1);
     }
 
+    /**绑定设备建立连接*/
+    @Override
+    public void bondedToConnection(int position, BluetoothDevice device) {
+
+    }
+
+    /**搜索到设备去绑定连接*/
     @Override
     public void bongDevice(BluetoothDevice deviceDTO, int position) {
         Log.i("选择蓝牙设备", position + deviceDTO.getName() + deviceDTO.getAddress());
@@ -248,12 +285,22 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                 break;
             case GlobalStateCode.CONNECTED:
                 Log.i("STATE_CONNECTED", "STATE_CONNECTED");
-                deviceBondStateTv.setText("连接成功");
-                connected(connectSocket);
+
+                for (BluetoothSocketDTO dto : GlobalInit.bluetoothSocketDTOList){
+                    if(mBluetoothDeviceBonded.equals(dto.getmBluetoothDevice())){
+                        BluetoothBondedDeviceDTO d = new BluetoothBondedDeviceDTO();
+                        d.setDevice(dto.getmBluetoothDevice());
+                        d.setState(BluetoothBondedDeviceAdapter.CON_STATE);
+                        d.setmBluetoothSocket(dto.getmBluetoothSocket());
+                        showBondedDevice(d);
+                        connected(dto.getmBluetoothSocket());
+                        break;
+                    }
+                }
+
                 break;
             case GlobalStateCode.DISCONNECTED:
                 Log.i("STATE_DISCONNECTED", "STATE_DISCONNECTED");
-                deviceBondStateTv.setText("");
                 break;
         }
     }
@@ -270,82 +317,45 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         }
     }
 
+    /**显示已绑定以及已连接设备*/
+    private void showBondedDevice(BluetoothBondedDeviceDTO dto){
+        mBondedDeviceList.add(dto);
+        mBluetoothBondedDeviceAdapter.notifyItemInserted(mBondedDeviceList.size() - 1);
+    }
+
     /**显示当前连接设备*/
     private void autoConnectDevice(BluetoothDevice device){
         mBluetoothDeviceBonded = device;
         scanDevice(false);
-        deviceBondedTv.setVisibility(View.VISIBLE);
-        if(StringUtil.isEmpty(device.getName())){
-            deviceBondedTv.setText(device.getAddress());
-        }else{
-            deviceBondedTv.setText(device.getName());
-        }
-        deviceBondStateTv.setText("正在连接...");
         connect(device);
     }
 
-    @OnClick(R.id.adm_tv_deviceBonded) void deviceBonded(){
+    /*@OnClick(R.id.adm_tv_deviceBonded) void deviceBonded() {
         ConfigUtil.showAlertDialog(this, "取消连接", "是否取消已连接设备", this);
-    }
+    }*/
 
     /**点击配对设备取消连接*/
     @Override
     public void confirmDialog() {
-        if(mGetInputStreamThread != null){
-            mGetInputStreamThread.cancel();
-            mGetInputStreamThread = null;
-        }
-        if(mConnectThread != null){
-            mConnectThread.cancel();
-            mConnectThread = null;
+        try {
+            GlobalInit.bluetoothSocketDTOList.get(0).getmBluetoothSocket().close();
+            if(mGetInputStreamThread != null){
+                mGetInputStreamThread.cancel();
+                mGetInputStreamThread.join();
+                mGetInputStreamThread = null;
+            }
+            if(mConnectThread != null){
+                mConnectThread.cancel();
+                mConnectThread.join();
+                mConnectThread = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void cancelDialog() {
-    }
-
-    private BluetoothHeadset mBluetoothHeadset;
-
-    private BluetoothProfile.ServiceListener mProfileListener = new BluetoothProfile.ServiceListener() {
-        @Override
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if(profile == BluetoothProfile.HEADSET){
-                mBluetoothHeadset = (BluetoothHeadset) proxy;
-                for (BluetoothDevice device : mBluetoothHeadset.getConnectedDevices()){
-                    Log.i("mBluetoothHeadset", device.getName() + device.getAddress());
-                }
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(int profile) {
-            if(profile == BluetoothProfile.HEADSET){
-                mBluetoothHeadset = null;
-                Log.i("mBluetoothHeadset", "没有连接");
-            }
-        }
-    };
-
-    private void getBluetoothHeadset(){
-        int flag = -1;
-        int a2dp = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP);
-        int headset = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET);
-        int health = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEALTH);
-
-        if(BluetoothProfile.STATE_CONNECTED == a2dp){
-            flag = a2dp;
-        }else if(BluetoothProfile.STATE_CONNECTED == headset){
-            flag = headset;
-        }else if(BluetoothProfile.STATE_CONNECTED == health){
-            flag = health;
-        }
-
-        Log.i("flag--", flag + a2dp + headset + health +"");
-
-        if(flag != -1){
-            mBluetoothAdapter.getProfileProxy(this, mProfileListener, flag);
-        }
     }
 
 
@@ -356,10 +366,16 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
             mConnectThread = null;
         }
 
-        //BluetoothDevice netDevice = mBluetoothAdapter.getRemoteDevice(device.getAddress());
-        //mBluetoothDeviceBonded = netDevice;
-        mConnectThread = new ConnectThread(device);
-        mConnectThread.start();
+        if(GlobalInit.bluetoothSocketDTOList != null){
+            BluetoothDevice netDevice = mBluetoothAdapter.getRemoteDevice(device.getAddress());
+            BluetoothSocketDTO socketDTO = new BluetoothSocketDTO();
+            socketDTO.setmBluetoothDevice(netDevice);
+            GlobalInit.bluetoothSocketDTOList.add(socketDTO);
+
+            mConnectThread = new ConnectThread(netDevice);
+            mConnectThread.start();
+        }
+
     }
 
     /**与蓝牙耳机建立连接*/
@@ -375,6 +391,14 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                 e.printStackTrace();
             }
             mSocket = socket;
+            if(GlobalInit.bluetoothSocketDTOList != null){
+                for (BluetoothSocketDTO d : GlobalInit.bluetoothSocketDTOList){
+                    if(d.getmBluetoothDevice().getAddress().equals(device.getAddress())){
+                        d.setmBluetoothSocket(mSocket);
+                        break;
+                    }
+                }
+            }
         }
 
         @Override
@@ -387,8 +411,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                 }
                 mSocket.connect();
                 connectEB.setFlag(true);
-                connectSocket = mSocket;
-                //connected(mSocket);
+
             } catch (IOException e) {
                 e.printStackTrace();
                 if(e.getMessage().contains("closed") || e.getMessage().contains("timeout")){
@@ -439,7 +462,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
 
         }else{
             Log.i("连接失败", "连接失败");
-            deviceBondStateTv.setText("");
+
         }
     }
 

@@ -1,5 +1,6 @@
 package com.zgy.translate.global;
 
+import android.bluetooth.BluetoothSocket;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,8 +12,16 @@ import com.meituan.android.walle.WalleChannelReader;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.zgy.translate.AppApplication;
+import com.zgy.translate.domains.dtos.BluetoothLeConnectionDTO;
+import com.zgy.translate.domains.dtos.BluetoothSocketDTO;
 import com.zgy.translate.services.BluetoothLeService;
 import com.zgy.translate.utils.ConfigUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import io.reactivex.internal.queue.MpscLinkedQueue;
 
 /**
  * Created by zhouguangyue on 2017/12/6.
@@ -30,6 +39,8 @@ public class GlobalInit {
     public static BluetoothLeService mBluetoothLeService;
     public static ServiceConnection mServiceConnection;
 
+    public static List<BluetoothLeConnectionDTO> leConnectionDTOList = new ArrayList<>(); //ble蓝牙连接集合
+    public static List<BluetoothSocketDTO> bluetoothSocketDTOList = new ArrayList<>(); //传统蓝牙连接集合
 
     public static GlobalInit getInstance() {
         if(globalInit == null){

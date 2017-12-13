@@ -23,8 +23,6 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
-
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -84,8 +82,9 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <!--baidu 语音识别-->
-        <meta-data android:name="com.baidu.speech.APP_ID"
+        <!-- baidu 语音识别 -->
+        <meta-data
+            android:name="com.baidu.speech.APP_ID"
             android:value="10308735" />
         <meta-data
             android:name="com.baidu.speech.API_KEY"
@@ -93,15 +92,13 @@
         <meta-data
             android:name="com.baidu.speech.SECRET_KEY"
             android:value="c743fcb3b3d30ddb58b9bd0b816d4e25" />
-        <service android:name="com.baidu.speech.VoiceRecognitionService" android:exported="false" />
 
+        <service
+            android:name="com.baidu.speech.VoiceRecognitionService"
+            android:exported="false" />
 
         <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".activitys.BluetoothActivity" />
         <activity android:name=".activitys.BluetoothDeviceManagerActivity" />
@@ -111,8 +108,15 @@
         <service
             android:name=".services.BluetoothLeService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
+        <activity android:name=".activitys.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

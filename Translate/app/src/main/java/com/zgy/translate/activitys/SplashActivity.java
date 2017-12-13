@@ -45,6 +45,8 @@ public class SplashActivity extends BaseActivity {
     private BluetoothA2dp mBluetoothA2dp;
     private BluetoothHealth mBluetoothHealth;
     private BluetoothGatt mBluetoothGatt;
+    private BluetoothProfile mBluetoothProfile;
+    private int pro;
 
 
     @Override
@@ -100,6 +102,7 @@ public class SplashActivity extends BaseActivity {
         super.onStop();
         //executorService.shutdown();
         //executorService = null;
+        finish();
     }
 
     /**登录情况*/
@@ -118,18 +121,22 @@ public class SplashActivity extends BaseActivity {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             Log.i("profile", profile +"");
             if(profile == BluetoothProfile.HEADSET){
-
+                pro = profile;
+                mBluetoothProfile = proxy;
                 Log.i("HEADSET", "HEADSET");
             }else if(profile == BluetoothProfile.A2DP){
-
+                pro = profile;
+                mBluetoothProfile = proxy;
                 getConnectionDevice(SOCKET, proxy);
 
                 Log.i("A2DP", "A2DP");
             }else if(profile == BluetoothProfile.HEALTH){
-
+                pro = profile;
+                mBluetoothProfile = proxy;
                 Log.i("HEALTH", "HEALTH");
             }else if(profile == BluetoothProfile.GATT){
-
+                pro = profile;
+                mBluetoothProfile = proxy;
                 getConnectionDevice(GATT, proxy);
                 Log.i("GATT", "GATT");
             }
@@ -161,6 +168,8 @@ public class SplashActivity extends BaseActivity {
                 for (BluetoothDevice device : mBluetoothA2dp.getConnectedDevices()){
                     if(GlobalInit.bluetoothSocketDTOList == null){
                         GlobalInit.bluetoothSocketDTOList = new ArrayList<>();
+                    }else{
+                        GlobalInit.bluetoothSocketDTOList.clear();
                     }
                     BluetoothSocketDTO socketDTO = new BluetoothSocketDTO();
                     socketDTO.setmBluetoothDevice(device);
@@ -174,6 +183,8 @@ public class SplashActivity extends BaseActivity {
                 for (BluetoothDevice device : mBluetoothGatt.getConnectedDevices()){
                     if(GlobalInit.leConnectionDTOList == null){
                         GlobalInit.leConnectionDTOList = new ArrayList<>();
+                    }else {
+                        GlobalInit.leConnectionDTOList.clear();
                     }
                     BluetoothLeConnectionDTO dto = new BluetoothLeConnectionDTO();
                     dto.setmBluetoothDevice(device);
@@ -228,5 +239,8 @@ public class SplashActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         bundle = null;
+        mBluetoothAdapter.closeProfileProxy(pro, mBluetoothProfile);
+        mProfileListener = null;
+        mBluetoothAdapter = null;
     }
 }

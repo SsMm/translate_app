@@ -253,6 +253,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                 break;
             case GlobalStateCode.DISCONNECTED:
                 Log.i("STATE_DISCONNECTED", "STATE_DISCONNECTED");
+                deviceBondStateTv.setText("");
                 break;
         }
     }
@@ -290,15 +291,14 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     /**点击配对设备取消连接*/
     @Override
     public void confirmDialog() {
-        if(mConnectThread != null){
-            mConnectThread.cancel();
-            mConnectThread = null;
-        }
         if(mGetInputStreamThread != null){
             mGetInputStreamThread.cancel();
             mGetInputStreamThread = null;
         }
-        deviceBondStateTv.setText("");
+        if(mConnectThread != null){
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
     }
 
     @Override
@@ -356,9 +356,9 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
             mConnectThread = null;
         }
 
-        BluetoothDevice netDevice = mBluetoothAdapter.getRemoteDevice(device.getAddress());
-        mBluetoothDeviceBonded = netDevice;
-        mConnectThread = new ConnectThread(netDevice);
+        //BluetoothDevice netDevice = mBluetoothAdapter.getRemoteDevice(device.getAddress());
+        //mBluetoothDeviceBonded = netDevice;
+        mConnectThread = new ConnectThread(device);
         mConnectThread.start();
     }
 

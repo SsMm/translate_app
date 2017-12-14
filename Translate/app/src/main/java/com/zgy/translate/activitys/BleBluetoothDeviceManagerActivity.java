@@ -152,7 +152,7 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
     }
 
     @Override
-    public void bongDevice(BluetoothDevice device, int position) {
+    public void goBondedAndConDevice(BluetoothDevice device, int position, TextView view) {
         mDeviceAddress = device.getAddress();
         if (mBluetoothLeService != null) {
             if(mScanning){

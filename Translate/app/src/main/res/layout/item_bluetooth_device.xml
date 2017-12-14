@@ -11,4 +11,9 @@
         android:layout_height="match_parent"
         android:text="11111"/>
 
+    <TextView
+        android:id="@+id/ibd_tv_deviceState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>

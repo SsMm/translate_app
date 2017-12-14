@@ -79,13 +79,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     break;
                 case BluetoothAdapter.STATE_CONNECTING:
                     Log.i("STATE_CONNECTING", "STATE_CONNECTING");
+                    receiverInterface.receiverDeviceState(GlobalStateCode.CONNECTING, device);
                     break;
-                case BluetoothAdapter.STATE_DISCONNECTED:
-                    receiverInterface.receiverDeviceState(GlobalStateCode.DISCONNECTED, device);
-                    break;
-                case BluetoothAdapter.STATE_DISCONNECTING:
-                    Log.i("STATE_DISCONNECTING", "STATE_DISCONNECTING");
-                    break;
+
             }
         }else if(BluetoothDevice.ACTION_PAIRING_REQUEST.equals(action)){
             device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);

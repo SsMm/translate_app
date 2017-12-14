@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.zgy.translate.controllers.ActivityController;
+import com.zgy.translate.managers.AppReceiverManager;
 
 
 /**
@@ -16,11 +17,13 @@ import com.zgy.translate.controllers.ActivityController;
 public abstract class BaseActivity extends AppCompatActivity{
 
 
+    private AppReceiverManager.BluetoothConnectionStateReceiver bluetoothConnectionStateReceiver; //蓝牙连接状态
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityController.addActivity(this);
+        registerBluetoothConState();
     }
 
     public void init(){
@@ -44,11 +47,27 @@ public abstract class BaseActivity extends AppCompatActivity{
 
     }
 
+    /**注册广播接收蓝牙连接状态*/
+    private void registerBluetoothConState(){
+        bluetoothConnectionStateReceiver = AppReceiverManager.buildBlueConnStaRec();
+        registerReceiver(bluetoothConnectionStateReceiver, AppReceiverManager.connectionStateIntentFilter());
+    }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         ActivityController.removeActivity(this);
+        unRegisterBluetoothConState();
+    }
 
+
+    /**解除状态绑定*/
+    private void unRegisterBluetoothConState(){
+        if(bluetoothConnectionStateReceiver != null){
+            unregisterReceiver(bluetoothConnectionStateReceiver);
+            bluetoothConnectionStateReceiver = null;
+        }
     }
 
 

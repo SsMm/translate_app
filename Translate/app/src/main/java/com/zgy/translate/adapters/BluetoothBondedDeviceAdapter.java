@@ -10,6 +10,8 @@ import android.widget.TextView;
 import com.zgy.translate.R;
 import com.zgy.translate.adapters.interfaces.BluetoothBondedDeviceAdapterInterface;
 import com.zgy.translate.domains.dtos.BluetoothBondedDeviceDTO;
+import com.zgy.translate.domains.dtos.BluetoothSocketDTO;
+import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.utils.StringUtil;
 
 import java.util.List;
@@ -20,14 +22,15 @@ import java.util.List;
 
 public class BluetoothBondedDeviceAdapter extends RecyclerView.Adapter<BluetoothBondedDeviceAdapter.BluetoothBondedViewHolder> {
     public static final String CON_STATE = "connection";
+    public static final String CONING_STATE = "connecting";
     public static final String Bon_STATE = "bonded";
 
     private Context mContext;
-    private List<BluetoothBondedDeviceDTO> deviceDTOs;
+    private List<BluetoothSocketDTO> deviceDTOs;
     private BluetoothBondedDeviceAdapterInterface adapterInterface;
 
 
-    public BluetoothBondedDeviceAdapter(Context context, List<BluetoothBondedDeviceDTO> deviceDTOs,
+    public BluetoothBondedDeviceAdapter(Context context, List<BluetoothSocketDTO> deviceDTOs,
                                         BluetoothBondedDeviceAdapterInterface adapterInterface){
         mContext = context;
         this.deviceDTOs = deviceDTOs;
@@ -43,22 +46,24 @@ public class BluetoothBondedDeviceAdapter extends RecyclerView.Adapter<Bluetooth
 
     @Override
     public void onBindViewHolder(BluetoothBondedViewHolder holder, int position) {
-        BluetoothBondedDeviceDTO dto = deviceDTOs.get(position);
-        if(dto.getState().equals(Bon_STATE)){
+        BluetoothSocketDTO dto = deviceDTOs.get(position);
+        if(Bon_STATE.equals(dto.getState())){
             holder.state.setText("");
-        }else{
-            holder.state.setText("已连接");
+        }else if(CONING_STATE.equals(dto.getState())){
+            holder.state.setText(GlobalConstants.STATE_CONNECTING);
+        }else if(CON_STATE.equals(dto.getState())){
+            holder.state.setText(GlobalConstants.STATE_CONNECTED);
         }
-        if(StringUtil.isEmpty(dto.getDevice().getName())){
-            holder.name.setText(dto.getDevice().getAddress());
+        if(StringUtil.isEmpty(dto.getmBluetoothDevice().getName())){
+            holder.name.setText(dto.getmBluetoothDevice().getAddress());
         }else{
-            holder.name.setText(dto.getDevice().getName());
+            holder.name.setText(dto.getmBluetoothDevice().getName());
         }
 
         holder.name.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapterInterface.bondedToConnection(holder.getAdapterPosition(), dto.getDevice());
+                adapterInterface.bondedToConnection(holder.getAdapterPosition(), dto.getmBluetoothDevice());
             }
         });
 
@@ -74,8 +79,8 @@ public class BluetoothBondedDeviceAdapter extends RecyclerView.Adapter<Bluetooth
         TextView name, state;
         private BluetoothBondedViewHolder(View itemView) {
             super(itemView);
-            name = (TextView) itemView.findViewById(R.id.ibbd_tv_bondedName);
-            state = (TextView) itemView.findViewById(R.id.ibbd_tv_bondedState);
+            name = itemView.findViewById(R.id.ibbd_tv_bondedName);
+            state = itemView.findViewById(R.id.ibbd_tv_bondedState);
         }
     }
 

@@ -52,12 +52,11 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
         }else{
             holder.name.setText(device.getName());
         }
-        Log.i("name", holder.name.getText().toString());
 
         holder.name.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapterInterface.bongDevice(device, holder.getAdapterPosition());
+                adapterInterface.goBondedAndConDevice(device, holder.getAdapterPosition(), holder.state);
             }
         });
 
@@ -69,13 +68,13 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
     }
 
 
+    public class DeviceViewHolder extends RecyclerView.ViewHolder{
+        TextView name, state;
 
-    class DeviceViewHolder extends RecyclerView.ViewHolder{
-        TextView name;
-
-        private DeviceViewHolder(View itemView) {
+        public DeviceViewHolder(View itemView) {
             super(itemView);
-            name = (TextView) itemView.findViewById(R.id.ibd_tv_deviceName);
+            name = itemView.findViewById(R.id.ibd_tv_deviceName);
+            state = itemView.findViewById(R.id.ibd_tv_deviceState);
         }
 
     }

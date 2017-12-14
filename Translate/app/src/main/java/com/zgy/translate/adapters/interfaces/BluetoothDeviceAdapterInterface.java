@@ -1,7 +1,10 @@
 package com.zgy.translate.adapters.interfaces;
 
 import android.bluetooth.BluetoothDevice;
+import android.view.View;
+import android.widget.TextView;
 
+import com.zgy.translate.adapters.BluetoothDeviceAdapter;
 import com.zgy.translate.domains.dtos.BluetoothDeviceDTO;
 
 /**
@@ -10,6 +13,6 @@ import com.zgy.translate.domains.dtos.BluetoothDeviceDTO;
 
 public interface BluetoothDeviceAdapterInterface {
 
-    void bongDevice(BluetoothDevice device, int position);  //绑定蓝牙设备
+    void goBondedAndConDevice(BluetoothDevice device, int position, TextView view);  //绑定蓝牙设备
 
 }

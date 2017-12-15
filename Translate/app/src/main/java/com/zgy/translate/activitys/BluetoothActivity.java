@@ -31,14 +31,14 @@ public class BluetoothActivity extends Activity {
         startRecordBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bluetoothRecorder.startRecording(BluetoothActivity.this, audioManager);
+                //bluetoothRecorder.startRecording(BluetoothActivity.this, audioManager);
             }
         });
 
         stopRecordBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bluetoothRecorder.stopRecording();
+               // bluetoothRecorder.stopRecording();
             }
         });
 
@@ -46,14 +46,14 @@ public class BluetoothActivity extends Activity {
         startPlayBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bluetoothRecorder.startPlaying();
+               // bluetoothRecorder.startPlaying();
             }
         });
 
         stopPlayBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bluetoothRecorder.stopPlaying();
+               // bluetoothRecorder.stopPlaying();
             }
         });
 

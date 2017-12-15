@@ -1,6 +1,9 @@
 package com.zgy.translate.managers.sing;
 
 import com.baidu.speech.asr.SpeechConstant;
+import com.zgy.translate.global.GlobalInit;
+import com.zgy.translate.global.GlobalParams;
+import com.zgy.translate.managers.CacheManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,8 +59,8 @@ public class SpeechAsrStartParamManager {
     }
 
     /**耳机输入源*/
-    public SpeechAsrStartParamManager createBle(){
-        map.put(SpeechConstant.IN_FILE, "");
+    public SpeechAsrStartParamManager createBlue(String path){
+        map.put(SpeechConstant.IN_FILE, path);
         return manager;
     }
 

@@ -103,8 +103,8 @@ public class SplashActivity extends BaseActivity implements BluetoothProfileMana
                 }
             }
             if(ask){
-                //RedirectUtil.redirect(this, VoiceTranslateActivity.class);
-                checkBle();
+                RedirectUtil.redirect(this, VoiceTranslateActivity.class);
+                //checkBle();
             }else{
                 checkBle();
             }

@@ -121,11 +121,11 @@ public class BluetoothRecorder {
             e.printStackTrace();
         }
 
-        //audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
-        //audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH); //让声音路由到蓝牙A2DP。此方法虽已弃用，但就它比较直接、好用。
-        audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
+        audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH); //让声音路由到蓝牙A2DP。此方法虽已弃用，但就它比较直接、好用。
+        //audioManager.setMode(AudioManager.MODE_NORMAL);
         try {
-            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            //mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mPlayer.setDataSource(fileName);
             mPlayer.prepare();
             mPlayer.start();

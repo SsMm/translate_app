@@ -36,6 +36,27 @@ public class CacheManager {
         return cachePath;
     }
 
+    //创建一个临时目录，用于复制临时文件，如assets目录下的离线资源文件
+    public static String createTmpDir(Context context, String dir) {
+        String tmpDir = Environment.getExternalStorageDirectory().toString() + "/" + dir;
+        if (!makeDir(tmpDir)) {
+            tmpDir = context.getExternalFilesDir(dir).getAbsolutePath();
+            if (!makeDir(dir)) {
+                throw new RuntimeException("create model resources dir failed :" + tmpDir);
+            }
+        }
+        return tmpDir;
+    }
+
+    private static boolean makeDir(String dirPath) {
+        File file = new File(dirPath);
+        if (!file.exists()) {
+            return file.mkdirs();
+        } else {
+            return true;
+        }
+    }
+
     /**
      * 判断当前内存情况
      * */

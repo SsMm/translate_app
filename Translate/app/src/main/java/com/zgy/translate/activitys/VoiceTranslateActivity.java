@@ -55,6 +55,8 @@ import butterknife.OnClick;
 
 public class VoiceTranslateActivity extends BaseActivity implements EventListener, SpeechSynthesizerListener{
 
+    private static final String UTTERANCE_ID = "appolo";
+
     private EventManager mAsr; //识别
     private SpeechSynthesizer mSpeechSynthesizer; //合成
 
@@ -172,8 +174,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        //mSpeechSynthesizer.speak(t);
-                                        mSpeechSynthesizer.synthesize(t);
+                                        mSpeechSynthesizer.speak(t);
+                                        //mSpeechSynthesizer.synthesize(t, UTTERANCE_ID);
                                     }
                                 });
                             } catch (UnsupportedEncodingException e) {
@@ -217,33 +219,42 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void onSynthesizeStart(String utteranceId) {
         //合成过程开始
-        Log.i("合成过程开始", "合成过程开始");
-        try {
-            ttsFileOutputStream = new FileOutputStream(getPathFile(true));
-            ttsBufferedOutputStream = new BufferedOutputStream(ttsFileOutputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(UTTERANCE_ID.equals(utteranceId)){
+            Log.i("合成过程开始", "合成过程开始");
+            try {
+                ttsFileOutputStream = new FileOutputStream(getPathFile(true));
+                ttsBufferedOutputStream = new BufferedOutputStream(ttsFileOutputStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     @Override
     public void onSynthesizeDataArrived(String utteranceId, byte[] audioData, int progress) {
         //合成数据过程中的回调接口，返回合成数据和进度，分多次回调
-        Log.i("合成数据过程中的回调接口", "合成数据过程中的回调接口");
-        try {
-            ttsBufferedOutputStream.write(audioData);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(UTTERANCE_ID.equals(utteranceId)){
+            Log.i("合成数据过程中的回调接口", "合成数据过程中的回调接口");
+            try {
+                ttsBufferedOutputStream.write(audioData);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     @Override
     public void onSynthesizeFinish(String utteranceId) {
         //合成正常结束状态
-        Log.i("合成正常结束状态", "合成正常结束状态");
-        //BluetoothRecorder.startPlaying(ttsFile.getAbsolutePath(), VoiceTranslateActivity.this, mAudioManager);
-        AudioRecordUtil.startTrack(ttsFile, mAudioManager);
-        close();
+        if(UTTERANCE_ID.equals(utteranceId)){
+            Log.i("合成正常结束状态", "合成正常结束状态");
+            //BluetoothRecorder.startPlaying(ttsFile.getAbsolutePath(), VoiceTranslateActivity.this, mAudioManager);
+            AudioRecordUtil.startTrack(ttsFile, mAudioManager);
+            close();
+        }
+
     }
 
     @Override
@@ -275,15 +286,21 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @OnClick(R.id.start_speech) void startInput(){
         mediaRecorderPath = getPathFile(false);
-        //BluetoothRecorder.startRecording(this, mAudioManager, );
-        AudioRecordUtil.startRecord(mediaRecorderPath);
-        //toCNSpeech(true);
+        //BluetoothRecorder.startRecording(this, mAudioManager, GlobalParams.DEMO_PATH);
+        /*AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager,
+                new AudioRecordUtil.AudioRecordInterface() {
+            @Override
+            public void openBlueSCO() {
+                toCNSpeech(false);
+            }
+        });*/
+        BluetoothRecorder.startPlaying(GlobalParams.DEMO_PATH, this, mAudioManager);
+
     }
 
     @OnClick(R.id.stop_speech) void stopInput(){
         //BluetoothRecorder.stopRecording(this, mAudioManager);
-        AudioRecordUtil.stopRecord();
-        toCNSpeech(false);
+        //AudioRecordUtil.stopRecord();
         //stopSpeech();
     }
 

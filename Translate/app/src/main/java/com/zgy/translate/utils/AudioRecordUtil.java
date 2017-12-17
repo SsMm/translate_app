@@ -1,5 +1,9 @@
 package com.zgy.translate.utils;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -32,7 +36,8 @@ public class AudioRecordUtil {
     private static short[] mAudioTrackData;
     private static ScheduledExecutorService executorService;
 
-    public static void startRecord(File pathFile){
+    public static void startRecord(File pathFile, Context context, AudioManager audioManager,
+                                   AudioRecordInterface recordInterface){
         checkPoolState();
         int sampleRateInHz = 44100;//所有Android系统都支持的频率
         int recordBufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
@@ -41,12 +46,43 @@ public class AudioRecordUtil {
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 sampleRateInHz, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordBufferSizeInBytes);
 
-        executorService.submit(new Runnable() {
+        if(!audioManager.isBluetoothScoAvailableOffCall()){
+            ConfigUtil.showToask(context, "系统不支持蓝牙录音");
+            return;
+        }
+
+        audioManager.startBluetoothSco();//蓝牙录音的关键，启动SCO连接，耳机话筒才起作用
+
+        //蓝牙SCO连接建立需要时间，连接建立后会发出ACTION_SCO_AUDIO_STATE_CHANGED消息，通过接收该消息而进入后续逻辑。
+        //也有可能此时SCO已经建立，则不会收到上述消息，可以startBluetoothSco()前先stopBluetoothSco()
+
+        context.registerReceiver(new BroadcastReceiver() {
             @Override
-            public void run() {
-                doStart(pathFile);
+            public void onReceive(Context context, Intent intent) {
+                int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+                Log.i("state", state+"");
+                if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
+                    audioManager.setBluetoothScoOn(true); //打开SCO
+                    recordInterface.openBlueSCO();
+                    executorService.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            doStart(pathFile);
+                        }
+                    });
+                    Log.i("开始录音", "开始录音");
+                    ConfigUtil.showToask(context, "开始录音");
+                    context.unregisterReceiver(this);
+                }else{
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    audioManager.startBluetoothSco();
+                }
             }
-        });
+        },new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
 
     }
 
@@ -61,7 +97,7 @@ public class AudioRecordUtil {
                     dataOutputStream.writeShort(mAudioRecordData[i]);
                 }
                 if(AudioRecord.ERROR_BAD_VALUE != num && AudioRecord.ERROR != num){
-                    Log.d("TAG", String.valueOf(num));
+                    //Log.d("TAG", String.valueOf(num));
                 }
             }
             dataOutputStream.flush();
@@ -167,4 +203,9 @@ public class AudioRecordUtil {
         executorService = Executors.newSingleThreadScheduledExecutor();
     }
 
+
+    public interface AudioRecordInterface{
+        void openBlueSCO();
+    }
 }
+

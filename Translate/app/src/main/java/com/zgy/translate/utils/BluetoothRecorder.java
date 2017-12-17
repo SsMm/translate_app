@@ -28,9 +28,6 @@ public class BluetoothRecorder {
     /**开启录音*/
     public static void startRecording(Context context, AudioManager audioManager, String fileName){
 
-        //mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        //mFileName += "/btrecorder" + System.currentTimeMillis() + ".3gp";
-
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -110,10 +107,7 @@ public class BluetoothRecorder {
             audioManager.setBluetoothA2dpOn(true); //如果A2DP没建立，则建立A2DP连接
         }
 
-        if(audioManager.isBluetoothScoOn()){
-            audioManager.setBluetoothScoOn(false);
-            audioManager.stopBluetoothSco();
-        }
+        audioManager.stopBluetoothSco();
 
         try {
             Thread.sleep(5 * 100);
@@ -123,9 +117,7 @@ public class BluetoothRecorder {
 
         audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
         audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH); //让声音路由到蓝牙A2DP。此方法虽已弃用，但就它比较直接、好用。
-        //audioManager.setMode(AudioManager.MODE_NORMAL);
         try {
-            //mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mPlayer.setDataSource(fileName);
             mPlayer.prepare();
             mPlayer.start();

@@ -80,8 +80,8 @@ public class AudioRecordUtil {
 
     private static void doStart(File pathFile){
         short[] mAudioRecordData;
-        int sampleRateInHz = 44100;//所有Android系统都支持的频率
-        //int sampleRateInHz = 16000;
+        //int sampleRateInHz = 44100;//所有Android系统都支持的频率
+        int sampleRateInHz = 16000;
         int recordBufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
         mAudioRecordData = new short[recordBufferSizeInBytes];
@@ -97,6 +97,15 @@ public class AudioRecordUtil {
                 for (int i = 0 ; i < num ; i++){
                     dataOutputStream.writeShort(mAudioRecordData[i]);
                 }
+
+                long v = 0;
+
+                for (int j = 0 ; j < mAudioRecordData.length ; j++){
+                    v += mAudioRecordData[j] * mAudioRecordData[j];
+                }
+                double mean = v / num;
+                double volume = 10 * Math.log10(mean);
+                Log.i("volume", volume +"");
             }
             dataOutputStream.flush();
             dataOutputStream.close();
@@ -116,13 +125,24 @@ public class AudioRecordUtil {
 
 
     public static void startTrack(File pathFile, AudioManager audioManager){
+        Log.i("pathfile", pathFile.length() + "");
         checkPoolState();
         //int sampleRateInHz = 44100;//所有Android系统都支持的频率
 
         if(!audioManager.isBluetoothA2dpOn()){
             audioManager.setBluetoothA2dpOn(true);
+            audioManager.setSpeakerphoneOn(false);
         }
 
+        audioManager.stopBluetoothSco();
+
+        try {
+            Thread.sleep(5 * 100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
         audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);
 
@@ -137,7 +157,8 @@ public class AudioRecordUtil {
 
     private static void doPlay(File pathFile){
         short[] mAudioTrackData;
-        int sampleRateInHz = 44100;//所有Android系统都支持的频率
+        //int sampleRateInHz = 44100;//所有Android系统都支持的频率
+        int sampleRateInHz = 16000;//所有Android系统都支持的频率
 
         /*int trackBufferSizeInBytes = AudioRecord.getMinBufferSize(
                 sampleRateInHz, AudioFormat.CHANNEL_IN_MONO,
@@ -174,7 +195,7 @@ public class AudioRecordUtil {
                 i++;
             }
             dataInputStream.close();
-
+            wipe(mAudioTrackData, 0, mAudioTrackData.length);
             mAudioTrack.play();
             mAudioTrack.write(mAudioTrackData, 0, musicLength);
             mAudioTrack.stop();

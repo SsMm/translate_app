@@ -32,25 +32,17 @@ public class AudioRecordUtil {
     private static AudioRecord mAudioRecord;
     private static AudioTrack mAudioTrack;
 
-    private static short[] mAudioRecordData;
-    private static short[] mAudioTrackData;
     private static ScheduledExecutorService executorService;
 
-    public static void startRecord(File pathFile, Context context, AudioManager audioManager,
-                                   AudioRecordInterface recordInterface){
+    public static void startRecord(File pathFile, Context context, AudioManager audioManager){
         checkPoolState();
-        int sampleRateInHz = 44100;//所有Android系统都支持的频率
-        int recordBufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
-                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-        mAudioRecordData = new short[recordBufferSizeInBytes];
-        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                sampleRateInHz, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordBufferSizeInBytes);
 
         if(!audioManager.isBluetoothScoAvailableOffCall()){
             ConfigUtil.showToask(context, "系统不支持蓝牙录音");
             return;
         }
 
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         audioManager.startBluetoothSco();//蓝牙录音的关键，启动SCO连接，耳机话筒才起作用
 
         //蓝牙SCO连接建立需要时间，连接建立后会发出ACTION_SCO_AUDIO_STATE_CHANGED消息，通过接收该消息而进入后续逻辑。
@@ -63,7 +55,7 @@ public class AudioRecordUtil {
                 Log.i("state", state+"");
                 if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
                     audioManager.setBluetoothScoOn(true); //打开SCO
-                    recordInterface.openBlueSCO();
+                    audioManager.setSpeakerphoneOn(false);
                     executorService.submit(new Runnable() {
                         @Override
                         public void run() {
@@ -87,17 +79,23 @@ public class AudioRecordUtil {
     }
 
     private static void doStart(File pathFile){
-        mAudioRecord.startRecording();
+        short[] mAudioRecordData;
+        int sampleRateInHz = 44100;//所有Android系统都支持的频率
+        //int sampleRateInHz = 16000;
+        int recordBufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
+                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        mAudioRecordData = new short[recordBufferSizeInBytes];
+        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT,
+                sampleRateInHz, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordBufferSizeInBytes);
+
         try {
             DataOutputStream dataOutputStream = new DataOutputStream(
                     new BufferedOutputStream(new FileOutputStream(pathFile)));
+            mAudioRecord.startRecording();
             while (mAudioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING){
-                int num = mAudioRecord.read(mAudioRecordData, 0, mAudioRecordData.length);
+                int num = mAudioRecord.read(mAudioRecordData, 0, recordBufferSizeInBytes);
                 for (int i = 0 ; i < num ; i++){
                     dataOutputStream.writeShort(mAudioRecordData[i]);
-                }
-                if(AudioRecord.ERROR_BAD_VALUE != num && AudioRecord.ERROR != num){
-                    //Log.d("TAG", String.valueOf(num));
                 }
             }
             dataOutputStream.flush();
@@ -119,17 +117,7 @@ public class AudioRecordUtil {
 
     public static void startTrack(File pathFile, AudioManager audioManager){
         checkPoolState();
-        int sampleRateInHz = 44100;//所有Android系统都支持的频率
-        int trackBufferSizeInBytes = AudioRecord.getMinBufferSize(
-                sampleRateInHz, AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT);
-
-        mAudioTrackData = new short[trackBufferSizeInBytes];
-
-        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                sampleRateInHz, AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, trackBufferSizeInBytes,
-                AudioTrack.MODE_STREAM);
+        //int sampleRateInHz = 44100;//所有Android系统都支持的频率
 
         if(!audioManager.isBluetoothA2dpOn()){
             audioManager.setBluetoothA2dpOn(true);
@@ -148,11 +136,25 @@ public class AudioRecordUtil {
     }
 
     private static void doPlay(File pathFile){
-        mAudioTrack.play();
+        short[] mAudioTrackData;
+        int sampleRateInHz = 44100;//所有Android系统都支持的频率
+
+        /*int trackBufferSizeInBytes = AudioRecord.getMinBufferSize(
+                sampleRateInHz, AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT);*/
+
+        int musicLength = (int) (pathFile.length() / 2);
+        mAudioTrackData = new short[musicLength];
+
+        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                sampleRateInHz, AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT, musicLength * 2,
+                AudioTrack.MODE_STREAM);
+
         try {
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(pathFile)));
 
-            while (mAudioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING
+           /* while (mAudioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING
                     && dataInputStream.available() > 0) {
                 Log.i("track", "----");
                 int i = 0;
@@ -164,9 +166,18 @@ public class AudioRecordUtil {
                 //wipe(mAudioTrackData, 0, mAudioTrackData.length);
                 // 然后将数据写入到AudioTrack中
                 mAudioTrack.write(mAudioTrackData, 0, mAudioTrackData.length);
+            }*/
+
+            int i = 0;
+            while (dataInputStream.available() > 0){
+                mAudioTrackData[i] = dataInputStream.readShort();
+                i++;
             }
-            mAudioTrack.stop();
             dataInputStream.close();
+
+            mAudioTrack.play();
+            mAudioTrack.write(mAudioTrackData, 0, musicLength);
+            mAudioTrack.stop();
         } catch (Exception e) {
             e.printStackTrace();
         }

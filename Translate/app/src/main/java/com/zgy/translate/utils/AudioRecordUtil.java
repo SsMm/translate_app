@@ -129,26 +129,25 @@ public class AudioRecordUtil {
         checkPoolState();
         //int sampleRateInHz = 44100;//所有Android系统都支持的频率
 
-        if(!audioManager.isBluetoothA2dpOn()){
-            audioManager.setBluetoothA2dpOn(true);
-            audioManager.setSpeakerphoneOn(false);
-        }
-
-        audioManager.stopBluetoothSco();
-
-        try {
-            Thread.sleep(5 * 100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-        audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
-        audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);
-
         executorService.submit(new Runnable() {
             @Override
             public void run() {
+                if(!audioManager.isBluetoothA2dpOn()){
+                    audioManager.setBluetoothA2dpOn(true);
+                    audioManager.setSpeakerphoneOn(false);
+                }
+
+                audioManager.stopBluetoothSco();
+
+                try {
+                    Thread.sleep(5 * 100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
+                audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);
                 doPlay(pathFile);
             }
         });

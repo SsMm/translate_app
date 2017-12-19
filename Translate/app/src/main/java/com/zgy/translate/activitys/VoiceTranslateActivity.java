@@ -1,9 +1,11 @@
 package com.zgy.translate.activitys;
 
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputFilter;
 import android.util.Log;
 import android.util.Xml;
 
@@ -32,6 +34,7 @@ import com.zgy.translate.managers.sing.TransManager;
 import com.zgy.translate.utils.AudioRecordUtil;
 import com.zgy.translate.utils.BluetoothRecorder;
 import com.zgy.translate.utils.ConfigUtil;
+import com.zgy.translate.utils.InFileStream;
 import com.zgy.translate.utils.StringUtil;
 
 
@@ -40,18 +43,23 @@ import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
 
 public class VoiceTranslateActivity extends BaseActivity implements EventListener, SpeechSynthesizerListener{
 
@@ -63,11 +71,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private String inputResult = "";
     private AudioManager mAudioManager;
 
-    private File ttsFile;
     private FileOutputStream ttsFileOutputStream;
     private BufferedOutputStream ttsBufferedOutputStream;
-    private File mediaRecorderPath;
+    private File mediaRecorderPath; //存放蓝牙录音和语音合成蓝牙播放文件地址
 
+    private ScheduledExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,10 +132,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void onEvent(String name, String params, byte[] bytes, int offset, int length) {
         switch (name){
             case SpeechConstant.CALLBACK_EVENT_ASR_READY: // 引擎准备就绪，可以开始说话
-                ConfigUtil.showToask(VoiceTranslateActivity.this, "开始讲话。。。");
+                ConfigUtil.showToask(this, "开始讲话。。。");
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_BEGIN: // 检测到用户的已经开始说话
                 Log.i("speech--BEGIN", "开始说话");
+                //stopSpeech();
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_END: // 检测到用户的已经停止说话
                 Log.i("speech--END", "停止说话");
@@ -152,39 +161,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 Log.i("长语音结束", "长语音结束");
                 Log.i("结束后录音结果", inputResult);
                 if(!StringUtil.isEmpty(inputResult)){
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String trans = HttpGet.get(TransManager.getInstance()
-                                    .params(inputResult, GlobalConstants.CH, GlobalConstants.EN)
-                                    .build());
-                            if(StringUtil.isEmpty(trans)){
-                                return;
-                            }
-                            Log.i("翻译结果", trans);
-                            String tt = GsonManager.getInstance()
-                                    .fromJson(trans, TransResultResponse.class)
-                                    .getTrans_result()
-                                    .get(0)
-                                    .getDst();
-                            String t;
-                            try {
-                                t = URLDecoder.decode(tt, "utf-8");
-                                Log.i("合成文本", t);
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mSpeechSynthesizer.speak(t);
-                                        //mSpeechSynthesizer.synthesize(t, UTTERANCE_ID);
-                                    }
-                                });
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }).start();
+                    speechToTransAndSynt(inputResult);
+                    inputResult = "";
                 }else{
-                    Log.i("没有输入", "没有输入");
+                    ConfigUtil.showToask(this, "没有检测到输入，请重新输入");
                 }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_VOLUME:
@@ -192,6 +172,49 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 Log.i("音量", vol.volumePercent + "");
                 break;
         }
+    }
+
+    /**语音识别后自动翻译合成*/
+    private void speechToTransAndSynt(String result){
+        checkPoolState();
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                String trans = HttpGet.get(TransManager.getInstance()
+                        .params(result, GlobalConstants.CH, GlobalConstants.EN)
+                        .build());
+                if(StringUtil.isEmpty(trans)){
+                    ConfigUtil.showToask(VoiceTranslateActivity.this, "找不到翻译结果，请重新再试！");
+                    return;
+                }
+                Log.i("翻译结果", trans);
+                //翻译后文本
+                String dstT = GsonManager.getInstance()
+                        .fromJson(trans, TransResultResponse.class)
+                        .getTrans_result().get(0).getDst();
+                //翻译前文本
+                String srcT = GsonManager.getInstance().fromJson(trans, TransResultResponse.class)
+                        .getTrans_result().get(0).getSrc();
+
+                String src;
+                String dst;
+                try {
+                    src = URLDecoder.decode(srcT, "utf-8");
+                    dst = URLDecoder.decode(dstT, "utf-8");
+                    Log.i("翻译前文本", src);
+                    Log.i("合成文本", dst);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSpeechSynthesizer.speak(dst);
+                            //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+                        }
+                    });
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private Volume parseVolumeJson(String jsonStr) {
@@ -222,7 +245,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(UTTERANCE_ID.equals(utteranceId)){
             Log.i("合成过程开始", "合成过程开始");
             try {
-                ttsFileOutputStream = new FileOutputStream(getPathFile(true));
+                mediaRecorderPath = getPathFile(true);
+                ttsFileOutputStream = new FileOutputStream(mediaRecorderPath);
                 ttsBufferedOutputStream = new BufferedOutputStream(ttsFileOutputStream);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -250,9 +274,24 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         //合成正常结束状态
         if(UTTERANCE_ID.equals(utteranceId)){
             Log.i("合成正常结束状态", "合成正常结束状态");
-            //BluetoothRecorder.startPlaying(ttsFile.getAbsolutePath(), VoiceTranslateActivity.this, mAudioManager);
-            AudioRecordUtil.startTrack(ttsFile, mAudioManager);
             close();
+            AudioRecordUtil.startTrack(mediaRecorderPath, mAudioManager);
+            /*AndroidAudioConverter.with(this)
+                    .setFile(mediaRecorderPath)
+                    .setFormat(AudioFormat.MP3)
+                    .setCallback(new IConvertCallback() {
+                        @Override
+                        public void onSuccess(File file) {
+                            Log.i("file---", file.getAbsolutePath());
+                            BluetoothRecorder.startPlaying(file.getAbsolutePath(), VoiceTranslateActivity.this, mAudioManager);
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Log.i("shib", e.getMessage());
+                        }
+                    })
+                    .convert();*/
         }
 
     }
@@ -286,22 +325,17 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @OnClick(R.id.start_speech) void startInput(){
         mediaRecorderPath = getPathFile(false);
-        //BluetoothRecorder.startRecording(this, mAudioManager, GlobalParams.DEMO_PATH);
-        /*AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager,
-                new AudioRecordUtil.AudioRecordInterface() {
-            @Override
-            public void openBlueSCO() {
-                toCNSpeech(false);
-            }
-        });*/
-        BluetoothRecorder.startPlaying(GlobalParams.DEMO_PATH, this, mAudioManager);
+        AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
+        //toCNSpeech(false);
 
     }
 
     @OnClick(R.id.stop_speech) void stopInput(){
-        //BluetoothRecorder.stopRecording(this, mAudioManager);
-        //AudioRecordUtil.stopRecord();
-        //stopSpeech();
+        AudioRecordUtil.stopRecord();
+        //AudioRecordUtil.startTrack(mediaRecorderPath, mAudioManager);
+        //stopSpeech();;
+        InFileStream.setInputStream(mediaRecorderPath.getAbsolutePath());
+        toCNSpeech(false);
     }
 
     /**中文输入*/
@@ -316,7 +350,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else{
              json = new JSONObject(SpeechAsrStartParamManager.getInstance()
                     .createCN()
-                    .createBlue(mediaRecorderPath.getAbsolutePath())
+                    .createBlue("#com.zgy.translate.utils.InFileStream.create16kStream()")
                     .build()).toString();
             Log.i("cn-blue-josn", json);
         }
@@ -347,6 +381,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     }
 
     private File getPathFile(boolean flag){
+        File ttsFile;
         if(flag){ //true是蓝牙播放 false是从蓝牙录音
             ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.PLAY_PATH);
             Log.i("ttfile", ttsFile.getAbsolutePath());
@@ -354,6 +389,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.RECORDER_PATH);
             Log.i("ttfile", ttsFile.getAbsolutePath());
         }
+
+        //ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.DEMO_PATH);
+        //Log.i("ttfile", ttsFile.getAbsolutePath());
         if(ttsFile.exists()){
             ttsFile.delete();
         }
@@ -364,6 +402,17 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             e.printStackTrace();
         }
         return ttsFile;
+    }
+
+    /**
+     * 查看是否有线程池存在执行任务，有就关闭，建立新线程池
+     * */
+    private void checkPoolState(){
+        if (executorService != null){
+            executorService.shutdown();
+            executorService = null;
+        }
+        executorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
@@ -378,6 +427,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             mSpeechSynthesizer.setSpeechSynthesizerListener(null);
             mSpeechSynthesizer.release();
             mSpeechSynthesizer = null;
+        }
+        if (executorService != null){
+            executorService.shutdown();
+            executorService = null;
         }
     }
 

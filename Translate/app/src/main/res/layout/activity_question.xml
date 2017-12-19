@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bar="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zgy.translate.activitys.QuestionActivity"
+    android:orientation="vertical">
+
+    <com.zgy.translate.widget.CommonBar
+        android:id="@+id/aq_cb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        bar:bar_title="常见问题"
+        bar:show_left="true"
+        bar:left_icon="@mipmap/back"/>
+
+   <android.support.v7.widget.RecyclerView
+       android:id="@+id/aq_rv_questionList"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
+   </android.support.v7.widget.RecyclerView>
+
+</LinearLayout>

@@ -2,4 +2,13 @@
     <string name="app_name">Apollo翻译</string>
     <string name="share_title">翻译</string>
     <string name="title_activity_ble_device_manager">BleDeviceManagerActivity</string>
+
+    <string name="phone_num">手机号:</string>
+    <string name="phone_code">验证码:</string>
+    <string name="phone_msg">密码:</string>
+    <string name="phone_msg_again">确认密码:</string>
+    <string name="login">登录</string>
+    <string name="register">注册</string>
+    <string name="forget_msg">忘记密码?</string>
+
 </resources>

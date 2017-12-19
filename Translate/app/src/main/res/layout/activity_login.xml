@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bar="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zgy.translate.activitys.LoginActivity"
+    android:orientation="vertical">
+
+    <com.zgy.translate.widget.CommonBar
+        android:id="@+id/al_cb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        bar:bar_title="登录"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/colorText"
+        android:layout_marginTop="@dimen/margin_10"
+        android:padding="@dimen/padding_10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"
+                android:text="@string/phone_num"/>
+
+            <EditText
+                android:id="@+id/al_et_phoneNum"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:inputType="phone"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"/>
+        </LinearLayout>
+
+        <include layout="@layout/common_horizontal_line"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"
+                android:text="@string/phone_code"/>
+
+            <EditText
+                android:id="@+id/al_et_phoneCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:inputType="text"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/al_tv_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_50"
+        android:layout_marginStart="@dimen/dimen_50"
+        android:layout_marginEnd="@dimen/dimen_50"
+        android:background="@drawable/bg_button_solid"
+        android:padding="@dimen/padding_10"
+        android:gravity="center"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/text_16"
+        android:text="@string/login"/>
+
+    <TextView
+        android:id="@+id/al_tv_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_20"
+        android:layout_marginStart="@dimen/dimen_50"
+        android:layout_marginEnd="@dimen/dimen_50"
+        android:background="@drawable/bg_button"
+        android:padding="@dimen/padding_10"
+        android:gravity="center"
+        android:textColor="@color/colorCommon"
+        android:textSize="@dimen/text_16"
+        android:text="@string/register"/>
+
+    <LinearLayout
+        android:id="@+id/al_ll_forgetMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/dimen_20"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colorCommon"
+            android:text="@string/forget_msg"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorCommon"/>
+    </LinearLayout>
+
+
+</LinearLayout>

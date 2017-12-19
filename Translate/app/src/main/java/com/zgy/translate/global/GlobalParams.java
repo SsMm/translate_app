@@ -20,8 +20,7 @@ public class GlobalParams {
     public static String RECORDER_PATH = "input" + ".pcm"; //蓝牙耳机录音地址
     public static String PLAY_PATH =  "out" + ".pcm"; //蓝牙耳机播放地址
     public static UserInfoDTO userInfoDTO; //用户基本信息
-    public static String DEMO_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() +
-            "/btrecorder" + ".3gp";
+    public static String DEMO_PATH = "btrecorder" + ".3gp";
 
 
 

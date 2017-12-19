@@ -4,6 +4,8 @@ package com.zgy.translate.global;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.ServiceConnection;
+import android.util.Log;
+
 import com.meituan.android.walle.WalleChannelReader;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
 
 
 /**
@@ -58,7 +62,7 @@ public class GlobalInit {
     }
 
     private void baseInit(){
-
+        //initAndroidAudioConverter();
     }
 
     private void initBuglyCrashReport(){
@@ -67,6 +71,10 @@ public class GlobalInit {
         Bugly.setAppChannel(appContext, channel);
 
         Bugly.init(appContext, "", isDebug);
+    }
+
+    private void initAndroidAudioConverter(){
+
     }
 
     /**绑定蓝牙接收通知服务*/

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/dimen_20"
+        android:background="@color/colorText"
+        android:padding="@dimen/padding_20">
+
+        <TextView
+            android:id="@+id/iq_tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_18"
+            android:textColor="@color/colorBlack"
+            android:text="下单后可以修改订单吗？"/>
+
+        <TextView
+            android:id="@+id/iq_tv_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_20"
+            android:lineSpacingExtra="5dp"
+            android:textScaleX="1dp"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colorBT"
+            android:text="1、是看得见斯柯达富锦市看似简单付款了时间的\n2、达康书记是打开即可"/>
+
+    </LinearLayout>
+
+</LinearLayout>

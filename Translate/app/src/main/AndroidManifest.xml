@@ -116,7 +116,16 @@
             </intent-filter>
         </activity>
         <activity android:name=".activitys.LoginActivity" />
-        <activity android:name=".activitys.QuestionActivity"></activity>
+        <activity android:name=".activitys.QuestionActivity" />
+        <activity android:name=".activitys.RegisterActivity" />
+        <activity android:name=".activitys.ForgetPawActivity" />
+        <activity android:name=".activitys.FindPawActivity" />
+        <activity android:name=".activitys.RevisePhoneActivity" />
+        <activity android:name=".activitys.MySettingActivity" />
+        <activity android:name=".activitys.AboutActivity" />
+        <activity android:name=".activitys.FeedBackActivity" />
+        <activity android:name=".activitys.MyMsgActivity" />
+        <activity android:name=".activitys.PersonalizedActivity"></activity>
     </application>
 
 </manifest>

@@ -8,5 +8,11 @@
         <attr name="right_icon" format="reference"/>
         <attr name="show_right" format="boolean"/>
     </declare-styleable>
+    
+    <declare-styleable name="CommonNav">
+        <attr name="nav_leftTitle" format="string"/>
+        <attr name="nav_rightTitle" format="string"/>
+        <attr name="nav_show_right" format="boolean"/>
+    </declare-styleable>
 
 </resources>

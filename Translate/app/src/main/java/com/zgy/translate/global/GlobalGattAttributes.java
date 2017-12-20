@@ -16,6 +16,8 @@
 
 package com.zgy.translate.global;
 
+import android.os.ParcelUuid;
+
 import java.util.HashMap;
 
 /**
@@ -26,17 +28,21 @@ public class GlobalGattAttributes {
     public static String HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb";
     public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
 
+    public static final String DEVICE_SERVICE = "5052494d-2dab-0541-6572-6f6861424c47";
+    public static final String DEVICE_SERVICE_CHAR = "43464152-2dab-4231-6572-6f6861424c47";
+
     static {
         // Sample Services.
         attributes.put("0000180d-0000-1000-8000-00805f9b34fb", "Heart Rate Service");
-        attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Device Information Service");
+        attributes.put("5052494d-2dab-0541-6572-6f6861424c47", "Device Information Service");
         // Sample Characteristics.
         attributes.put(HEART_RATE_MEASUREMENT, "Heart Rate Measurement");
-        attributes.put("00002a29-0000-1000-8000-00805f9b34fb", "Manufacturer Name String");
+        attributes.put("43464152-2dab-4231-6572-6f6861424c47", "Manufacturer Name String");
     }
 
     public static String lookup(String uuid, String defaultName) {
         String name = attributes.get(uuid);
         return name == null ? defaultName : name;
     }
+
 }

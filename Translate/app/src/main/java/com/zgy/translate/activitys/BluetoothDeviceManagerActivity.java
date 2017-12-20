@@ -39,7 +39,9 @@ import com.zgy.translate.receivers.BluetoothReceiver;
 import com.zgy.translate.receivers.interfaces.BluetoothReceiverInterface;
 import com.zgy.translate.utils.ClsUtils;
 import com.zgy.translate.utils.ConfigUtil;
+import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
+import com.zgy.translate.widget.CommonBar;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -47,6 +49,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -60,7 +63,7 @@ import retrofit2.http.PUT;
 
 public class BluetoothDeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface,
         BluetoothReceiverInterface, ConfigUtil.AlertDialogInterface, BluetoothBondedDeviceAdapterInterface,
-        BluetoothProfileManagerInterface{
+        BluetoothProfileManagerInterface, CommonBar.CommonBarInterface{
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final UUID MY_UUID2 = UUID.fromString("00001102-0000-1000-8000-00805F9B34FB");
@@ -68,6 +71,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
 
     @BindView(R.id.adm_rv_deviceList) RecyclerView deviceRv; //搜索到设备
     @BindView(R.id.adm_rv_bondeDeviceList) RecyclerView bondedDeviceRv; //绑定设备
+    @BindView(R.id.adm_cb) CommonBar commonBar;
 
 
     private BluetoothAdapter mBluetoothAdapter;
@@ -103,6 +107,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     @Override
     public void initEvent() {
         EventBus.getDefault().register(this);
+        commonBar.setBarInterface(this);
     }
 
     @Override
@@ -164,11 +169,22 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         }
     }
 
+    /**获取连接设备信息*/
     @Override
     public void getProfileFinish() {
         if(mBluetoothAdapter.isEnabled()){
             getBondDevice();
         }
+    }
+
+    @Override
+    public void checkLeftIcon() {
+        finish();
+    }
+
+    @Override
+    public void checkRightIcon() {
+        RedirectUtil.redirect(this, MySettingActivity.class);
     }
 
     /**开启蓝牙*/
@@ -329,7 +345,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                     BluetoothSocketDTO dto = mBondedDeviceList.get(p);
                     dto.setState(BluetoothBondedDeviceAdapter.CON_STATE);
                     mBluetoothBondedDeviceAdapter.notifyItemChanged(p);
-                    connected(dto.getmBluetoothSocket());
+                    //connected(dto.getmBluetoothSocket());
                 }
                 if(GlobalInit.bluetoothSocketDTOList != null){
                     GlobalInit.bluetoothSocketDTOList.clear();
@@ -440,6 +456,8 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     /**与蓝牙耳机建立连接*/
     public class ConnectThread extends Thread{
         private final BluetoothSocket mSocket;
+        private OutputStream outputStream;
+        private InputStream inputStream;
 
         public ConnectThread(BluetoothDevice device){
             BluetoothSocket socket = null;
@@ -461,6 +479,28 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                     return;
                 }
                 mSocket.connect();
+
+                outputStream = mSocket.getOutputStream();
+                outputStream.write(0);
+
+                inputStream = mSocket.getInputStream();
+                byte[] buffer = new byte[1024];
+                int bytes;
+                while (true){
+                    try {
+                        int bytesAvailable = inputStream.available();
+                        if(bytesAvailable > 0){
+                            bytes = inputStream.read(buffer);
+                            Log.i("bytes--", bytes + "");
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        if(e.getMessage().contains("closed")){
+                            Log.i("耳机关闭", "请检查蓝牙耳机是否开启");
+                            break;
+                        }
+                    }
+                }
                 connectEB.setFlag(true);
             } catch (IOException e) {
                 e.printStackTrace();

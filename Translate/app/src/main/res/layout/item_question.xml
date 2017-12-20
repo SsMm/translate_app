@@ -26,7 +26,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_20"
             android:lineSpacingExtra="5dp"
-            android:textScaleX="1dp"
             android:textSize="@dimen/text_16"
             android:textColor="@color/colorBT"
             android:text="1、是看得见斯柯达富锦市看似简单付款了时间的\n2、达康书记是打开即可"/>

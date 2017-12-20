@@ -28,6 +28,7 @@ import com.zgy.translate.adapters.BluetoothDeviceAdapter;
 import com.zgy.translate.adapters.interfaces.BluetoothDeviceAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.global.GlobalConstants;
+import com.zgy.translate.global.GlobalGattAttributes;
 import com.zgy.translate.global.GlobalInit;
 import com.zgy.translate.managers.inst.GattUpdateReceiverManager;
 import com.zgy.translate.receivers.BluetoothLeGattUpdateReceiver;
@@ -321,26 +322,33 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
         for (BluetoothGattService gattService : gattServices){
             Log.e("------", "-----------------------------");
             Log.i("gattService--id", gattService.getUuid().toString());
-            List<BluetoothGattCharacteristic> characteristics = gattService.getCharacteristics();
-            for (BluetoothGattCharacteristic characteristic : characteristics){
-                Log.i("characteristic--id", characteristic.getUuid().toString());
-                int charaProp = characteristic.getProperties();
-                Log.i("flag---", charaProp + "--" + characteristic.getPermissions());
-                if((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0){
-                    Log.i("可读", "可读");
-                    Log.i("可读", (charaProp | BluetoothGattCharacteristic.PROPERTY_READ) + "");
-                    if(mNotifyCharacteristic != null){
-                        //mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
-                        mNotifyCharacteristic = null;
+
+            if(gattService.getUuid().toString().equals(GlobalGattAttributes.DEVICE_SERVICE)){
+                List<BluetoothGattCharacteristic> characteristics = gattService.getCharacteristics();
+                for (BluetoothGattCharacteristic characteristic : characteristics){
+                    Log.i("characteristic--id", characteristic.getUuid().toString());
+                    if(characteristic.getUuid().toString().equals(GlobalGattAttributes.DEVICE_SERVICE_CHAR)){
+                        int charaProp = characteristic.getProperties();
+                        Log.i("flag---", charaProp + "--" + characteristic.getPermissions());
+                        if((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0){
+                            Log.i("可读", "可读");
+                            Log.i("可读", (charaProp | BluetoothGattCharacteristic.PROPERTY_READ) + "");
+                            if(mNotifyCharacteristic != null){
+                                mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
+                                mNotifyCharacteristic = null;
+                            }
+                            mBluetoothLeService.readCharacteristic(characteristic);
+                        }
+                        if((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0){
+                            Log.i("可通知", "可通知");
+                            Log.i("可通知", (charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) + "");
+                            mNotifyCharacteristic = characteristic;
+                            mBluetoothLeService.setCharacteristicNotification(characteristic, true);
+                        }
+                        break;
                     }
-                    mBluetoothLeService.readCharacteristic(characteristic);
                 }
-                if((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0){
-                    Log.i("可通知", "可通知");
-                    Log.i("可通知", (charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) + "");
-                    //mNotifyCharacteristic = characteristic;
-                    //mBluetoothLeService.setCharacteristicNotification(characteristic, true);
-                }
+                break;
             }
         }
     }

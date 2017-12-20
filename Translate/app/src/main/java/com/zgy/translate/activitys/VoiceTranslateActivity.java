@@ -206,8 +206,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mSpeechSynthesizer.speak(dst);
-                            //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+                            //mSpeechSynthesizer.speak(dst);
+                            mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
                         }
                     });
                 } catch (UnsupportedEncodingException e) {
@@ -275,7 +275,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(UTTERANCE_ID.equals(utteranceId)){
             Log.i("合成正常结束状态", "合成正常结束状态");
             close();
-            AudioRecordUtil.startTrack(mediaRecorderPath, mAudioManager);
+            AudioRecordUtil.startTrack(this, mediaRecorderPath, mAudioManager);
             /*AndroidAudioConverter.with(this)
                     .setFile(mediaRecorderPath)
                     .setFormat(AudioFormat.MP3)
@@ -324,18 +324,18 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
 
     @OnClick(R.id.start_speech) void startInput(){
-        mediaRecorderPath = getPathFile(false);
-        AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
-        //toCNSpeech(false);
+        //mediaRecorderPath = getPathFile(false);
+        //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
+        toCNSpeech(true);
 
     }
 
     @OnClick(R.id.stop_speech) void stopInput(){
-        AudioRecordUtil.stopRecord();
+        //AudioRecordUtil.stopRecord();
         //AudioRecordUtil.startTrack(mediaRecorderPath, mAudioManager);
-        //stopSpeech();;
-        InFileStream.setInputStream(mediaRecorderPath.getAbsolutePath());
-        toCNSpeech(false);
+        stopSpeech();
+        //InFileStream.setInputStream(mediaRecorderPath.getAbsolutePath());
+        //toCNSpeech(false);
     }
 
     /**中文输入*/

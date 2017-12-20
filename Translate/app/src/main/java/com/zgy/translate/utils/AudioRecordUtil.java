@@ -4,11 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.print.PageRange;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -20,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -29,10 +32,18 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class AudioRecordUtil {
 
+    private static final int BUFFER_SIZE = 2048;
+
     private static AudioRecord mAudioRecord;
     private static AudioTrack mAudioTrack;
 
+    private static FileInputStream fileInputStream;
+    private static FileOutputStream fileOutputStream;
+
+    private static byte[] mBuffer = new byte[BUFFER_SIZE];
+
     private static ScheduledExecutorService executorService;
+    private static volatile boolean mIsRecording = false;
 
     public static void startRecord(File pathFile, Context context, AudioManager audioManager){
         checkPoolState();
@@ -80,16 +91,22 @@ public class AudioRecordUtil {
 
     private static void doStart(File pathFile){
         short[] mAudioRecordData;
-        //int sampleRateInHz = 44100;//所有Android系统都支持的频率
-        int sampleRateInHz = 16000;
-        int recordBufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
-                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-        mAudioRecordData = new short[recordBufferSizeInBytes];
-        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT,
-                sampleRateInHz, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, recordBufferSizeInBytes);
+        //mAudioRecordData = new short[recordBufferSizeInBytes];
+        mBuffer = new byte[BUFFER_SIZE];
+        mIsRecording = true;
+        int sampleRate = 44100;//所有Android系统都支持的频率
+        //int sampleRate = 16000;
+        int audioSource = MediaRecorder.AudioSource.DEFAULT;
+        int channelConfig = AudioFormat.CHANNEL_IN_STEREO;
+        int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+
+        int minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+
+        mAudioRecord = new AudioRecord(audioSource,
+                sampleRate, channelConfig, audioFormat, Math.max(minBufferSize, BUFFER_SIZE));
 
         try {
-            DataOutputStream dataOutputStream = new DataOutputStream(
+            /*DataOutputStream dataOutputStream = new DataOutputStream(
                     new BufferedOutputStream(new FileOutputStream(pathFile)));
             mAudioRecord.startRecording();
             while (mAudioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING){
@@ -108,31 +125,59 @@ public class AudioRecordUtil {
                 Log.i("volume", volume +"");
             }
             dataOutputStream.flush();
-            dataOutputStream.close();
+            dataOutputStream.close();*/
+
+            fileOutputStream = new FileOutputStream(pathFile);
+            while (mIsRecording){
+                int read = mAudioRecord.read(mBuffer, 0, BUFFER_SIZE);
+                if(read > 0){
+                    fileOutputStream.write(mBuffer, 0, read);
+                }else{
+                    //失败
+                    stopRecord();
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
+            stopRecord();
+        }finally {
+            stopRecord();
         }
     }
 
     public static void stopRecord(){
-        if(mAudioRecord != null && mAudioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING){
+        mIsRecording = false;
+        if(mAudioRecord != null){
             mAudioRecord.stop();
             mAudioRecord.release();
             mAudioRecord = null;
+        }
+        if(fileOutputStream != null){
+            try {
+                fileOutputStream.close();
+                fileOutputStream = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         checkPoolState();
     }
 
 
-    public static void startTrack(File pathFile, AudioManager audioManager){
+    public static void startTrack(Context context, File pathFile, AudioManager audioManager){
         Log.i("pathfile", pathFile.length() + "");
         checkPoolState();
-        //int sampleRateInHz = 44100;//所有Android系统都支持的频率
+
+        if(!audioManager.isBluetoothScoAvailableOffCall()){
+            ConfigUtil.showToask(context, "系统不支持蓝牙录音");
+            return;
+        }
 
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                if(!audioManager.isBluetoothA2dpOn()){
+               /* if(!audioManager.isBluetoothA2dpOn()){
                     audioManager.setBluetoothA2dpOn(true);
                     audioManager.setSpeakerphoneOn(false);
                 }
@@ -145,10 +190,37 @@ public class AudioRecordUtil {
                     e.printStackTrace();
                 }
 
-                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                //audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
-                audioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);
-                doPlay(pathFile);
+                audioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);*/
+
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                audioManager.startBluetoothSco();//蓝牙录音的关键，启动SCO连接，耳机话筒才起作用
+
+                //蓝牙SCO连接建立需要时间，连接建立后会发出ACTION_SCO_AUDIO_STATE_CHANGED消息，通过接收该消息而进入后续逻辑。
+                //也有可能此时SCO已经建立，则不会收到上述消息，可以startBluetoothSco()前先stopBluetoothSco()
+
+                context.registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+                        Log.i("state", state+"");
+                        if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
+                            audioManager.setBluetoothScoOn(true); //打开SCO
+                            audioManager.setSpeakerphoneOn(false);
+                            ConfigUtil.showToask(context, "开始播放");
+                            doPlay(pathFile);
+                            context.unregisterReceiver(this);
+                        }else{
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            audioManager.startBluetoothSco();
+                        }
+                    }
+                },new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
             }
         });
 
@@ -156,23 +228,50 @@ public class AudioRecordUtil {
 
     private static void doPlay(File pathFile){
         short[] mAudioTrackData;
-        //int sampleRateInHz = 44100;//所有Android系统都支持的频率
-        int sampleRateInHz = 16000;//所有Android系统都支持的频率
+        mBuffer = new byte[BUFFER_SIZE];
+        int sampleRate = 44100;//所有Android系统都支持的频率
+        //int sampleRate = 16000;//所有Android系统都支持的频率
+        int streamType = AudioManager.STREAM_VOICE_CALL;
+        int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
+        int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+        int mode = AudioTrack.MODE_STREAM;
 
-        /*int trackBufferSizeInBytes = AudioRecord.getMinBufferSize(
-                sampleRateInHz, AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT);*/
+        int minBufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
 
-        int musicLength = (int) (pathFile.length() / 2);
+        //AudioAttributes audioAttributes = new AudioAttributes()
+
+        mAudioTrack = new AudioTrack(streamType, sampleRate, channelConfig, audioFormat,
+                Math.max(minBufferSize, BUFFER_SIZE), mode);
+
+       /* int musicLength = (int) (pathFile.length() / 2);
         mAudioTrackData = new short[musicLength];
 
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                 sampleRateInHz, AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT, musicLength * 2,
-                AudioTrack.MODE_STREAM);
+                AudioTrack.MODE_STREAM);*/
 
         try {
-            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(pathFile)));
+
+            fileInputStream = new FileInputStream(pathFile);
+            int read;
+            mAudioTrack.play();
+            while ((read = fileInputStream.read(mBuffer)) > 0){
+                Log.i("read--", read + "");
+                int ret = mAudioTrack.write(mBuffer, 0, read);
+                Log.i("ret---", ret+"");
+                switch (ret){
+                    case AudioTrack.ERROR_BAD_VALUE:
+                    case AudioTrack.ERROR_DEAD_OBJECT:
+                    case AudioTrack.ERROR_INVALID_OPERATION:
+                        stopTrack();
+                        return;
+                    default:
+                        break;
+                }
+            }
+
+            //DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(pathFile)));
 
            /* while (mAudioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING
                     && dataInputStream.available() > 0) {
@@ -188,7 +287,7 @@ public class AudioRecordUtil {
                 mAudioTrack.write(mAudioTrackData, 0, mAudioTrackData.length);
             }*/
 
-            int i = 0;
+            /*int i = 0;
             while (dataInputStream.available() > 0){
                 mAudioTrackData[i] = dataInputStream.readShort();
                 i++;
@@ -197,16 +296,28 @@ public class AudioRecordUtil {
             wipe(mAudioTrackData, 0, mAudioTrackData.length);
             mAudioTrack.play();
             mAudioTrack.write(mAudioTrackData, 0, musicLength);
-            mAudioTrack.stop();
+            mAudioTrack.stop();*/
         } catch (Exception e) {
             e.printStackTrace();
+            stopTrack();
+        }finally {
+            stopTrack();
         }
     }
 
     public static void stopTrack(){
         if(mAudioTrack != null){
+            mAudioTrack.stop();
             mAudioTrack.release();
             mAudioTrack = null;
+        }
+        if(fileInputStream != null){
+            try {
+                fileInputStream.close();
+                fileInputStream = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         checkPoolState();
     }

@@ -17,6 +17,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.zgy.translate.R;
@@ -64,7 +68,7 @@ import retrofit2.http.PUT;
 
 public class BluetoothDeviceManagerActivity extends BaseActivity implements BluetoothDeviceAdapterInterface,
         BluetoothReceiverInterface, ConfigUtil.AlertDialogInterface, BluetoothBondedDeviceAdapterInterface,
-        BluetoothProfileManagerInterface, CommonBar.CommonBarInterface{
+        BluetoothProfileManagerInterface, CommonBar.CommonBarInterface, CompoundButton.OnCheckedChangeListener{
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final UUID MY_UUID2 = UUID.fromString("00001102-0000-1000-8000-00805F9B34FB");
@@ -73,6 +77,8 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     @BindView(R.id.adm_rv_deviceList) RecyclerView deviceRv; //搜索到设备
     @BindView(R.id.adm_rv_bondeDeviceList) RecyclerView bondedDeviceRv; //绑定设备
     @BindView(R.id.adm_cb) CommonBar commonBar;
+    @BindView(R.id.adm_cb_setBlut) CheckBox setBluetooth; //蓝牙控制开关
+    @BindView(R.id.adm_pb) ProgressBar progressBar;
 
 
     private BluetoothAdapter mBluetoothAdapter;
@@ -109,6 +115,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     public void initEvent() {
         EventBus.getDefault().register(this);
         commonBar.setBarInterface(this);
+        setBluetooth.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -163,9 +170,14 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         receiverManager = new ComUpdateReceiverManager(this);
         receiverManager.register(this);
 
+        progressBar.setVisibility(View.GONE);
+
         if(!mBluetoothProfileManager.getBluetoothProfile()){
             if(mBluetoothAdapter.isEnabled()){
+                setBluetooth.setChecked(true);
                 getBondDevice();
+            }else{
+                setBluetooth.setChecked(false);
             }
         }
     }
@@ -174,7 +186,10 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     @Override
     public void getProfileFinish() {
         if(mBluetoothAdapter.isEnabled()){
+            setBluetooth.setChecked(true);
             getBondDevice();
+        }else{
+            setBluetooth.setChecked(false);
         }
     }
 
@@ -188,11 +203,25 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         RedirectUtil.redirect(this, MySettingActivity.class);
     }
 
-    /**开启蓝牙*/
-    @OnClick(R.id.start_blue) void startBle(){
-        //bluetoothAdapter.enable();  //弹出蓝牙开启确认框
-        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivityForResult(intent, REQUEST_ENABLE_BT);
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        switch (compoundButton.getId()){
+            case R.id.adm_cb_setBlut:
+                if(setBluetooth.isChecked()){
+                    //开启蓝牙
+                    //bluetoothAdapter.enable();  //弹出蓝牙开启确认框
+                    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(intent, REQUEST_ENABLE_BT);
+                }else{
+                    //关闭蓝牙
+                    if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
+                        scanDevice(false);
+                        mBluetoothAdapter.disable();
+                        Log.i("guanbi", "关闭蓝牙");
+                    }
+                }
+                break;
+        }
     }
 
     @Override
@@ -204,14 +233,6 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
             }else{
                 ConfigUtil.showToask(this, "蓝牙开启失败，重新开启");
             }
-        }
-    }
-
-    @OnClick(R.id.stop_blue) void stopBle(){
-        if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
-            scanDevice(false);
-            mBluetoothAdapter.disable();
-            Log.i("guanbi", "关闭蓝牙");
         }
     }
 
@@ -229,10 +250,12 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
             }
 
             if(mBluetoothAdapter != null){
+                progressBar.setVisibility(View.VISIBLE);
                 mBluetoothAdapter.startDiscovery();
             }
         }else{
             if(mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering()){
+                progressBar.setVisibility(View.GONE);
                 mBluetoothAdapter.cancelDiscovery();
             }
         }
@@ -284,7 +307,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     }
 
     /**重新搜索*/
-    @OnClick(R.id.refresh) void refreshDiscovery(){
+    @OnClick(R.id.adm_ll_refresh) void refreshDiscovery(){
         scanDevice(true);
     }
 
@@ -397,6 +420,13 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         }else{
             Log.i("配对", "配对失败");
         }
+    }
+
+    /**搜索完成*/
+    @Override
+    public void receivefinished() {
+        ConfigUtil.showToask(this, "搜索完成");
+        progressBar.setVisibility(View.GONE);
     }
 
     /**显示已绑定以及已连接设备*/

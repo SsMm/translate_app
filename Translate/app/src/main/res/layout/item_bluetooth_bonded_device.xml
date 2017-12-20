@@ -3,17 +3,54 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="@color/colorText"
     android:padding="@dimen/padding_10">
 
-    <TextView
-        android:id="@+id/ibbd_tv_bondedName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+    <include layout="@layout/common_horizontal_line"/>
 
-    <TextView
-        android:id="@+id/ibbd_tv_bondedState"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/ibbd_iv_icon"
+            android:layout_width="@dimen/dimen_25"
+            android:layout_height="@dimen/dimen_50"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/device"/>
+
+        <ImageView
+            android:id="@+id/ibbd_iv_startBonded"
+            android:layout_width="@dimen/dimen_25"
+            android:layout_height="@dimen/dimen_25"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/start_bonded"/>
+
+        <TextView
+            android:id="@+id/ibbd_tv_bondedName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_10"
+            android:layout_marginStart="@dimen/margin_10"
+            android:layout_toRightOf="@id/ibbd_iv_icon"
+            android:layout_toEndOf="@id/ibbd_iv_icon"
+            android:layout_toStartOf="@id/ibbd_iv_startBonded"
+            android:layout_toLeftOf="@id/ibbd_iv_startBonded"/>
+
+        <TextView
+            android:id="@+id/ibbd_tv_bondedState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ibbd_tv_bondedName"
+            android:layout_marginLeft="@dimen/margin_10"
+            android:layout_marginStart="@dimen/margin_10"
+            android:layout_toRightOf="@id/ibbd_iv_icon"
+            android:layout_toEndOf="@id/ibbd_iv_icon"
+            android:layout_toStartOf="@id/ibbd_iv_startBonded"
+            android:layout_toLeftOf="@id/ibbd_iv_startBonded"/>
+
+    </RelativeLayout>
+
 
 </LinearLayout>

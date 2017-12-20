@@ -49,7 +49,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
             }
             receiverInterface.receiverDevice(device);
         }else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
-            ConfigUtil.showToask(context, "搜索完成");
+            receiverInterface.receivefinished();
         }else if(BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)){
             device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             int status = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, 0);

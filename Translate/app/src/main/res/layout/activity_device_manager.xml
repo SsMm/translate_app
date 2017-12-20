@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:bar="http://schemas.android.com/apk/res-auto"
@@ -8,50 +8,115 @@
     tools:context="com.zgy.translate.activitys.BluetoothDeviceManagerActivity"
     android:orientation="vertical">
 
-    <com.zgy.translate.widget.CommonBar
-        android:id="@+id/adm_cb"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.zgy.translate.widget.CommonBar
+            android:id="@+id/adm_cb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            bar:bar_title="设备管理"
+            bar:show_left="true"
+            bar:left_icon="@mipmap/back"
+            bar:show_right="true"
+            bar:right_icon="@mipmap/setting"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorText"
+            android:padding="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBlack"
+                android:text="开启蓝牙"/>
+
+            <CheckBox
+                android:id="@+id/adm_cb_setBlut"
+                android:layout_width="@dimen/dimen_50"
+                android:layout_height="@dimen/dimen_25"
+                android:layout_alignParentEnd="true"
+                android:button="@null"
+                android:background="@drawable/selector_switch"/>
+
+        </RelativeLayout>
+
+        <include layout="@layout/common_horizontal_line"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorText"
+            android:padding="@dimen/padding_10"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colordcdcdc"
+            android:text="已配对的设备"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/adm_rv_bondeDeviceList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </android.support.v7.widget.RecyclerView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_20"
+            android:background="@color/colorText"
+            android:padding="@dimen/padding_10"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colordcdcdc"
+            android:text="发现设备"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/adm_rv_deviceList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </android.support.v7.widget.RecyclerView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/adm_ll_refresh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        bar:bar_title="设备管理"
-        bar:show_left="true"
-        bar:left_icon="@mipmap/back"
-        bar:show_right="true"
-        bar:right_icon="@mipmap/setting"/>
+        android:layout_gravity="bottom"
+        android:background="@color/colorText"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_10"
+        android:gravity="center">
 
-    <Button
-        android:id="@+id/start_blue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开启蓝牙"/>
+        <ProgressBar
+            android:id="@+id/adm_pb"
+            android:layout_width="@dimen/dimen_25"
+            android:layout_height="@dimen/dimen_25" />
 
-    <Button
-        android:id="@+id/stop_blue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="关闭蓝牙"/>
-
-    <Button
-        android:id="@+id/refresh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="刷新"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/adm_rv_bondeDeviceList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </android.support.v7.widget.RecyclerView>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_14"
+            android:textColor="#cdedfc"
+            android:text="刷新设备"/>
+    </LinearLayout>
 
     <TextView
+        android:id="@+id/adm_tv_goTran"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin_10"
-        android:text="搜索到设备"/>
+        android:layout_marginStart="@dimen/dimen_50"
+        android:layout_marginEnd="@dimen/dimen_50"
+        android:layout_marginBottom="@dimen/dimen_60"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_button_solid"
+        android:padding="@dimen/padding_10"
+        android:gravity="center"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/text_16"
+        android:text="开始翻译"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/adm_rv_deviceList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </android.support.v7.widget.RecyclerView>
-
-</LinearLayout>
+</FrameLayout>

@@ -2,18 +2,50 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
+    android:background="@color/colorText"
     android:padding="@dimen/padding_10">
 
-    <TextView
-        android:id="@+id/ibd_tv_deviceName"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="11111"/>
+    <include layout="@layout/common_horizontal_line"/>
 
-    <TextView
-        android:id="@+id/ibd_tv_deviceState"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/ibd_iv_icon"
+            android:layout_width="@dimen/dimen_25"
+            android:layout_height="@dimen/dimen_50"
+            android:src="@mipmap/device"/>
+
+        <TextView
+            android:id="@+id/ibd_tv_deviceName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_toEndOf="@id/ibd_iv_icon"
+            android:layout_marginLeft="@dimen/margin_10"
+            android:layout_marginRight="@dimen/margin_10"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colorBlack"/>
+
+        <TextView
+            android:id="@+id/ibd_tv_deviceState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/ibd_iv_icon"
+            android:layout_below="@id/ibd_tv_deviceName"
+            android:layout_marginLeft="@dimen/margin_10"
+            android:layout_marginRight="@dimen/margin_10"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textSize="@dimen/text_14"
+            android:textColor="@color/colordcdcdc"/>
+
+    </RelativeLayout>
+
 
 </LinearLayout>

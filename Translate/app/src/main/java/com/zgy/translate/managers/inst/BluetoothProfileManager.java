@@ -6,8 +6,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHealth;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.os.ParcelUuid;
 import android.util.Log;
 
 import com.zgy.translate.MainActivity;
@@ -21,6 +23,7 @@ import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.RedirectUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by zhouguangyue on 2017/12/14.
@@ -31,6 +34,7 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
     private static final int SOCKET = 0;
     private static final int GATT = 1;
 
+    private BluetoothManager bluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothHeadset mBluetoothHeadset;
     private BluetoothA2dp mBluetoothA2dp;
@@ -44,7 +48,8 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
     public BluetoothProfileManager(Context context,BluetoothProfileManagerInterface managerInterface){
         mContext = context;
         this.managerInterface = managerInterface;
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
         GlobalInit.askBlueMap.clear();
     }
 
@@ -68,6 +73,7 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
         int headset = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET);
         int health = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEALTH);
         int gatt = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.GATT);
+        int gatt_service = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.GATT_SERVER);
 
         if(BluetoothProfile.STATE_CONNECTED == a2dp){
             flag = a2dp;
@@ -81,7 +87,7 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
             flag = 0;
         }
 
-        Log.i("flag--", flag +","+ a2dp +","+ headset +","+ health+","+ gatt);
+        Log.i("flag--", flag +","+ a2dp +","+ headset +","+ health+","+ gatt + "，" + gatt_service);
 
         if(flag == 0){
             return false;
@@ -149,6 +155,12 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
                     GlobalInit.bluetoothSocketDTOList.add(socketDTO);
                     GlobalInit.askBlueMap.put(device, true);
                     Log.i("mBluetoothA2dp", device.getName() + device.getAddress());
+
+                    if(device.getUuids() != null){
+                        for (ParcelUuid uuid : device.getUuids()){
+                            Log.i("mBluetoothA2dp--uuid", uuid.toString());
+                        }
+                    }
                 }
                 managerInterface.getProfileFinish();
                 break;
@@ -165,6 +177,11 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
                     GlobalInit.leConnectionDTOList.add(dto);
                     GlobalInit.askBlueMap.put(device, true);
                     Log.i("mBluetoothGatt", device.getName() + device.getAddress());
+                    if(device.getUuids() != null){
+                        for (ParcelUuid uuid : device.getUuids()){
+                            Log.i("mBluetoothGatt--uuid", uuid.toString());
+                        }
+                    }
                 }
                 managerInterface.getProfileFinish();
                 break;
@@ -173,8 +190,8 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
     }
 
     public void onMyDestroy(){
-
         mBluetoothAdapter.closeProfileProxy(pro, mBluetoothProfile);
+        bluetoothManager = null;
         mBluetoothAdapter = null;
     }
 }

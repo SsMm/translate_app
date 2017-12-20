@@ -319,7 +319,9 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
         if(gattServices == null){
             return;
         }
-        for (BluetoothGattService gattService : gattServices){
+        findService(gattServices.get(gattServices.size() - 1));
+
+        /*for (BluetoothGattService gattService : gattServices){
             Log.e("------", "-----------------------------");
             Log.i("gattService--id", gattService.getUuid().toString());
 
@@ -349,6 +351,32 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
                     }
                 }
                 break;
+            }
+        }*/
+    }
+
+    private void findService(BluetoothGattService gattService){
+        List<BluetoothGattCharacteristic> characteristics = gattService.getCharacteristics();
+        for (BluetoothGattCharacteristic characteristic : characteristics) {
+            Log.i("characteristic--id", characteristic.getUuid().toString());
+            if (characteristic.getUuid().toString().equals(GlobalGattAttributes.DEVICE_SERVICE_CHAR)) {
+                int charaProp = characteristic.getProperties();
+                Log.i("flag---", charaProp + "--" + characteristic.getPermissions());
+                if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+                    Log.i("可读", "可读");
+                    Log.i("可读", (charaProp | BluetoothGattCharacteristic.PROPERTY_READ) + "");
+                    if (mNotifyCharacteristic != null) {
+                        mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
+                        mNotifyCharacteristic = null;
+                    }
+                    mBluetoothLeService.readCharacteristic(characteristic);
+                }
+                if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                    Log.i("可通知", "可通知");
+                    Log.i("可通知", (charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) + "");
+                    mNotifyCharacteristic = characteristic;
+                    mBluetoothLeService.setCharacteristicNotification(characteristic, true);
+                }
             }
         }
     }

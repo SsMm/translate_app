@@ -37,6 +37,7 @@ import com.zgy.translate.managers.inst.ComUpdateReceiverManager;
 import com.zgy.translate.managers.inst.inter.BluetoothProfileManagerInterface;
 import com.zgy.translate.receivers.BluetoothReceiver;
 import com.zgy.translate.receivers.interfaces.BluetoothReceiverInterface;
+import com.zgy.translate.utils.ByteTransform;
 import com.zgy.translate.utils.ClsUtils;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.RedirectUtil;
@@ -491,7 +492,9 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                         int bytesAvailable = inputStream.available();
                         if(bytesAvailable > 0){
                             bytes = inputStream.read(buffer);
+                            String result = ByteTransform.numToHex16(bytes);
                             Log.i("bytes--", bytes + "");
+                            Log.i("result---", result);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

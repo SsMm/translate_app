@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bar="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zgy.translate.activitys.FindPawActivity"
+    android:orientation="vertical">
+
+    <com.zgy.translate.widget.CommonBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        bar:bar_title="修改密码"
+        bar:show_left="true"
+        bar:left_icon="@mipmap/back"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/colorText"
+        android:layout_marginTop="@dimen/margin_10"
+        android:padding="@dimen/padding_10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"
+                android:text="   手机号:"/>
+
+            <EditText
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:inputType="phone"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"/>
+        </LinearLayout>
+
+        <include layout="@layout/common_horizontal_line"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"
+                android:text="       密码:"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:inputType="textPassword"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"/>
+        </LinearLayout>
+
+        <include layout="@layout/common_horizontal_line"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"
+                android:text="@string/phone_msg_again"/>
+
+            <EditText
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:inputType="textPassword"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_50"
+        android:layout_marginStart="@dimen/dimen_50"
+        android:layout_marginEnd="@dimen/dimen_50"
+        android:background="@drawable/bg_button_solid"
+        android:padding="@dimen/padding_10"
+        android:gravity="center"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/text_16"
+        android:text="确认修改"/>
+
+
+</LinearLayout>

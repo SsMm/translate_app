@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:nav="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zgy.translate.activitys.MySettingActivity"
+    android:orientation="vertical">
+
+    <com.zgy.translate.widget.CommonBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:bar_title="设置"
+        app:show_left="true"
+        app:left_icon="@mipmap/back"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_20"
+        android:padding="@dimen/padding_10"
+        android:orientation="horizontal"
+        android:background="@color/colorText">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ams_civ_headerIcon"
+            android:layout_width="@dimen/dimen_50"
+            android:layout_height="@dimen/dimen_50"
+            android:src="@mipmap/device" />
+
+        <ImageView
+            android:id="@+id/ams_iv_more"
+            android:layout_width="@dimen/dimen_25"
+            android:layout_height="@dimen/dimen_25"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/more"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/ams_civ_headerIcon"
+            android:layout_toStartOf="@id/ams_iv_more"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/padding_10"
+            android:paddingEnd="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBlack"
+                android:text="第三节课"
+                android:ellipsize="end"
+                android:lines="1"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_5"
+                android:textSize="@dimen/text_14"
+                android:textColor="@color/colordcdcdc"
+                android:text="第三节课"
+                android:ellipsize="end"
+                android:lines="1"/>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_20"
+        android:background="@color/colorText"
+        android:padding="@dimen/padding_10">
+
+        <CheckBox
+            android:id="@+id/ams_cb_choose"
+            android:layout_width="@dimen/dimen_50"
+            android:layout_height="@dimen/dimen_25"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/selector_switch"
+            android:button="@null"
+            android:checked="true"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/ams_cb_choose"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/padding_10"
+            android:paddingEnd="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBlack"
+                android:text="设置翻译读取设备"
+                android:ellipsize="end"
+                android:lines="1"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_5"
+                android:textSize="@dimen/text_14"
+                android:textColor="@color/colordcdcdc"
+                android:text="默认手机扬声器读取"
+                android:ellipsize="end"
+                android:lines="1"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20"
+                android:orientation="vertical"
+                android:background="@color/colorText"
+                android:padding="@dimen/padding_10">
+
+                <com.zgy.translate.widget.CommonNav
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    nav:nav_leftTitle="@string/device_manager"/>
+
+                <include layout="@layout/common_horizontal_line"/>
+
+                <com.zgy.translate.widget.CommonNav
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    nav:nav_leftTitle="@string/share_other"/>
+
+                <include layout="@layout/common_horizontal_line"/>
+
+                <com.zgy.translate.widget.CommonNav
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    nav:nav_leftTitle="@string/often_question"/>
+
+                <include layout="@layout/common_horizontal_line"/>
+
+                <com.zgy.translate.widget.CommonNav
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    nav:nav_leftTitle="@string/about"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_40"
+                android:background="@color/colorText"
+                android:padding="@dimen/padding_10"
+                android:gravity="center"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colordcdcdc"
+                android:text="@string/exit"/>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</LinearLayout>

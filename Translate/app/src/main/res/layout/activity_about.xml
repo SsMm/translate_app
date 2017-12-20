@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bar="http://schemas.android.com/apk/res-auto"
+    xmlns:nav="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zgy.translate.activitys.AboutActivity"
+    android:orientation="vertical">
+
+    <com.zgy.translate.widget.CommonBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        bar:bar_title="@string/about"
+        bar:show_left="true"
+        bar:left_icon="@mipmap/back"/>
+
+    <com.zgy.translate.widget.CommonNav
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_20"
+        android:padding="@dimen/padding_10"
+        bar:nav_leftTitle="版本更新"/>
+
+    <com.zgy.translate.widget.CommonNav
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_20"
+        android:padding="@dimen/padding_10"
+        bar:nav_leftTitle="意见反馈"/>
+
+</LinearLayout>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bar="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zgy.translate.activitys.FeedBackActivity"
+    android:orientation="vertical">
+
+    <com.zgy.translate.widget.CommonBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        bar:bar_title="意见反馈"
+        bar:show_left="true"
+        bar:left_icon="@mipmap/back"/>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_20"
+                android:padding="@dimen/padding_10"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBlack"
+                android:text="问题以及建议主题？"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="200dp"
+                android:textCursorDrawable="@null"
+                android:background="@color/colorText"
+                android:hint="请输入您要反馈的问题以及建议"
+                android:gravity="top"
+                android:padding="@dimen/padding_10"
+                android:textSize="@dimen/text_16"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_50"
+                android:layout_marginStart="@dimen/dimen_50"
+                android:layout_marginEnd="@dimen/dimen_50"
+                android:background="@drawable/bg_button_solid"
+                android:padding="@dimen/padding_10"
+                android:gravity="center"
+                android:textColor="@color/colorText"
+                android:textSize="@dimen/text_16"
+                android:text="提交"/>
+
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+
+
+</LinearLayout>

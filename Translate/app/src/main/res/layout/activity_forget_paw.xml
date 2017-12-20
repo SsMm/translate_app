@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bar="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zgy.translate.activitys.ForgetPawActivity"
+    android:orientation="vertical">
+
+    <com.zgy.translate.widget.CommonBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        bar:bar_title="找回密码"
+        bar:show_left="true"
+        bar:left_icon="@mipmap/back"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/colorText"
+        android:layout_marginTop="@dimen/margin_10"
+        android:padding="@dimen/padding_10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"
+                android:text="   手机号:"/>
+
+            <EditText
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:inputType="phone"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"/>
+        </LinearLayout>
+
+        <include layout="@layout/common_horizontal_line"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_10">
+
+            <TextView
+                android:id="@+id/ar_tv_code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"
+                android:text="   验证码:"/>
+
+            <TextView
+                android:id="@+id/ar_tv_sendCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/bg_button"
+                android:padding="@dimen/padding_5"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorCommon"
+                android:text="发送验证码"/>
+
+            <EditText
+                android:id="@+id/ar_et_phoneCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/ar_tv_code"
+                android:layout_toStartOf="@id/ar_tv_sendCode"
+                android:layout_centerVertical="true"
+                android:background="@null"
+                android:inputType="text"
+                android:textSize="@dimen/text_16"
+                android:textColor="@color/colorBT"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_50"
+        android:layout_marginStart="@dimen/dimen_50"
+        android:layout_marginEnd="@dimen/dimen_50"
+        android:background="@drawable/bg_button_solid"
+        android:padding="@dimen/padding_10"
+        android:gravity="center"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/text_16"
+        android:text="下一步"/>
+
+</LinearLayout>

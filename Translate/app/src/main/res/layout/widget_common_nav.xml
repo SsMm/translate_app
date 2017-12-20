@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="@dimen/padding_10"
+    android:paddingBottom="@dimen/padding_10"
+    android:background="@color/colorText">
+
+    <TextView
+        android:id="@+id/wcn_tv_leftTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:textSize="@dimen/text_16"
+        android:textColor="@color/colorBlack"/>
+
+    <ImageView
+        android:id="@+id/wcn_iv_icon"
+        android:layout_width="@dimen/dimen_25"
+        android:layout_height="@dimen/dimen_25"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/more"/>
+
+    <TextView
+        android:id="@+id/wcn_tv_rightTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/wcn_tv_leftTitle"
+        android:layout_toStartOf="@id/wcn_iv_icon"
+        android:layout_centerVertical="true"
+        android:paddingLeft="@dimen/padding_5"
+        android:paddingStart="@dimen/padding_5"
+        android:textSize="@dimen/text_14"
+        android:textColor="@color/colordcdcdc"
+        android:lines="1"
+        android:ellipsize="end"
+        android:textDirection="rtl"/>
+
+</RelativeLayout>

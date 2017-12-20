@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bar="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.zgy.translate.activitys.MyMsgActivity"
+    android:orientation="vertical">
+
+    <com.zgy.translate.widget.CommonBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        bar:bar_title="个人信息"
+        bar:show_left="true"
+        bar:left_icon="@mipmap/back"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:background="@color/colorText"
+        android:padding="@dimen/padding_10">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colorBlack"
+            android:text="头像"/>
+
+        <ImageView
+            android:id="@+id/amm_iv_icon"
+            android:layout_width="@dimen/dimen_25"
+            android:layout_height="@dimen/dimen_25"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/more"/>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ams_civ_headerIcon"
+            android:layout_width="@dimen/dimen_50"
+            android:layout_height="@dimen/dimen_50"
+            android:layout_toStartOf="@id/amm_iv_icon"
+            android:layout_marginRight="@dimen/margin_10"
+            android:layout_marginEnd="@dimen/margin_10"
+            android:src="@mipmap/device" />
+    </RelativeLayout>
+
+    <include layout="@layout/common_horizontal_line"/>
+
+    <android.support.v4.widget.NestedScrollView
+        xmlns:nav="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorText">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/padding_10"
+            android:orientation="vertical">
+
+            <com.zgy.translate.widget.CommonNav
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                nav:nav_leftTitle="个性签名"
+                nav:nav_show_right="true"
+                nav:nav_rightTitle="就开始开始看地脚螺栓"/>
+
+            <include layout="@layout/common_horizontal_line"/>
+
+            <com.zgy.translate.widget.CommonNav
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                nav:nav_leftTitle="个性签名"
+                nav:nav_show_right="true"
+                nav:nav_rightTitle="就开始开始看地脚螺栓"/>
+
+            <include layout="@layout/common_horizontal_line"/>
+
+            <com.zgy.translate.widget.CommonNav
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                nav:nav_leftTitle="姓名"
+                nav:nav_show_right="true"
+                nav:nav_rightTitle="就开始开始看地脚螺栓"/>
+
+            <include layout="@layout/common_horizontal_line"/>
+
+            <com.zgy.translate.widget.CommonNav
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                nav:nav_leftTitle="性别"
+                nav:nav_show_right="true"
+                nav:nav_rightTitle="男"/>
+
+            <include layout="@layout/common_horizontal_line"/>
+
+            <com.zgy.translate.widget.CommonNav
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                nav:nav_leftTitle="生日"
+                nav:nav_show_right="true"
+                nav:nav_rightTitle="1955-11-11"/>
+
+            <include layout="@layout/common_horizontal_line"/>
+
+            <com.zgy.translate.widget.CommonNav
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                nav:nav_leftTitle="手机号"
+                nav:nav_show_right="true"
+                nav:nav_rightTitle="112121212"/>
+
+
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</LinearLayout>

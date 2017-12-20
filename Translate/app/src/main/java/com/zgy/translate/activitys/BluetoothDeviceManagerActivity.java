@@ -522,7 +522,12 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                         int bytesAvailable = inputStream.available();
                         if(bytesAvailable > 0){
                             bytes = inputStream.read(buffer);
-                            String result = ByteTransform.numToHex16(bytes);
+                            String result = null;
+                            try {
+                                result = ByteTransform.bytes2String(buffer);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             Log.i("bytes--", bytes + "");
                             Log.i("result---", result);
                         }

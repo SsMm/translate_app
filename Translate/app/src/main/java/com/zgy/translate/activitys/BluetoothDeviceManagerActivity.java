@@ -352,7 +352,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     public void receiverDeviceState(int state, BluetoothDevice device) {
         switch (state){
             case GlobalStateCode.BONDED:
-                Log.i("绑定状态", "已绑定");
+                goBondedConViewState.setVisibility(View.VISIBLE);
                 goBondedConViewState.setText(GlobalConstants.STATE_BONDED);
                 autoConnectDevice(deviceEBList.get(devicePosition));
                 deviceEBList.remove(devicePosition);
@@ -360,11 +360,11 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                 goBondedConViewState = null;
                 break;
             case GlobalStateCode.BONDING:
-                Log.i("绑定状态", "绑定中");
+                goBondedConViewState.setVisibility(View.VISIBLE);
                 goBondedConViewState.setText(GlobalConstants.STATE_BONDING);
                 break;
             case GlobalStateCode.BONDNONE:
-                Log.i("绑定状态", "没有绑定");
+                goBondedConViewState.setVisibility(View.GONE);
                 ConfigUtil.showToask(this, GlobalConstants.STATE_BONDNONE);
                 break;
             case GlobalStateCode.CONNECTED:

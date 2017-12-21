@@ -60,7 +60,10 @@ public class AppReceiverManager {
        }
 
        private void removeBluetoothDeviceCon(BluetoothDevice device){
-           if(GlobalInit.bluetoothSocketDTOList != null && GlobalInit.bluetoothSocketDTOList.size() > 0){
+           if(GlobalInit.bluetoothSocketDTOList != null){
+               GlobalInit.bluetoothSocketDTOList.clear();
+           }
+           /*if(GlobalInit.bluetoothSocketDTOList != null && GlobalInit.bluetoothSocketDTOList.size() > 0){
                for (BluetoothSocketDTO d : GlobalInit.bluetoothSocketDTOList){
                    if(device.getAddress().equals(d.getmBluetoothDevice().getAddress())){
                        try {
@@ -78,7 +81,7 @@ public class AppReceiverManager {
                        }
                    }
                }
-           }
+           }*/
        }
 
    }

@@ -56,7 +56,10 @@ public class BluetoothBondedDeviceAdapter extends RecyclerView.Adapter<Bluetooth
             holder.state.setVisibility(View.VISIBLE);
             holder.state.setText(GlobalConstants.STATE_CONNECTED);
         }
-        if(StringUtil.isEmpty(dto.getmBluetoothDevice().getName())){
+        if(dto.getmBluetoothDevice() == null){
+            return;
+        }
+        if(dto.getmBluetoothDevice() != null && dto.getmBluetoothDevice().getName() == null){
             holder.name.setText(dto.getmBluetoothDevice().getAddress());
         }else{
             holder.name.setText(dto.getmBluetoothDevice().getName());

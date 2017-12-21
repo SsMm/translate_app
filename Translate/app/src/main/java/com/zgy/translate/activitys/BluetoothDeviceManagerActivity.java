@@ -387,7 +387,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                     BluetoothSocketDTO dto = mBondedDeviceList.get(po);
                     dto.setState(BluetoothBondedDeviceAdapter.CONING_STATE);
                     dto.setmBluetoothSocketConThread(mConnectThread);
-                    if(mConnectThread.getCurrSocket() != null){
+                    if(mConnectThread != null){
                         dto.setmBluetoothSocket(mConnectThread.getCurrSocket());
                     }
                     mBluetoothBondedDeviceAdapter.notifyItemChanged(po);
@@ -396,7 +396,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                     dto2.setState(BluetoothBondedDeviceAdapter.CONING_STATE);
                     dto2.setmBluetoothDevice(mBluetoothDeviceBonded);
                     dto2.setmBluetoothSocketConThread(mConnectThread);
-                    if(mConnectThread.getCurrSocket() != null){
+                    if(mConnectThread != null){
                         dto2.setmBluetoothSocket(mConnectThread.getCurrSocket());
                     }
                     showBondedDevice(dto2);

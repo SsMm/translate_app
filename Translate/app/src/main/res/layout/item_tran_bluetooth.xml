@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/padding_10">
+
+    <ImageView
+        android:id="@+id/itb_iv_vo"
+        android:layout_width="@dimen/dimen_50"
+        android:layout_height="@dimen/dimen_50"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:src="@mipmap/bluetooth"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/tran_phone"
+        android:layout_toStartOf="@id/itb_iv_vo">
+
+        <ImageView
+            android:id="@+id/itb_iv_goTTS"
+            android:layout_width="@dimen/dimen_40"
+            android:layout_height="@dimen/dimen_40"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:src="@mipmap/voice_volume"/>
+
+        <TextView
+            android:id="@+id/itb_tv_src"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/itb_iv_goTTS"
+            android:textSize="@dimen/text_16"
+            android:textColor="#5acba8"/>
+
+        <TextView
+            android:id="@+id/itb_tv_dst"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/itb_iv_goTTS"
+            android:layout_below="@id/itb_tv_src"
+            android:layout_marginTop="@dimen/margin_5"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colorBlack" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

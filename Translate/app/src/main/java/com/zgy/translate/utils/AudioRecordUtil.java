@@ -70,7 +70,7 @@ public class AudioRecordUtil {
                     executorService.submit(new Runnable() {
                         @Override
                         public void run() {
-                            doStart(pathFile);
+                            doStart2(pathFile);
                         }
                     });
                     Log.i("开始录音", "开始录音");
@@ -142,6 +142,57 @@ public class AudioRecordUtil {
             e.printStackTrace();
             stopRecord();
         }finally {
+            stopRecord();
+        }
+    }
+
+    private static void doStart2(File pathFile){
+        mBuffer = new byte[BUFFER_SIZE];
+        mIsRecording = true;
+        int sampleRate = 8000;//所有Android系统都支持的频率
+        int audioSource = MediaRecorder.AudioSource.VOICE_CALL;
+        int channelConfig = AudioFormat.CHANNEL_IN_STEREO;
+        int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+
+        int minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+
+        mAudioRecord = new AudioRecord(audioSource,
+                sampleRate, channelConfig, audioFormat, Math.max(minBufferSize, BUFFER_SIZE));
+
+        BufferedOutputStream bufferedOutputStream = null;
+
+        try {
+
+            bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathFile));
+            while (mIsRecording){
+                int read = mAudioRecord.read(mBuffer, 0, BUFFER_SIZE);
+                if(read > 0){
+                    bufferedOutputStream.write(mBuffer);
+                }else{
+                    stopRecord();
+                }
+
+                long v = 0;
+                for(int i = 0 ; i <mBuffer.length ; i++){
+                    v += mBuffer[i] * mBuffer[i];
+                }
+                double mean = v / read;
+                double volume = 10 * Math.log10(mean);
+                int vol = (int) volume;
+                Log.i("volume", vol +"");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if(bufferedOutputStream != null){
+                try {
+                    bufferedOutputStream.flush();
+                    bufferedOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             stopRecord();
         }
     }
@@ -307,7 +358,7 @@ public class AudioRecordUtil {
         }
     }
 
-    public static void stopTrack(){
+    private static void stopTrack(){
         if(mAudioTrack != null){
             mAudioTrack.stop();
             mAudioTrack.release();
@@ -324,7 +375,7 @@ public class AudioRecordUtil {
         checkPoolState();
     }
 
-    public static void doPlay2(File pathFile){
+    private static void doPlay2(File pathFile){
 
         mBuffer = new byte[BUFFER_SIZE];
         //int sampleRate = 44100;//所有Android系统都支持的频率
@@ -341,21 +392,28 @@ public class AudioRecordUtil {
         mAudioTrack = new AudioTrack(streamType, sampleRate, channelConfig, audioFormat,
                 Math.max(minBufferSize, BUFFER_SIZE), mode);
 
+        BufferedInputStream bufferedInputStream = null;
+
         try {
 
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(pathFile));
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(pathFile));
 
             mAudioTrack.play();
             while (bufferedInputStream.available() > 0){
                 int size = bufferedInputStream.read(mBuffer, 0, BUFFER_SIZE);
                 mAudioTrack.write(mBuffer, 0, BUFFER_SIZE);
             }
-            bufferedInputStream.close();
             mAudioTrack.stop();
         } catch (Exception e) {
             e.printStackTrace();
-            stopTrack();
         }finally {
+            try {
+                if(bufferedInputStream != null){
+                    bufferedInputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             stopTrack();
         }
 

@@ -166,7 +166,6 @@ public class AudioRecordUtil {
 
 
     public static void startTrack(Context context, File pathFile, AudioManager audioManager){
-        Log.i("pathfile", pathFile.length() + "");
         checkPoolState();
 
         if(!audioManager.isBluetoothScoAvailableOffCall()){
@@ -209,7 +208,10 @@ public class AudioRecordUtil {
                             audioManager.setBluetoothScoOn(true); //打开SCO
                             audioManager.setSpeakerphoneOn(false);
                             ConfigUtil.showToask(context, "开始播放");
-                            doPlay(pathFile);
+                            doPlay2(pathFile);
+                            context.unregisterReceiver(this);
+                        }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
+                            ConfigUtil.showToask(context, "蓝牙播放失败");
                             context.unregisterReceiver(this);
                         }else{
                             try {
@@ -322,6 +324,42 @@ public class AudioRecordUtil {
         checkPoolState();
     }
 
+    public static void doPlay2(File pathFile){
+
+        mBuffer = new byte[BUFFER_SIZE];
+        //int sampleRate = 44100;//所有Android系统都支持的频率
+        int sampleRate = 8000;//所有Android系统都支持的频率
+        int streamType = AudioManager.STREAM_VOICE_CALL;
+        int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
+        int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+        int mode = AudioTrack.MODE_STREAM;
+
+        int minBufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+
+        //AudioAttributes audioAttributes = new AudioAttributes()
+
+        mAudioTrack = new AudioTrack(streamType, sampleRate, channelConfig, audioFormat,
+                Math.max(minBufferSize, BUFFER_SIZE), mode);
+
+        try {
+
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(pathFile));
+
+            mAudioTrack.play();
+            while (bufferedInputStream.available() > 0){
+                int size = bufferedInputStream.read(mBuffer, 0, BUFFER_SIZE);
+                mAudioTrack.write(mBuffer, 0, BUFFER_SIZE);
+            }
+            bufferedInputStream.close();
+            mAudioTrack.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+            stopTrack();
+        }finally {
+            stopTrack();
+        }
+
+    }
 
     /**
      * 消除噪音

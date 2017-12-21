@@ -41,12 +41,7 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
     @Override
     public void onBindViewHolder(DeviceViewHolder holder, int position) {
         BluetoothDevice device = deviceDTOList.get(position);
-        Log.w("---", "---------------");
-        if(device.getUuids() != null){
-            for (ParcelUuid uuid : device.getUuids()){
-                Log.i("device--uuid", uuid.toString());
-            }
-        }
+
         if(device.getName() == null){
             holder.name.setText(device.getAddress());
         }else{
@@ -56,6 +51,7 @@ public class BluetoothDeviceAdapter extends RecyclerView.Adapter<BluetoothDevice
         holder.name.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                holder.state.setVisibility(View.VISIBLE);
                 adapterInterface.goBondedAndConDevice(device, holder.getAdapterPosition(), holder.state);
             }
         });

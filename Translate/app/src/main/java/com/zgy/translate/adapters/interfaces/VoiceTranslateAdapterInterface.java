@@ -6,5 +6,5 @@ package com.zgy.translate.adapters.interfaces;
 
 public interface VoiceTranslateAdapterInterface {
 
-
+    void goTTS(String dst);
 }

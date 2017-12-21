@@ -12,6 +12,14 @@ public class VoiceTransDTO {
     private String lanSrc; //源语言文本
     private String lanDst; //翻译语言文本
 
+    public void setLagType(String lagType) {
+        this.lagType = lagType;
+    }
+
+    public String getLagType() {
+        return lagType;
+    }
+
     public String getLanImg() {
         return lanImg;
     }

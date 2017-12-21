@@ -48,10 +48,12 @@ public class BluetoothBondedDeviceAdapter extends RecyclerView.Adapter<Bluetooth
     public void onBindViewHolder(BluetoothBondedViewHolder holder, int position) {
         BluetoothSocketDTO dto = deviceDTOs.get(position);
         if(Bon_STATE.equals(dto.getState())){
-            holder.state.setText("");
+            holder.state.setVisibility(View.GONE);
         }else if(CONING_STATE.equals(dto.getState())){
+            holder.state.setVisibility(View.VISIBLE);
             holder.state.setText(GlobalConstants.STATE_CONNECTING);
         }else if(CON_STATE.equals(dto.getState())){
+            holder.state.setVisibility(View.VISIBLE);
             holder.state.setText(GlobalConstants.STATE_CONNECTED);
         }
         if(StringUtil.isEmpty(dto.getmBluetoothDevice().getName())){

@@ -56,17 +56,6 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
     /**获取蓝牙是否连接以及连接状态*/
 
     public boolean getBluetoothProfile(){
-        if(GlobalInit.bluetoothSocketDTOList == null){
-            GlobalInit.bluetoothSocketDTOList = new ArrayList<>();
-        }else{
-            GlobalInit.bluetoothSocketDTOList.clear();
-        }
-
-        if(GlobalInit.leConnectionDTOList == null){
-            GlobalInit.leConnectionDTOList = new ArrayList<>();
-        }else {
-            GlobalInit.leConnectionDTOList.clear();
-        }
 
         int flag = -1;
         int a2dp = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP);
@@ -153,12 +142,15 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
                     socketDTO.setmBluetoothDevice(device);
                     socketDTO.setState(BluetoothBondedDeviceAdapter.CON_STATE);
                     GlobalInit.bluetoothSocketDTOList.add(socketDTO);
-                    GlobalInit.askBlueMap.put(device, true);
                     Log.i("mBluetoothA2dp", device.getName() + device.getAddress());
 
                     if(device.getUuids() != null){
                         for (ParcelUuid uuid : device.getUuids()){
                             Log.i("mBluetoothA2dp--uuid", uuid.toString());
+                            if(GlobalGattAttributes.DEVICE_SERVICE.equals(uuid.toString())){
+                                GlobalInit.askBlueMap.put(device, true);
+                                return;
+                            }
                         }
                     }
                 }

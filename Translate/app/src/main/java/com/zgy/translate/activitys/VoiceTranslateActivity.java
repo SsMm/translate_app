@@ -320,8 +320,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //手机入，耳机出
             mSpeechSynthesizer.speak(dst);
         }else{
-            //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
-            mSpeechSynthesizer.speak(dst);
+            mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+            //mSpeechSynthesizer.speak(dst);
         }
     }
 
@@ -362,25 +362,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void onSynthesizeFinish(String utteranceId) {
         //合成正常结束状态
         if(UTTERANCE_ID.equals(utteranceId)){
-            Log.i("合成正常结束状态", "合成正常结束状态");
             close();
             AudioRecordUtil.startTrack(this, mediaRecorderPath, mAudioManager);
-            /*AndroidAudioConverter.with(this)
-                    .setFile(mediaRecorderPath)
-                    .setFormat(AudioFormat.MP3)
-                    .setCallback(new IConvertCallback() {
-                        @Override
-                        public void onSuccess(File file) {
-                            Log.i("file---", file.getAbsolutePath());
-                            BluetoothRecorder.startPlaying(file.getAbsolutePath(), VoiceTranslateActivity.this, mAudioManager);
-                        }
-
-                        @Override
-                        public void onFailure(Exception e) {
-                            Log.i("shib", e.getMessage());
-                        }
-                    })
-                    .convert();*/
         }
 
     }

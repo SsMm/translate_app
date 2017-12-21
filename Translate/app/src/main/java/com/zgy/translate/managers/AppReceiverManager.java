@@ -1,5 +1,6 @@
 package com.zgy.translate.managers;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -51,6 +52,7 @@ public class AppReceiverManager {
                            //RedirectUtil.redirect(this, BleBluetoothDeviceManagerActivity.class); //ble搜索
                            RedirectUtil.redirect(context, BluetoothDeviceManagerActivity.class); //传统搜索
                        }
+                       ((Activity) context).finish();
                        break;
                }
            }

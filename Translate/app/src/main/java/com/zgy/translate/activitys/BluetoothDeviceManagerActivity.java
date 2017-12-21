@@ -79,6 +79,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     @BindView(R.id.adm_cb) CommonBar commonBar;
     @BindView(R.id.adm_cb_setBlut) CheckBox setBluetooth; //蓝牙控制开关
     @BindView(R.id.adm_pb) ProgressBar progressBar;
+    @BindView(R.id.adm_tv_goTran) TextView tv_goTran; //去翻译
 
 
     private BluetoothAdapter mBluetoothAdapter;
@@ -201,6 +202,11 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     @Override
     public void checkRightIcon() {
         RedirectUtil.redirect(this, MySettingActivity.class);
+    }
+
+    /**去翻译*/
+    @OnClick(R.id.adm_tv_goTran) void goTran(){
+        RedirectUtil.redirect(this, VoiceTranslateActivity.class);
     }
 
     @Override
@@ -362,7 +368,6 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                 ConfigUtil.showToask(this, GlobalConstants.STATE_BONDNONE);
                 break;
             case GlobalStateCode.CONNECTED:
-                Log.i("STATE_CONNECTED", "STATE_CONNECTED");
                 ConfigUtil.showToask(this, GlobalConstants.STATE_CONNECTED);
                 int p = getCurConDeviceIndex();
                 if(p != -1){
@@ -377,22 +382,26 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                 }
                 break;
             case GlobalStateCode.CONNECTING:
-                ConfigUtil.showToask(this, GlobalConstants.STATE_CONNECTING);
                 int po = getCurConDeviceIndex();
                 if(po != -1){
                     BluetoothSocketDTO dto = mBondedDeviceList.get(po);
                     dto.setState(BluetoothBondedDeviceAdapter.CONING_STATE);
                     dto.setmBluetoothSocketConThread(mConnectThread);
-                    dto.setmBluetoothSocket(mConnectThread.getCurrSocket());
+                    if(mConnectThread.getCurrSocket() != null){
+                        dto.setmBluetoothSocket(mConnectThread.getCurrSocket());
+                    }
                     mBluetoothBondedDeviceAdapter.notifyItemChanged(po);
                 }else{
                     BluetoothSocketDTO dto2 = new BluetoothSocketDTO();
                     dto2.setState(BluetoothBondedDeviceAdapter.CONING_STATE);
                     dto2.setmBluetoothDevice(mBluetoothDeviceBonded);
                     dto2.setmBluetoothSocketConThread(mConnectThread);
-                    dto2.setmBluetoothSocket(mConnectThread.getCurrSocket());
+                    if(mConnectThread.getCurrSocket() != null){
+                        dto2.setmBluetoothSocket(mConnectThread.getCurrSocket());
+                    }
                     showBondedDevice(dto2);
                 }
+                ConfigUtil.showToask(this, GlobalConstants.STATE_CONNECTING);
                 break;
         }
     }
@@ -503,10 +512,9 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
 
         @Override
         public void run() {
-            BluetoothConnectEB connectEB = new BluetoothConnectEB();
             try {
                 if(mSocket.isConnected()){
-                    Log.i("蓝牙已连接", "蓝牙已连接");
+                    ConfigUtil.showToask(BluetoothDeviceManagerActivity.this, "蓝牙已连接");
                     return;
                 }
                 mSocket.connect();
@@ -534,28 +542,26 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
                     } catch (IOException e) {
                         e.printStackTrace();
                         if(e.getMessage().contains("closed")){
-                            Log.i("耳机关闭", "请检查蓝牙耳机是否开启");
+                            ConfigUtil.showToask(BluetoothDeviceManagerActivity.this, "请检查蓝牙耳机是否开启");
                             break;
                         }
                     }
                 }
-                connectEB.setFlag(true);
+
             } catch (IOException e) {
                 e.printStackTrace();
                 if(e.getMessage().contains("closed") || e.getMessage().contains("timeout")){
-                    Log.i("连接失败日志", "连接关闭或超时，重新连接");
+                    ConfigUtil.showToask(BluetoothDeviceManagerActivity.this, "连接失败");
                 }else{
-                    Log.i("连接失败日志", "连接失败，重新连接");
+                    ConfigUtil.showToask(BluetoothDeviceManagerActivity.this, "连接失败");
                 }
                 try {
                     mSocket.close();
-                    connectEB.setFlag(false);
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
             }
 
-            EventBus.getDefault().post(connectEB);
         }
 
         public void cancel(){

@@ -8,6 +8,10 @@ import android.support.v7.widget.RecyclerView;
 import android.text.InputFilter;
 import android.util.Log;
 import android.util.Xml;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.baidu.speech.EventListener;
 import com.baidu.speech.EventManager;
@@ -19,9 +23,12 @@ import com.baidu.tts.client.SpeechSynthesizerListener;
 import com.baidu.tts.client.TtsMode;
 import com.zgy.translate.R;
 
+import com.zgy.translate.adapters.VoiceTranslateAdapter;
+import com.zgy.translate.adapters.interfaces.VoiceTranslateAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.base.BaseResponseObject;
 import com.zgy.translate.domains.RecogResult;
+import com.zgy.translate.domains.dtos.VoiceTransDTO;
 import com.zgy.translate.domains.response.TransResultResponse;
 import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.global.GlobalKey;
@@ -35,6 +42,7 @@ import com.zgy.translate.utils.AudioRecordUtil;
 import com.zgy.translate.utils.BluetoothRecorder;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.InFileStream;
+import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
 
 
@@ -61,9 +69,16 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class VoiceTranslateActivity extends BaseActivity implements EventListener, SpeechSynthesizerListener{
+public class VoiceTranslateActivity extends BaseActivity implements EventListener, SpeechSynthesizerListener,
+        VoiceTranslateAdapterInterface{
 
     private static final String UTTERANCE_ID = "appolo";
+
+    @BindView(R.id.avt_tv_tranLeft) TextView tv_tranLeft; //翻译左语言
+    @BindView(R.id.avt_tv_tranRight) TextView tv_tranRight; //翻译右语言
+    @BindView(R.id.avt_rv_tranContent) RecyclerView rv_tran; //显示翻译内容
+    @BindView(R.id.avt_iv_voice) ImageView iv_phoneVoic; //从手机入显示，耳机入隐藏
+
 
     private EventManager mAsr; //识别
     private SpeechSynthesizer mSpeechSynthesizer; //合成
@@ -76,6 +91,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private File mediaRecorderPath; //存放蓝牙录音和语音合成蓝牙播放文件地址
 
     private ScheduledExecutorService executorService;
+
+    private VoiceTranslateAdapter voiceTranslateAdapter;
+    private List<VoiceTransDTO> voiceTransDTOList;
+    private volatile boolean isPhone; //判断是否从手机入
+    private boolean isSpeech = false; //是否在输入录音
+    private boolean isLeftLangCN = true; //左翻译语言是中文
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +127,21 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         initSpeech();
         initTTs();
+
+        //获取用户设置输入输出位置
+        if(true){
+            isPhone = true;
+            iv_phoneVoic.setVisibility(View.VISIBLE);
+        }else{
+            isPhone = false;
+            iv_phoneVoic.setVisibility(View.GONE);
+        }
+
+        voiceTransDTOList = new ArrayList<>();
+        voiceTranslateAdapter = new VoiceTranslateAdapter(this, voiceTransDTOList, this);
+        rv_tran.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        rv_tran.setAdapter(voiceTranslateAdapter);
+
     }
 
     /**初始化语音识别*/
@@ -180,11 +217,19 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                String trans = HttpGet.get(TransManager.getInstance()
-                        .params(result, GlobalConstants.CH, GlobalConstants.EN)
-                        .build());
+                String trans = null;
+                if(isLeftLangCN){
+                    trans = HttpGet.get(TransManager.getInstance()
+                            .params(result, GlobalConstants.CH, GlobalConstants.EN)
+                            .build());
+                }else{
+                    trans = HttpGet.get(TransManager.getInstance()
+                            .params(result, GlobalConstants.EN, GlobalConstants.CH)
+                            .build());
+                }
                 if(StringUtil.isEmpty(trans)){
                     ConfigUtil.showToask(VoiceTranslateActivity.this, "找不到翻译结果，请重新再试！");
+                    stopSpeech();
                     return;
                 }
                 Log.i("翻译结果", trans);
@@ -201,13 +246,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 try {
                     src = URLDecoder.decode(srcT, "utf-8");
                     dst = URLDecoder.decode(dstT, "utf-8");
+                    addTranContent(src, dst);
                     Log.i("翻译前文本", src);
                     Log.i("合成文本", dst);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //mSpeechSynthesizer.speak(dst);
-                            mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+                            createSynthesizer(dst);
                         }
                     });
                 } catch (UnsupportedEncodingException e) {
@@ -234,6 +279,50 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         private int volumePercent = -1;
         private int volume = -1;
         private String origalJson;
+    }
+
+    /**添加翻译内容*/
+    private void addTranContent(String src, String dst){
+        VoiceTransDTO dto = new VoiceTransDTO();
+        if(isPhone){
+            //从耳机
+            dto.setLagType(VoiceTranslateAdapter.FROM_PHONE);
+        }else{
+            //从蓝牙
+            dto.setLagType(VoiceTranslateAdapter.FROM_BLUE);
+        }
+        dto.setLanSrc(src);
+        dto.setLanDst(dst);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                voiceTransDTOList.add(dto);
+                voiceTranslateAdapter.notifyItemInserted(voiceTransDTOList.size() - 1);
+            }
+        });
+
+    }
+
+    /**
+     *翻译内容点击再次语音合成
+     * */
+    @Override
+    public void goTTS(String dst) {
+        createSynthesizer(dst);
+    }
+
+    /**
+     * 语音合成
+     * */
+    private void createSynthesizer(String dst){
+        if(!isPhone){
+            //手机入，耳机出
+            mSpeechSynthesizer.speak(dst);
+        }else{
+            //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+            mSpeechSynthesizer.speak(dst);
+        }
     }
 
     /**
@@ -298,7 +387,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void onError(String utteranceId, SpeechError speechError) {
-        Log.i("合成正常结束状态", "合成出错");
+        ConfigUtil.showToask(this, "语音合成出错，请重新合成");
     }
 
     private void close(){
@@ -322,21 +411,59 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
     }
 
-
-    @OnClick(R.id.start_speech) void startInput(){
-        //mediaRecorderPath = getPathFile(false);
-        //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
-        toCNSpeech(true);
-
+    /**
+     * 个人设置
+     * */
+    @OnClick(R.id.avt_iv_setting) void sett(){
+        RedirectUtil.redirect(this, MySettingActivity.class);
     }
 
-    @OnClick(R.id.stop_speech) void stopInput(){
+    /**
+     * 中英文互换
+     * */
+    @OnClick(R.id.avt_ll_tranTitle) void tranLang(){
+        if(!isLeftLangCN){
+            isLeftLangCN = true;
+            tv_tranLeft.setText(getResources().getString(R.string.tran_cn));
+            tv_tranRight.setText(getResources().getString(R.string.tran_zn));
+        }else{
+            isLeftLangCN = false;
+            tv_tranLeft.setText(getResources().getString(R.string.tran_zn));
+            tv_tranRight.setText(getResources().getString(R.string.tran_cn));
+        }
+    }
+
+    /**
+     * 开始录音
+     * */
+    @OnClick(R.id.avt_iv_voice) void startInput(){
+        //mediaRecorderPath = getPathFile(false);
+        //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
+        //从手机入
+        if(!isSpeech){
+            //开始录音
+            isSpeech = true;
+            if(isLeftLangCN){
+                //左中
+                toCNSpeech(true);
+            }else{
+                //左英
+                toENSpeech(true);
+            }
+        }else{
+            //结束录音
+            isSpeech = false;
+            stopSpeech();
+        }
+    }
+
+   /* @OnClick(R.id.stop_speech) void stopInput(){
         //AudioRecordUtil.stopRecord();
         //AudioRecordUtil.startTrack(mediaRecorderPath, mAudioManager);
         stopSpeech();
         //InFileStream.setInputStream(mediaRecorderPath.getAbsolutePath());
         //toCNSpeech(false);
-    }
+    }*/
 
     /**中文输入*/
     private void toCNSpeech(boolean flag){
@@ -431,6 +558,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if (executorService != null){
             executorService.shutdown();
             executorService = null;
+        }
+        if(voiceTransDTOList != null){
+            voiceTransDTOList.clear();
+            voiceTransDTOList = null;
+            voiceTranslateAdapter = null;
+            rv_tran.setAdapter(null);
+            rv_tran.setLayoutManager(null);
         }
     }
 

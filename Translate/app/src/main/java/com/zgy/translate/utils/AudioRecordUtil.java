@@ -67,14 +67,13 @@ public class AudioRecordUtil {
                 if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
                     audioManager.setBluetoothScoOn(true); //打开SCO
                     audioManager.setSpeakerphoneOn(false);
+                    ConfigUtil.showToask(context, "开始录音");
                     executorService.submit(new Runnable() {
                         @Override
                         public void run() {
                             doStart2(pathFile);
                         }
                     });
-                    Log.i("开始录音", "开始录音");
-                    ConfigUtil.showToask(context, "开始录音");
                     context.unregisterReceiver(this);
                 }else{
                     try {
@@ -150,7 +149,7 @@ public class AudioRecordUtil {
         mBuffer = new byte[BUFFER_SIZE];
         mIsRecording = true;
         int sampleRate = 8000;//所有Android系统都支持的频率
-        int audioSource = MediaRecorder.AudioSource.VOICE_CALL;
+        int audioSource = MediaRecorder.AudioSource.DEFAULT;
         int channelConfig = AudioFormat.CHANNEL_IN_STEREO;
         int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
 
@@ -162,7 +161,7 @@ public class AudioRecordUtil {
         BufferedOutputStream bufferedOutputStream = null;
 
         try {
-
+            mAudioRecord.startRecording();
             bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(pathFile));
             while (mIsRecording){
                 int read = mAudioRecord.read(mBuffer, 0, BUFFER_SIZE);
@@ -172,6 +171,9 @@ public class AudioRecordUtil {
                     stopRecord();
                 }
 
+                if(read == 0){
+                    return;
+                }
                 long v = 0;
                 for(int i = 0 ; i <mBuffer.length ; i++){
                     v += mBuffer[i] * mBuffer[i];

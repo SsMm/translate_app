@@ -169,14 +169,18 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void onEvent(String name, String params, byte[] bytes, int offset, int length) {
         switch (name){
             case SpeechConstant.CALLBACK_EVENT_ASR_READY: // 引擎准备就绪，可以开始说话
-                ConfigUtil.showToask(this, "开始讲话。。。");
+                if(isPhone){
+                    ConfigUtil.showToask(this, "开始讲话。。。");
+                }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_BEGIN: // 检测到用户的已经开始说话
                 Log.i("speech--BEGIN", "开始说话");
-                //stopSpeech();
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_END: // 检测到用户的已经停止说话
-                Log.i("speech--END", "停止说话");
+                if(!isPhone){
+                    stopSpeech();
+                    ConfigUtil.showToask(this, "停止说话");
+                }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL: // 临时识别结果, 长语音模式需要从此消息中取出结果
                 RecogResult recogResult = RecogResult.parseJson(params);
@@ -191,8 +195,15 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_FINISH: // 识别结束， 最终识别结果或可能的错误
-                RecogResult recogResult2 = RecogResult.parseJson(params);
-                Log.i("speech--FINISH", params);
+                if(!isPhone){
+                    Log.i("FINISH后录音结果", inputResult);
+                    if(!StringUtil.isEmpty(inputResult)){
+                        speechToTransAndSynt(inputResult);
+                        inputResult = "";
+                    }else{
+                        ConfigUtil.showToask(this, "没有检测到输入，请重新输入");
+                    }
+                }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_LONG_SPEECH:
                 Log.i("长语音结束", "长语音结束");
@@ -321,7 +332,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             mSpeechSynthesizer.speak(dst);
         }else{
             mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
-            //mSpeechSynthesizer.speak(dst);
         }
     }
 
@@ -420,12 +430,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * 开始录音
      * */
     @OnClick(R.id.avt_iv_voice) void startInput(){
-        //mediaRecorderPath = getPathFile(false);
-        //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
         //从手机入
         if(!isSpeech){
             //开始录音
             isSpeech = true;
+            //mediaRecorderPath = getPathFile(false);
+            //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
             if(isLeftLangCN){
                 //左中
                 toCNSpeech(true);
@@ -437,16 +447,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //结束录音
             isSpeech = false;
             stopSpeech();
+            //AudioRecordUtil.stopRecord();
+            //toCNSpeech(false);
         }
     }
 
-   /* @OnClick(R.id.stop_speech) void stopInput(){
-        //AudioRecordUtil.stopRecord();
-        //AudioRecordUtil.startTrack(mediaRecorderPath, mAudioManager);
-        stopSpeech();
-        //InFileStream.setInputStream(mediaRecorderPath.getAbsolutePath());
-        //toCNSpeech(false);
-    }*/
 
     /**中文输入*/
     private void toCNSpeech(boolean flag){
@@ -460,7 +465,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else{
              json = new JSONObject(SpeechAsrStartParamManager.getInstance()
                     .createCN()
-                    .createBlue("#com.zgy.translate.utils.InFileStream.create16kStream()")
+                    .createBlue(mediaRecorderPath.getAbsolutePath())
                     .build()).toString();
             Log.i("cn-blue-josn", json);
         }

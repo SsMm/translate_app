@@ -3,18 +3,14 @@ package com.zgy.translate.activitys;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputFilter;
 import android.util.Log;
-import android.util.Xml;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.baidu.speech.EventListener;
@@ -26,30 +22,27 @@ import com.baidu.tts.client.SpeechSynthesizer;
 import com.baidu.tts.client.SpeechSynthesizerListener;
 import com.baidu.tts.client.TtsMode;
 import com.tbruyelle.rxpermissions2.RxPermissions;
-import com.zgy.translate.MainActivity;
 import com.zgy.translate.R;
 
 import com.zgy.translate.adapters.VoiceTranslateAdapter;
 import com.zgy.translate.adapters.interfaces.VoiceTranslateAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
-import com.zgy.translate.base.BaseResponseObject;
 import com.zgy.translate.domains.RecogResult;
 import com.zgy.translate.domains.dtos.VoiceTransDTO;
 import com.zgy.translate.domains.response.TransResultResponse;
 import com.zgy.translate.global.GlobalConstants;
+import com.zgy.translate.global.GlobalInit;
 import com.zgy.translate.global.GlobalKey;
 import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.http.HttpGet;
 import com.zgy.translate.managers.CacheManager;
-import com.zgy.translate.managers.CreateGattManager;
+import com.zgy.translate.managers.inst.CreateGattManager;
 import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.inst.inter.CreateGattManagerInterface;
 import com.zgy.translate.managers.sing.SpeechAsrStartParamManager;
 import com.zgy.translate.managers.sing.TransManager;
 import com.zgy.translate.utils.AudioRecordUtil;
-import com.zgy.translate.utils.BluetoothRecorder;
 import com.zgy.translate.utils.ConfigUtil;
-import com.zgy.translate.utils.InFileStream;
 import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
 
@@ -59,13 +52,10 @@ import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -81,6 +71,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         VoiceTranslateAdapterInterface, CreateGattManagerInterface{
 
     private static final String UTTERANCE_ID = "appolo";
+    private static boolean FROM_PHONE_MIC = true; //默认从手机麦克风出
 
     @BindView(R.id.avt_tv_tranLeft) TextView tv_tranLeft; //翻译左语言
     @BindView(R.id.avt_tv_tranRight) TextView tv_tranRight; //翻译右语言
@@ -154,19 +145,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         initSpeech();
         initTTs();
 
-        //获取用户设置输入输出位置
-        if(true){
-            isPhone = true;
-            iv_phoneVoic.setVisibility(View.VISIBLE);
-        }else{
-            isPhone = false;
-            iv_phoneVoic.setVisibility(View.GONE);
-        }
-
-
         //与gatt建立联系
-        //createGattManager = new CreateGattManager(this, this);
-        //createGattManager.setParams(mBluetoothAdapter).init();
+        createGattManager = new CreateGattManager(this, this);
+        createGattManager.setParams(mBluetoothAdapter).init();
 
 
         voiceTransDTOList = new ArrayList<>();
@@ -192,6 +173,18 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         mSpeechSynthesizer.auth(TtsMode.ONLINE); //在线混合
         mSpeechSynthesizer.setParam(SpeechSynthesizer.PARAM_SPEAKER, "0");
         mSpeechSynthesizer.initTts(TtsMode.ONLINE); //初始化在线混合
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //获取用户手机输出位置
+
+        if(true){ //默认从手机麦克风出
+            FROM_PHONE_MIC = true;
+        }else{
+            FROM_PHONE_MIC = false;
+        }
     }
 
     /**
@@ -360,9 +353,15 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * */
     private void createSynthesizer(String dst){
         if(!isPhone){
-            //手机入，耳机出
-            mSpeechSynthesizer.speak(dst);
+            //从耳机入，手机出
+            if(FROM_PHONE_MIC){ //从麦克风出
+                mSpeechSynthesizer.speak(dst);
+            }else{
+                //从听筒出
+                mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+            }
         }else{
+            //手机入，耳机出
             mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
         }
     }
@@ -405,7 +404,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         //合成正常结束状态
         if(UTTERANCE_ID.equals(utteranceId)){
             close();
-            AudioRecordUtil.startTrack(this, mediaRecorderPath, mAudioManager);
+            if(!isPhone && !FROM_PHONE_MIC){
+                //从手机听筒出
+
+            }
+            if(isPhone){
+                AudioRecordUtil.startTrack(this, mediaRecorderPath, mAudioManager);
+            }
         }
 
     }
@@ -472,18 +477,27 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void gattOrder(String order) {
-        if(order.contains("c")){
-
-            //mediaRecorderPath = getPathFile(false);
-            //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
-
-        }else{
-            //AudioRecordUtil.stopRecord();
-            if(isLeftLangCN){
-                //toCNSpeech(false);
-            }else{
-                //toENSpeech(false);
+        if(order.contains("o")){
+            Log.i("oooo", "oooo"); //启动
+            isPhone = false;
+            isSpeech = true;
+            mediaRecorderPath = getPathFile(false);
+            AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
+        }else if(order.contains("c")){
+            //停止
+            if(!isSpeech){
+                return;
             }
+            isSpeech = false;
+            AudioRecordUtil.stopRecord();
+            Log.i("ccc", "cccc");
+            if(isLeftLangCN){
+                toCNSpeech(false);
+            }else{
+                toENSpeech(false);
+            }
+        }else if(order.contains("w")){
+            Log.i("wwww", "wwww");
         }
     }
 
@@ -492,9 +506,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * */
     @OnClick(R.id.avt_iv_voice) void startInput(){
         //从手机入
-        if(!isPhone){
-            return;
-        }
+        isPhone = true;
         if(!isSpeech){
             //开始录音
             isSpeech = true;

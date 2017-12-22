@@ -75,6 +75,9 @@ public class AudioRecordUtil {
                         }
                     });
                     context.unregisterReceiver(this);
+                }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
+                    ConfigUtil.showToask(context, "录音失败");
+                    context.unregisterReceiver(this);
                 }else{
                     try {
                         Thread.sleep(1000);
@@ -382,7 +385,7 @@ public class AudioRecordUtil {
         mBuffer = new byte[BUFFER_SIZE];
         //int sampleRate = 44100;//所有Android系统都支持的频率
         int sampleRate = 8000;//所有Android系统都支持的频率
-        int streamType = AudioManager.STREAM_VOICE_CALL;
+        int streamType = AudioManager.STREAM_MUSIC;
         int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
         int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
         int mode = AudioTrack.MODE_STREAM;

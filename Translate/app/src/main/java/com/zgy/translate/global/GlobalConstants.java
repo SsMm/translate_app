@@ -18,6 +18,8 @@ public class GlobalConstants {
     public static final String STATE_BONDED = "绑定成功";
     public static final String STATE_CONNECTED = "蓝牙连接成功";
     public static final String STATE_CONNECTING = "蓝牙连接中...";
+    public static final String BLUETOOTH_A2DP = "";
+    public static final String BLUETOOTH_BLE = "AirohaBLE";
 
 
 

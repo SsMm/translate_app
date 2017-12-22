@@ -80,14 +80,14 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
                 Log.i(TAG, "Unable to initialize Bluetooth");
                 finish();
             }
-            GlobalInit.mBluetoothLeService = mBluetoothLeService;
+
             //mBluetoothLeService.connect(mDeviceAddress);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mBluetoothLeService = null;
-            GlobalInit.mBluetoothLeService = null;
+
         }
     };
 
@@ -188,7 +188,6 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
         //初始化服务
         Intent gattServiceIntent = new Intent(getApplicationContext(), BluetoothLeService.class);
         getApplicationContext().bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-        GlobalInit.mServiceConnection = mServiceConnection;
 
         //注册
         gattUpdateReceiverManager = new GattUpdateReceiverManager(this);

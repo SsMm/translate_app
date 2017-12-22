@@ -54,7 +54,7 @@ public class VoiceTranslateAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         .inflate(R.layout.item_tran_phone, parent, false));
             case BLUE_TYPE:
                 return new VoiceTranBlueViewHolder(LayoutInflater.from(mContext)
-                        .inflate(R.layout.item_tran_phone, parent, false));
+                        .inflate(R.layout.item_tran_bluetooth, parent, false));
             default:
                 return null;
         }

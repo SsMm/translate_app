@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -319,20 +320,19 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     /**添加翻译内容*/
     private void addTranContent(String src, String dst){
-        VoiceTransDTO dto = new VoiceTransDTO();
-        if(isPhone){
-            //从耳机
-            dto.setLagType(VoiceTranslateAdapter.FROM_PHONE);
-        }else{
-            //从蓝牙
-            dto.setLagType(VoiceTranslateAdapter.FROM_BLUE);
-        }
-        dto.setLanSrc(src);
-        dto.setLanDst(dst);
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                VoiceTransDTO dto = new VoiceTransDTO();
+                if(isPhone){
+                    //从耳机
+                    dto.setLagType(VoiceTranslateAdapter.FROM_PHONE);
+                }else{
+                    //从蓝牙
+                    dto.setLagType(VoiceTranslateAdapter.FROM_BLUE);
+                }
+                dto.setLanSrc(src);
+                dto.setLanDst(dst);
                 voiceTransDTOList.add(dto);
                 voiceTranslateAdapter.notifyItemInserted(voiceTransDTOList.size() - 1);
             }
@@ -406,7 +406,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             close();
             if(!isPhone && !FROM_PHONE_MIC){
                 //从手机听筒出
-
+                AudioRecordUtil.startPlayFromCall(this, mediaRecorderPath, mAudioManager);
             }
             if(isPhone){
                 AudioRecordUtil.startTrack(this, mediaRecorderPath, mAudioManager);
@@ -668,4 +668,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     }
                 });
     }
+
+
 }

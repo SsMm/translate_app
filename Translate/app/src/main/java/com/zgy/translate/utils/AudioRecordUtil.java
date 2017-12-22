@@ -433,7 +433,7 @@ public class AudioRecordUtil {
     /**
      * 手机听筒播放
      * */
-    public void startPlayFromCall(Context context, File pathFile, AudioManager audioManager){
+    public static void startPlayFromCall(Context context, File pathFile, AudioManager audioManager){
         checkPoolState();
 
         if(!audioManager.isBluetoothScoAvailableOffCall()){
@@ -445,7 +445,7 @@ public class AudioRecordUtil {
             @Override
             public void run() {
 
-                audioManager.setMode(AudioManager.MODE_IN_CALL);
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 audioManager.setSpeakerphoneOn(false);
                 audioManager.setBluetoothScoOn(false);
 
@@ -456,9 +456,9 @@ public class AudioRecordUtil {
         });
     }
 
-    private void doCallPlay(File pathFile){
+    private static void doCallPlay(File pathFile){
         mBuffer = new byte[BUFFER_SIZE];
-        int sampleRate = 8000;//所有Android系统都支持的频率
+        int sampleRate = 16000;//所有Android系统都支持的频率
         int streamType = AudioManager.STREAM_VOICE_CALL;
         int channelConfig = AudioFormat.CHANNEL_OUT_MONO;
         int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
@@ -497,7 +497,7 @@ public class AudioRecordUtil {
         }
     }
 
-    private void stopCallPlay(){
+    private static void stopCallPlay(){
         if(mAudioTrack != null){
             mAudioTrack.stop();
             mAudioTrack.release();

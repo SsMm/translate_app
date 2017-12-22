@@ -105,7 +105,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
     @Override
     public void getA2DPProfileFinish(boolean result) {
         if(!result){
-            scanLeDevice(true);
+            //scanLeDevice(true);
         }else{
             gattManagerInterface.noRequest();
         }

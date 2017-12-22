@@ -44,14 +44,7 @@ public class AppReceiverManager {
 
                switch (status){
                    case BluetoothAdapter.STATE_DISCONNECTED: //断开连接
-                       removeBluetoothDeviceCon(device);
                        ConfigUtil.showToask(context, GlobalConstants.STATE_DISCONNECTED);
-                       if(!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
-                           RedirectUtil.redirect(context, BluetoothDeviceManagerActivity.class); //传统搜索
-                       }else{
-                           //RedirectUtil.redirect(this, BleBluetoothDeviceManagerActivity.class); //ble搜索
-                           RedirectUtil.redirect(context, BluetoothDeviceManagerActivity.class); //传统搜索
-                       }
                        ((Activity) context).finish();
                        break;
                }

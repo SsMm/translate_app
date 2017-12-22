@@ -45,6 +45,9 @@ public class AudioRecordUtil {
     private static ScheduledExecutorService executorService;
     private static volatile boolean mIsRecording = false;
 
+    /**
+     * 耳机录音
+     * */
     public static void startRecord(File pathFile, Context context, AudioManager audioManager){
         checkPoolState();
 
@@ -221,6 +224,9 @@ public class AudioRecordUtil {
     }
 
 
+    /**
+     * 耳机播放
+     * */
     public static void startTrack(Context context, File pathFile, AudioManager audioManager){
         checkPoolState();
 
@@ -422,6 +428,82 @@ public class AudioRecordUtil {
             stopTrack();
         }
 
+    }
+
+    /**
+     * 手机听筒播放
+     * */
+    public void startPlayFromCall(Context context, File pathFile, AudioManager audioManager){
+        checkPoolState();
+
+        if(!audioManager.isBluetoothScoAvailableOffCall()){
+            ConfigUtil.showToask(context, "系统不支持蓝牙录音");
+            return;
+        }
+
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+
+                audioManager.setMode(AudioManager.MODE_IN_CALL);
+                audioManager.setSpeakerphoneOn(false);
+                audioManager.setBluetoothScoOn(false);
+
+                ConfigUtil.showToask(context, "开始播放");
+                doCallPlay(pathFile);
+
+            }
+        });
+    }
+
+    private void doCallPlay(File pathFile){
+        mBuffer = new byte[BUFFER_SIZE];
+        int sampleRate = 8000;//所有Android系统都支持的频率
+        int streamType = AudioManager.STREAM_VOICE_CALL;
+        int channelConfig = AudioFormat.CHANNEL_OUT_MONO;
+        int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+        int mode = AudioTrack.MODE_STREAM;
+
+        int minBufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+
+        //AudioAttributes audioAttributes = new AudioAttributes()
+
+        mAudioTrack = new AudioTrack(streamType, sampleRate, channelConfig, audioFormat,
+                Math.max(minBufferSize, BUFFER_SIZE), mode);
+
+        BufferedInputStream bufferedInputStream = null;
+
+        try {
+
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(pathFile));
+
+            mAudioTrack.play();
+            while (bufferedInputStream.available() > 0){
+                int size = bufferedInputStream.read(mBuffer, 0, BUFFER_SIZE);
+                mAudioTrack.write(mBuffer, 0, BUFFER_SIZE);
+            }
+            mAudioTrack.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if(bufferedInputStream != null){
+                    bufferedInputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            stopCallPlay();
+        }
+    }
+
+    private void stopCallPlay(){
+        if(mAudioTrack != null){
+            mAudioTrack.stop();
+            mAudioTrack.release();
+            mAudioTrack = null;
+        }
+        checkPoolState();
     }
 
     /**

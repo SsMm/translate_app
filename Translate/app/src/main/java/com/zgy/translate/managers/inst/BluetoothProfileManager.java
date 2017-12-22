@@ -19,6 +19,7 @@ import com.zgy.translate.domains.dtos.BluetoothSocketDTO;
 import com.zgy.translate.global.GlobalGattAttributes;
 import com.zgy.translate.global.GlobalInit;
 import com.zgy.translate.managers.inst.inter.BluetoothProfileManagerInterface;
+import com.zgy.translate.utils.BluetoothRecorder;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.RedirectUtil;
 
@@ -50,12 +51,11 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
         this.managerInterface = managerInterface;
         bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
-        GlobalInit.askBlueMap.clear();
     }
 
     /**获取蓝牙是否连接以及连接状态*/
 
-    public boolean getBluetoothProfile(){
+    public void getBluetoothProfile(){
 
         int flag = -1;
         int a2dp = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP);
@@ -79,11 +79,10 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
         Log.i("flag--", flag +","+ a2dp +","+ headset +","+ health+","+ gatt + "，" + gatt_service);
 
         if(flag == 0){
-            return false;
+            managerInterface.noProfile();
         }else if(flag != -1){
             mBluetoothAdapter.getProfileProxy(mContext, this, flag);
         }
-        return true;
     }
 
     @Override
@@ -129,53 +128,47 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
     }
 
     private void getConnectionDevice(int flag, BluetoothProfile proxy){
+        boolean fl = false;
         switch (flag){
             case SOCKET:
                 mBluetoothA2dp = (BluetoothA2dp) proxy;
                 for (BluetoothDevice device : mBluetoothA2dp.getConnectedDevices()){
-                    if(GlobalInit.bluetoothSocketDTOList == null){
-                        GlobalInit.bluetoothSocketDTOList = new ArrayList<>();
-                    }else{
-                        GlobalInit.bluetoothSocketDTOList.clear();
-                    }
-                    BluetoothSocketDTO socketDTO = new BluetoothSocketDTO();
-                    socketDTO.setmBluetoothDevice(device);
-                    socketDTO.setState(BluetoothBondedDeviceAdapter.CON_STATE);
-                    GlobalInit.bluetoothSocketDTOList.add(socketDTO);
                     Log.i("mBluetoothA2dp", device.getName() + device.getAddress());
-
                     if(device.getUuids() != null){
                         for (ParcelUuid uuid : device.getUuids()){
                             Log.i("mBluetoothA2dp--uuid", uuid.toString());
                             if(GlobalGattAttributes.DEVICE_SERVICE.equals(uuid.toString())){
-                                GlobalInit.askBlueMap.put(device, true);
-                                return;
+                                fl = true;
+                                break;
                             }
                         }
                     }
                 }
-                managerInterface.getProfileFinish();
+                if(fl){
+                    managerInterface.getA2DPProfileFinish(true);
+                }else{
+                    managerInterface.getA2DPProfileFinish(false);
+                }
                 break;
             case GATT:
                 mBluetoothGatt = (BluetoothGatt) proxy;
                 for (BluetoothDevice device : mBluetoothGatt.getConnectedDevices()){
-                    if(GlobalInit.leConnectionDTOList == null){
-                        GlobalInit.leConnectionDTOList = new ArrayList<>();
-                    }else {
-                        GlobalInit.leConnectionDTOList.clear();
-                    }
-                    BluetoothLeConnectionDTO dto = new BluetoothLeConnectionDTO();
-                    dto.setmBluetoothDevice(device);
-                    GlobalInit.leConnectionDTOList.add(dto);
-                    GlobalInit.askBlueMap.put(device, true);
                     Log.i("mBluetoothGatt", device.getName() + device.getAddress());
                     if(device.getUuids() != null){
                         for (ParcelUuid uuid : device.getUuids()){
                             Log.i("mBluetoothGatt--uuid", uuid.toString());
+                            if(GlobalGattAttributes.DEVICE_SERVICE.equals(uuid.toString())){
+                                fl = true;
+                                break;
+                            }
                         }
                     }
                 }
-                managerInterface.getProfileFinish();
+                if(fl){
+                    managerInterface.getBLEProfileFinish(mBluetoothGatt, true);
+                }else{
+                    managerInterface.getBLEProfileFinish(mBluetoothGatt, false);
+                }
                 break;
         }
 

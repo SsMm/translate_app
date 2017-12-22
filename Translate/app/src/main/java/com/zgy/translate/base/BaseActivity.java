@@ -23,7 +23,7 @@ public abstract class BaseActivity extends AppCompatActivity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityController.addActivity(this);
-        registerBluetoothConState();
+        //registerBluetoothConState();
     }
 
     public void init(){
@@ -58,7 +58,7 @@ public abstract class BaseActivity extends AppCompatActivity{
     protected void onDestroy() {
         super.onDestroy();
         ActivityController.removeActivity(this);
-        unRegisterBluetoothConState();
+        //unRegisterBluetoothConState();
     }
 
 

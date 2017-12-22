@@ -1,6 +1,10 @@
 package com.zgy.translate.activitys;
 
+import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +25,8 @@ import com.baidu.tts.client.SpeechError;
 import com.baidu.tts.client.SpeechSynthesizer;
 import com.baidu.tts.client.SpeechSynthesizerListener;
 import com.baidu.tts.client.TtsMode;
+import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.zgy.translate.MainActivity;
 import com.zgy.translate.R;
 
 import com.zgy.translate.adapters.VoiceTranslateAdapter;
@@ -35,7 +41,9 @@ import com.zgy.translate.global.GlobalKey;
 import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.http.HttpGet;
 import com.zgy.translate.managers.CacheManager;
+import com.zgy.translate.managers.CreateGattManager;
 import com.zgy.translate.managers.GsonManager;
+import com.zgy.translate.managers.inst.inter.CreateGattManagerInterface;
 import com.zgy.translate.managers.sing.SpeechAsrStartParamManager;
 import com.zgy.translate.managers.sing.TransManager;
 import com.zgy.translate.utils.AudioRecordUtil;
@@ -70,7 +78,7 @@ import butterknife.OnClick;
 
 
 public class VoiceTranslateActivity extends BaseActivity implements EventListener, SpeechSynthesizerListener,
-        VoiceTranslateAdapterInterface{
+        VoiceTranslateAdapterInterface, CreateGattManagerInterface{
 
     private static final String UTTERANCE_ID = "appolo";
 
@@ -98,6 +106,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private boolean isSpeech = false; //是否在输入录音
     private boolean isLeftLangCN = true; //左翻译语言是中文
 
+    private CreateGattManager createGattManager;
+    private BluetoothAdapter mBluetoothAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,7 +134,23 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     /**初始化*/
     private void baseInit(){
+        if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
+            ConfigUtil.showToask(this, GlobalConstants.NO_BLE);
+            finish();
+        }
+
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        if(mBluetoothAdapter == null){
+            ConfigUtil.showToask(this, GlobalConstants.NO_BLUETOOTH);
+            finish();
+        }
+
+        showPermission();
+
         initSpeech();
         initTTs();
 
@@ -136,6 +162,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             isPhone = false;
             iv_phoneVoic.setVisibility(View.GONE);
         }
+
+
+        //与gatt建立联系
+        //createGattManager = new CreateGattManager(this, this);
+        //createGattManager.setParams(mBluetoothAdapter).init();
+
 
         voiceTransDTOList = new ArrayList<>();
         voiceTranslateAdapter = new VoiceTranslateAdapter(this, voiceTransDTOList, this);
@@ -426,16 +458,46 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
     }
 
+    @Override
+    public void noProfile() {
+        ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");
+        finish();
+    }
+
+    @Override
+    public void noRequest() {
+        ConfigUtil.showToask(this, "连接蓝牙不是本公司产品，请重新连接");
+        finish();
+    }
+
+    @Override
+    public void gattOrder(String order) {
+        if(order.contains("c")){
+
+            //mediaRecorderPath = getPathFile(false);
+            //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
+
+        }else{
+            //AudioRecordUtil.stopRecord();
+            if(isLeftLangCN){
+                //toCNSpeech(false);
+            }else{
+                //toENSpeech(false);
+            }
+        }
+    }
+
     /**
      * 开始录音
      * */
     @OnClick(R.id.avt_iv_voice) void startInput(){
         //从手机入
+        if(!isPhone){
+            return;
+        }
         if(!isSpeech){
             //开始录音
             isSpeech = true;
-            //mediaRecorderPath = getPathFile(false);
-            //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
             if(isLeftLangCN){
                 //左中
                 toCNSpeech(true);
@@ -447,8 +509,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //结束录音
             isSpeech = false;
             stopSpeech();
-            //AudioRecordUtil.stopRecord();
-            //toCNSpeech(false);
         }
     }
 
@@ -531,6 +591,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     }
 
     @Override
+    public void onBackPressed() {
+        System.gc();
+        ConfigUtil.againExit(this);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if(mAsr != null){
@@ -554,6 +620,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             rv_tran.setAdapter(null);
             rv_tran.setLayoutManager(null);
         }
+        if(createGattManager != null){
+            createGattManager.onMyDestroy();
+            createGattManager = null;
+        }
+        mBluetoothAdapter = null;
     }
 
     @Override
@@ -569,5 +640,20 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void onSpeechFinish(String s) {
 
+    }
+
+    private void showPermission(){
+        RxPermissions rxPermissions = new RxPermissions(this);
+
+        rxPermissions.request(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                .subscribe(granted -> {
+                    if(!granted){
+                        ConfigUtil.showToask(this, "请在手机设置中打开相应权限！");
+                    }
+                });
     }
 }

@@ -3,6 +3,7 @@ package com.zgy.translate.activitys;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHealth;
 import android.bluetooth.BluetoothProfile;
@@ -173,18 +174,18 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
 
         progressBar.setVisibility(View.GONE);
 
-        if(!mBluetoothProfileManager.getBluetoothProfile()){
+        /*if(!mBluetoothProfileManager.getBluetoothProfile()){
             if(mBluetoothAdapter.isEnabled()){
                 setBluetooth.setChecked(true);
                 getBondDevice();
             }else{
                 setBluetooth.setChecked(false);
             }
-        }
+        }*/
     }
 
     /**获取连接设备信息*/
-    @Override
+   /* @Override
     public void getProfileFinish() {
         if(mBluetoothAdapter.isEnabled()){
             setBluetooth.setChecked(true);
@@ -192,7 +193,7 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         }else{
             setBluetooth.setChecked(false);
         }
-    }
+    }*/
 
     @Override
     public void checkLeftIcon() {
@@ -490,6 +491,21 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
         BluetoothDevice netDevice = mBluetoothAdapter.getRemoteDevice(device.getAddress());
         mConnectThread = new ConnectThread(netDevice);
         mConnectThread.start();
+
+    }
+
+    @Override
+    public void noProfile() {
+
+    }
+
+    @Override
+    public void getA2DPProfileFinish(boolean result) {
+
+    }
+
+    @Override
+    public void getBLEProfileFinish(BluetoothGatt gatt, boolean result) {
 
     }
 

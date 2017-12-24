@@ -1,6 +1,7 @@
 package com.zgy.translate.adapters;
 
 import android.content.Context;
+import android.provider.ContactsContract;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ public class VoiceTranslateAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private Context mContext;
     private List<VoiceTransDTO> transDTOs;
     private VoiceTranslateAdapterInterface adapterInterface;
+    private ImageView imageView;
 
     public VoiceTranslateAdapter(Context context, List<VoiceTransDTO> dtos, VoiceTranslateAdapterInterface inter){
         mContext = context;
@@ -69,18 +71,20 @@ public class VoiceTranslateAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             ((VoiceTranPhoneViewHolder) holder).tts.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    adapterInterface.goTTS(dto.getLanDst());
+                    adapterInterface.goTTS(dto.getLanDst(), ((VoiceTranPhoneViewHolder) holder).tts);
                 }
             });
+            imageView = ((VoiceTranPhoneViewHolder) holder).tts;
         }else if(holder instanceof VoiceTranBlueViewHolder){
             ((VoiceTranBlueViewHolder) holder).src.setText(dto.getLanSrc());
             ((VoiceTranBlueViewHolder) holder).dst.setText(dto.getLanDst());
             ((VoiceTranBlueViewHolder) holder).tts.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    adapterInterface.goTTS(dto.getLanDst());
+                    adapterInterface.goTTS(dto.getLanDst(), ((VoiceTranBlueViewHolder) holder).tts);
                 }
             });
+            imageView = ((VoiceTranBlueViewHolder) holder).tts;
         }
     }
 
@@ -89,6 +93,12 @@ public class VoiceTranslateAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return transDTOs.size();
     }
 
+    public ImageView getCurrPlayImage(){
+        if(imageView != null){
+            return imageView;
+        }
+        return null;
+    }
 
     private class VoiceTranPhoneViewHolder extends RecyclerView.ViewHolder{
         TextView src, dst;

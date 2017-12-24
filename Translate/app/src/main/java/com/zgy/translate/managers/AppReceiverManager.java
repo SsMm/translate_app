@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.zgy.translate.activitys.BleBluetoothDeviceManagerActivity;
 import com.zgy.translate.activitys.BluetoothDeviceManagerActivity;
@@ -45,8 +47,12 @@ public class AppReceiverManager {
                switch (status){
                    case BluetoothAdapter.STATE_DISCONNECTED: //断开连接
                        ConfigUtil.showToask(context, GlobalConstants.STATE_DISCONNECTED);
-                       ((Activity) context).finish();
                        break;
+               }
+           }else if(ConnectivityManager.CONNECTIVITY_ACTION.equals(action)){
+               NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+               if(NetworkInfo.State.CONNECTED != info.getState() || !info.isAvailable()){
+                   ConfigUtil.showToask(context, "网络连接异常");
                }
            }
 
@@ -85,6 +91,7 @@ public class AppReceiverManager {
        final IntentFilter intentFilter = new IntentFilter();
 
        intentFilter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+       intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 
        return intentFilter;
    }

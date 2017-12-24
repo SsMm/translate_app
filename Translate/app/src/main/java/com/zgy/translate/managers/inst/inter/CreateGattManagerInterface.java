@@ -8,6 +8,7 @@ public interface CreateGattManagerInterface {
 
     void noProfile(); //
     void noRequest(); //不是要求蓝牙耳机
+    void conState(boolean state);
     void gattOrder(String order);
 
 }

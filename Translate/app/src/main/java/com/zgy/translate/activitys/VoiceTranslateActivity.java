@@ -4,14 +4,17 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.baidu.speech.EventListener;
@@ -30,6 +33,7 @@ import com.zgy.translate.adapters.interfaces.VoiceTranslateAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.domains.RecogResult;
 import com.zgy.translate.domains.dtos.VoiceTransDTO;
+import com.zgy.translate.domains.eventbuses.FinishRecorderEB;
 import com.zgy.translate.domains.response.TransResultResponse;
 import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.global.GlobalInit;
@@ -48,6 +52,9 @@ import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
 
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,6 +69,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -78,6 +86,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @BindView(R.id.avt_tv_tranRight) TextView tv_tranRight; //翻译右语言
     @BindView(R.id.avt_rv_tranContent) RecyclerView rv_tran; //显示翻译内容
     @BindView(R.id.avt_iv_voice) ImageView iv_phoneVoic; //从手机入显示，耳机入隐藏
+    @BindView(R.id.avt_ll_showConState) LinearLayout ll_showConState; //连接状态
+    @BindView(R.id.avt_iv_showCon_icon) ImageView iv_showConIcon;
+    @BindView(R.id.avt_tv_showConText) TextView tv_showConText;
+    @BindView(R.id.avt_unableCon) LinearLayout ll_unableConn; //无网络
 
 
     private EventManager mAsr; //识别
@@ -100,6 +112,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private CreateGattManager createGattManager;
     private BluetoothAdapter mBluetoothAdapter;
+    private AnimationDrawable animationDrawable;
+    private ImageView currPlayImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +130,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void initEvent() {
-
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -130,6 +144,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             ConfigUtil.showToask(this, GlobalConstants.NO_BLE);
             finish();
         }
+
+       //checkNetState();
 
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
@@ -156,6 +172,17 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         rv_tran.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rv_tran.setAdapter(voiceTranslateAdapter);
 
+    }
+
+    private void checkNetState(){
+        if(!ConfigUtil.isNetWorkConnected(this)){
+            ll_showConState.setVisibility(View.VISIBLE);
+            ll_unableConn.setVisibility(View.VISIBLE);
+            iv_showConIcon.setVisibility(View.GONE);
+            tv_showConText.setVisibility(View.GONE);
+        }else{
+            ll_showConState.setVisibility(View.GONE);
+        }
     }
 
     /**初始化语音识别*/
@@ -289,6 +316,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if(voiceTranslateAdapter.getCurrPlayImage() != null){
+                                currPlayImage = voiceTranslateAdapter.getCurrPlayImage();
+                            }
                             createSynthesizer(dst);
                         }
                     });
@@ -344,7 +374,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      *翻译内容点击再次语音合成
      * */
     @Override
-    public void goTTS(String dst) {
+    public void goTTS(String dst, ImageView imageView) {
+        currPlayImage = imageView;
         createSynthesizer(dst);
     }
 
@@ -356,6 +387,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
                 mSpeechSynthesizer.speak(dst);
+                if(animationDrawable != null){
+                    animationDrawable.stop();
+                }
+                showPlayAni(currPlayImage);
             }else{
                 //从听筒出
                 mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
@@ -363,6 +398,22 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else{
             //手机入，耳机出
             mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+        }
+    }
+
+    private void showPlayAni(ImageView imageView){
+        imageView.setImageResource(R.drawable.tts_voice_playing);
+        animationDrawable = (AnimationDrawable) imageView.getDrawable();
+        animationDrawable.start();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void playFinish(FinishRecorderEB eb){
+        if(currPlayImage != null){
+            currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
+        }
+        if(animationDrawable.isRunning()){
+            animationDrawable.stop();
         }
     }
 
@@ -404,12 +455,17 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         //合成正常结束状态
         if(UTTERANCE_ID.equals(utteranceId)){
             close();
+            if(animationDrawable != null){
+                animationDrawable.stop();
+            }
+            showPlayAni(currPlayImage);
             if(!isPhone && !FROM_PHONE_MIC){
                 //从手机听筒出
                 AudioRecordUtil.startPlayFromCall(this, mediaRecorderPath, mAudioManager);
             }
             if(isPhone){
-                AudioRecordUtil.startTrack(this, mediaRecorderPath, mAudioManager);
+                //AudioRecordUtil.startTrack(this, mediaRecorderPath, mAudioManager);
+                AudioRecordUtil.startPlayFromCall(this, mediaRecorderPath, mAudioManager);
             }
         }
 
@@ -466,13 +522,43 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void noProfile() {
         ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");
-        finish();
     }
 
     @Override
     public void noRequest() {
         ConfigUtil.showToask(this, "连接蓝牙不是本公司产品，请重新连接");
-        finish();
+    }
+
+    @Override
+    public void conState(boolean state) {
+        if(state){
+            showConState(true);
+        }else{
+            ConfigUtil.showToask(this, "连接失败");
+        }
+    }
+
+    private void showConState(boolean sta){
+        if(sta){
+            ll_showConState.setVisibility(View.VISIBLE);
+            ll_unableConn.setVisibility(View.GONE);
+            iv_showConIcon.setVisibility(View.VISIBLE);
+            tv_showConText.setVisibility(View.VISIBLE);
+            tv_showConText.setText("连接成功");
+        }
+        checkPoolState();
+        executorService.schedule(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ll_showConState.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }, 2000, TimeUnit.MILLISECONDS);
+
     }
 
     @Override
@@ -611,6 +697,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        EventBus.getDefault().unregister(this);
         if(mAsr != null){
             mAsr.unregisterListener(this);
             mAsr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
@@ -636,6 +723,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             createGattManager.onMyDestroy();
             createGattManager = null;
         }
+
+        animationDrawable = null;
         mBluetoothAdapter = null;
     }
 

@@ -179,14 +179,12 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
      * */
     @Override
     public void gattConnected() {
-        Log.i("连接成功", "连接成功");
-        ConfigUtil.showToask(mContext, "连接成功");
+        gattManagerInterface.conState(true);
     }
 
     @Override
     public void gattDisconnected() {
-        Log.i("连接失败", "连接失败");
-        ConfigUtil.showToask(mContext, "连接失败");
+        gattManagerInterface.conState(false);
         mBluetoothLeService.connect(connDevice.getAddress());
     }
 

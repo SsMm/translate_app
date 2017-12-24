@@ -14,6 +14,10 @@ import android.print.PageRange;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.zgy.translate.domains.eventbuses.FinishRecorderEB;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -415,6 +419,8 @@ public class AudioRecordUtil {
                 mAudioTrack.write(mBuffer, 0, BUFFER_SIZE);
             }
             mAudioTrack.stop();
+            FinishRecorderEB finishRecorderEB = new FinishRecorderEB(null, null);
+            EventBus.getDefault().post(finishRecorderEB);
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -483,6 +489,8 @@ public class AudioRecordUtil {
                 mAudioTrack.write(mBuffer, 0, BUFFER_SIZE);
             }
             mAudioTrack.stop();
+            FinishRecorderEB finishRecorderEB = new FinishRecorderEB(null, null);
+            EventBus.getDefault().post(finishRecorderEB);
         } catch (Exception e) {
             e.printStackTrace();
         }finally {

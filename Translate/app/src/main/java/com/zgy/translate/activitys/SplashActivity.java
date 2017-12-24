@@ -70,10 +70,10 @@ public class SplashActivity extends BaseActivity{
         super.onResume();
         if(!isLogin()){
             if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){ //连接已开
-               RedirectUtil.redirect(this, VoiceTranslateActivity.class);
+                RedirectUtil.redirect(this, VoiceTranslateActivity.class);
             }else{
-               ConfigUtil.showToask(this, "请开启蓝牙，连接耳机！");
-                finish();
+                ConfigUtil.showToask(this, "请开启蓝牙，连接耳机！");
+                RedirectUtil.redirect(this, VoiceTranslateActivity.class);
             }
         }else{
             //跳转到登录页面

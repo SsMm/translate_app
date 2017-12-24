@@ -19,11 +19,11 @@
 
         <ImageView
             android:id="@+id/itp_iv_goTTS"
-            android:layout_width="@dimen/dimen_40"
-            android:layout_height="@dimen/dimen_40"
-            android:layout_alignParentEnd="true"
+            android:layout_width="@dimen/dimen_30"
+            android:layout_height="@dimen/dimen_30"
             android:layout_alignParentBottom="true"
-            android:src="@mipmap/voice_volume"/>
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/tts_voice_playing3"/>
 
         <TextView
             android:id="@+id/itp_tv_src"

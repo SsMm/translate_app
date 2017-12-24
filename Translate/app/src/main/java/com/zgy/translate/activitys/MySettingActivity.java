@@ -5,10 +5,14 @@ import android.os.Bundle;
 
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.widget.CommonBar;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MySettingActivity extends BaseActivity {
+public class MySettingActivity extends BaseActivity implements CommonBar.CommonBarInterface{
+
+    @BindView(R.id.amsi_cb) CommonBar commonBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,11 +29,23 @@ public class MySettingActivity extends BaseActivity {
 
     @Override
     public void initEvent() {
-
+        commonBar.setBarInterface(this);
     }
 
     @Override
     public void initData() {
 
     }
+
+    @Override
+    public void checkLeftIcon() {
+        finish();
+    }
+
+    @Override
+    public void checkRightIcon() {
+
+    }
+
+
 }

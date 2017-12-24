@@ -10,6 +10,7 @@
     android:orientation="vertical">
 
     <com.zgy.translate.widget.CommonBar
+        android:id="@+id/amsi_cb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:bar_title="设置"
@@ -133,13 +134,6 @@
                 android:orientation="vertical"
                 android:background="@color/colorText"
                 android:padding="@dimen/padding_10">
-
-                <com.zgy.translate.widget.CommonNav
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    nav:nav_leftTitle="@string/device_manager"/>
-
-                <include layout="@layout/common_horizontal_line"/>
 
                 <com.zgy.translate.widget.CommonNav
                     android:layout_width="match_parent"

@@ -316,9 +316,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if(voiceTranslateAdapter.getCurrPlayImage() != null){
+                            /*if(voiceTranslateAdapter.getCurrPlayImage() != null){
                                 currPlayImage = voiceTranslateAdapter.getCurrPlayImage();
-                            }
+                            }*/
                             createSynthesizer(dst);
                         }
                     });
@@ -377,6 +377,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void goTTS(String dst, ImageView imageView) {
         currPlayImage = imageView;
         createSynthesizer(dst);
+        if(animationDrawable != null){
+            animationDrawable.stop();
+        }
+        showPlayAni(imageView);
     }
 
     /**
@@ -402,6 +406,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     }
 
     private void showPlayAni(ImageView imageView){
+        if(imageView == null){
+            return;
+        }
         imageView.setImageResource(R.drawable.tts_voice_playing);
         animationDrawable = (AnimationDrawable) imageView.getDrawable();
         animationDrawable.start();
@@ -412,7 +419,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(currPlayImage != null){
             currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
         }
-        if(animationDrawable.isRunning()){
+        if(animationDrawable != null && animationDrawable.isRunning()){
             animationDrawable.stop();
         }
     }
@@ -455,10 +462,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         //合成正常结束状态
         if(UTTERANCE_ID.equals(utteranceId)){
             close();
-            if(animationDrawable != null){
-                animationDrawable.stop();
-            }
-            showPlayAni(currPlayImage);
             if(!isPhone && !FROM_PHONE_MIC){
                 //从手机听筒出
                 AudioRecordUtil.startPlayFromCall(this, mediaRecorderPath, mAudioManager);

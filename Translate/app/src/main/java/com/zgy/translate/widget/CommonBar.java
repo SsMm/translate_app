@@ -50,7 +50,7 @@ public class CommonBar extends LinearLayout {
 
         if(show_left){
             leftIcon.setVisibility(VISIBLE);
-            GlideImageManager.showResImage(context, left_icon, leftIcon);
+            //GlideImageManager.showResImage(context, left_icon, leftIcon);
         }else{
             leftIcon.setVisibility(GONE);
         }

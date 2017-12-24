@@ -9,7 +9,8 @@
         android:id="@+id/wcb_leftIcon"
         android:layout_width="@dimen/dimen_25"
         android:layout_height="@dimen/dimen_25"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true"
+        android:src="@mipmap/back"/>
 
     <TextView
         android:id="@+id/wcb_title"

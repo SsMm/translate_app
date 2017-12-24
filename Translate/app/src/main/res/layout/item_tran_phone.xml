@@ -39,6 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_toStartOf="@id/itp_iv_goTTS"
             android:layout_alignParentBottom="true"
+            android:layout_below="@id/itp_tv_src"
             android:layout_marginTop="@dimen/margin_5"
             android:textSize="@dimen/text_16"
             android:textColor="@color/colorBlack" />

@@ -74,6 +74,7 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import jaygoo.widget.wlv.WaveLineView;
 
 
 public class VoiceTranslateActivity extends BaseActivity implements EventListener, SpeechSynthesizerListener,
@@ -90,6 +91,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @BindView(R.id.avt_iv_showCon_icon) ImageView iv_showConIcon;
     @BindView(R.id.avt_tv_showConText) TextView tv_showConText;
     @BindView(R.id.avt_unableCon) LinearLayout ll_unableConn; //无网络
+    @BindView(R.id.avt_wlv) WaveLineView waveLineView;
 
 
     private EventManager mAsr; //识别
@@ -206,6 +208,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onResume() {
         super.onResume();
+        waveLineView.onResume();
         //获取用户手机输出位置
 
         if(true){ //默认从手机麦克风出
@@ -270,6 +273,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_VOLUME:
                 Volume vol = parseVolumeJson(params);
+                waveLineView.setVolume(vol.volumePercent);
                 Log.i("音量", vol.volumePercent + "");
                 break;
         }
@@ -599,6 +603,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(!isSpeech){
             //开始录音
             isSpeech = true;
+            waveLineView.setVisibility(View.VISIBLE);
+            waveLineView.startAnim();
             if(isLeftLangCN){
                 //左中
                 toCNSpeech(true);
@@ -609,6 +615,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else{
             //结束录音
             isSpeech = false;
+            waveLineView.stopAnim();
+            waveLineView.setVisibility(View.GONE);
             stopSpeech();
         }
     }
@@ -727,6 +735,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             createGattManager = null;
         }
 
+        waveLineView.release();
         animationDrawable = null;
         mBluetoothAdapter = null;
     }

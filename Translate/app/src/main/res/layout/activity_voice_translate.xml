@@ -2,6 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:wlv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.zgy.translate.activitys.VoiceTranslateActivity">
@@ -98,4 +99,13 @@
         android:layout_above="@id/avt_iv_voice">
     </android.support.v7.widget.RecyclerView>
 
+    <jaygoo.widget.wlv.WaveLineView
+        android:id="@+id/avt_wlv"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_centerInParent="true"
+        wlv:wlvBackgroundColor="@android:color/transparent"
+        wlv:wlvLineColor="@color/colorCommon"
+        wlv:wlvMoveSpeed="290"
+        />
 </RelativeLayout>

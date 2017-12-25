@@ -35,6 +35,7 @@ import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.domains.RecogResult;
 import com.zgy.translate.domains.dtos.VoiceTransDTO;
 import com.zgy.translate.domains.eventbuses.FinishRecorderEB;
+import com.zgy.translate.domains.eventbuses.MonitorRecordAmplitudeEB;
 import com.zgy.translate.domains.response.TransResultResponse;
 import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.global.GlobalInit;
@@ -144,7 +145,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void initData() {
-
     }
 
     @Override
@@ -170,9 +170,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             finish();
         }
 
-       //checkNetState();
-
-        mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        mAudioManager = (AudioManager) getApplicationContext().getSystemService(AUDIO_SERVICE);
 
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
@@ -228,6 +226,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else{
             FROM_PHONE_MIC = false;
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        waveLineView.onPause();
     }
 
     /**
@@ -520,6 +524,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * 个人设置
      * */
     @OnClick(R.id.avt_iv_setting) void sett(){
+        stopSpeech();
+        AudioRecordUtil.stopRecord();
+        AudioRecordUtil.stopTrack();
+        AudioRecordUtil.stopCallPlay();
         RedirectUtil.redirect(this, MySettingActivity.class);
     }
 
@@ -566,6 +574,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             Log.i("oooo", "oooo"); //启动
             isPhone = false;
             isSpeech = true;
+            waveLineView.setVisibility(View.VISIBLE);
+            waveLineView.startAnim();
             mediaRecorderPath = getPathFile(false);
             AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
         }else if(order.contains("c")){
@@ -574,6 +584,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 return;
             }
             isSpeech = false;
+            waveLineView.stopAnim();
+            waveLineView.setVisibility(View.GONE);
             AudioRecordUtil.stopRecord();
             Log.i("ccc", "cccc");
             if(isLeftLangCN){
@@ -584,6 +596,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else if(order.contains("w")){
             Log.i("wwww", "wwww");
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void fromBlueVolume(MonitorRecordAmplitudeEB eb){
+        waveLineView.setVolume(eb.getLevel());
     }
 
     /**

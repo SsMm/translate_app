@@ -135,7 +135,6 @@ public class ConfigUtil {
         String androidId = Settings.Secure.getString(context.getApplicationContext().getContentResolver()
         , Settings.Secure.ANDROID_ID);
 
-        Log.i("shoujixinx", model + androidId);
         return model + androidId;
     }
 

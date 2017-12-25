@@ -21,6 +21,9 @@ public class GlobalConstants {
     public static final String BLUETOOTH_A2DP = "";
     public static final String BLUETOOTH_BLE = "AirohaBLE";
 
+    public static final String NULL_MSG = "信息不能为空";
+    public static final String NULL_PHONE = "手机号不能为空";
+
 
 
 

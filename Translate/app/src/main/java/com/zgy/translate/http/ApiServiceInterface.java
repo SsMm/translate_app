@@ -9,4 +9,5 @@ package com.zgy.translate.http;
 public interface ApiServiceInterface {
 
 
+
 }

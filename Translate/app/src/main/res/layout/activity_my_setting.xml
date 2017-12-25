@@ -10,14 +10,14 @@
     android:orientation="vertical">
 
     <com.zgy.translate.widget.CommonBar
-        android:id="@+id/amsi_cb"
+        android:id="@+id/ams_cb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:bar_title="设置"
-        app:show_left="true"
-        app:left_icon="@mipmap/back"/>
+        app:show_left="true"/>
 
     <RelativeLayout
+        android:id="@+id/ams_rl_baseMsg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_20"
@@ -50,6 +50,7 @@
             android:paddingEnd="@dimen/padding_10">
 
             <TextView
+                android:id="@+id/ams_tv_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_16"
@@ -59,6 +60,7 @@
                 android:lines="1"/>
 
             <TextView
+                android:id="@+id/ams_tv_per"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_5"
@@ -102,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_16"
                 android:textColor="@color/colorBlack"
-                android:text="设置翻译读取设备"
+                android:text="翻译输出设置"
                 android:ellipsize="end"
                 android:lines="1"/>
 
@@ -112,7 +114,7 @@
                 android:layout_marginTop="@dimen/margin_5"
                 android:textSize="@dimen/text_14"
                 android:textColor="@color/colordcdcdc"
-                android:text="默认手机扬声器读取"
+                android:text="打开手机扬声器输出，关闭手机听筒输出"
                 android:ellipsize="end"
                 android:lines="1"/>
         </LinearLayout>
@@ -136,6 +138,7 @@
                 android:padding="@dimen/padding_10">
 
                 <com.zgy.translate.widget.CommonNav
+                    android:id="@+id/ams_cn_share"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     nav:nav_leftTitle="@string/share_other"/>
@@ -143,6 +146,7 @@
                 <include layout="@layout/common_horizontal_line"/>
 
                 <com.zgy.translate.widget.CommonNav
+                    android:id="@+id/ams_cn_question"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     nav:nav_leftTitle="@string/often_question"/>
@@ -150,12 +154,14 @@
                 <include layout="@layout/common_horizontal_line"/>
 
                 <com.zgy.translate.widget.CommonNav
+                    android:id="@+id/ams_cn_about"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     nav:nav_leftTitle="@string/about"/>
             </LinearLayout>
 
             <TextView
+                android:id="@+id/ams_tv_exit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_40"

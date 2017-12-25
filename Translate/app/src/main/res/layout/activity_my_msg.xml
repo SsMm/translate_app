@@ -9,11 +9,11 @@
     android:orientation="vertical">
 
     <com.zgy.translate.widget.CommonBar
+        android:id="@+id/amm_cb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         bar:bar_title="个人信息"
-        bar:show_left="true"
-        bar:left_icon="@mipmap/back"/>
+        bar:show_left="true"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -39,7 +39,7 @@
             android:src="@drawable/more"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/ams_civ_headerIcon"
+            android:id="@+id/amm_civ_headerIcon"
             android:layout_width="@dimen/dimen_50"
             android:layout_height="@dimen/dimen_50"
             android:layout_toStartOf="@id/amm_iv_icon"
@@ -61,15 +61,6 @@
             android:layout_height="match_parent"
             android:padding="@dimen/padding_10"
             android:orientation="vertical">
-
-            <com.zgy.translate.widget.CommonNav
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                nav:nav_leftTitle="个性签名"
-                nav:nav_show_right="true"
-                nav:nav_rightTitle="就开始开始看地脚螺栓"/>
-
-            <include layout="@layout/common_horizontal_line"/>
 
             <com.zgy.translate.widget.CommonNav
                 android:layout_width="match_parent"

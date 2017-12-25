@@ -21,6 +21,8 @@ import com.zgy.translate.managers.inst.inter.BluetoothProfileManagerInterface;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.RedirectUtil;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import butterknife.ButterKnife;
@@ -29,6 +31,7 @@ public class SplashActivity extends BaseActivity{
 
 
     private BluetoothAdapter mBluetoothAdapter;
+    private ScheduledExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,20 +64,22 @@ public class SplashActivity extends BaseActivity{
         }
         if(!ConfigUtil.isNetWorkConnected(this)){
             ConfigUtil.showToask(this, "请检查网络!");
-            finish();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        try {
+            Thread.sleep(5 * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if(!isLogin()){
-            if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){ //连接已开
-                RedirectUtil.redirect(this, VoiceTranslateActivity.class);
-            }else{
+            if(mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()){ //连接已开
                 ConfigUtil.showToask(this, "请开启蓝牙，连接耳机！");
-                RedirectUtil.redirect(this, VoiceTranslateActivity.class);
             }
+            RedirectUtil.redirect(this, VoiceTranslateActivity.class);
         }else{
             //跳转到登录页面
             RedirectUtil.redirect(this, LoginActivity.class);
@@ -103,6 +108,16 @@ public class SplashActivity extends BaseActivity{
         mBluetoothAdapter = null;
     }
 
+    /**
+     * 查看是否有线程池存在执行任务，有就关闭，建立新线程池
+     * */
+    private void checkPoolState(){
+        if (executorService != null){
+            executorService.shutdown();
+            executorService = null;
+        }
+        executorService = Executors.newSingleThreadScheduledExecutor();
+    }
 
     @Override
     public void disConnected() {

@@ -58,10 +58,10 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_16"
                 android:textColor="@color/colorBT"
-                android:text="@string/phone_code"/>
+                android:text="    密码:"/>
 
             <EditText
-                android:id="@+id/al_et_phoneCode"
+                android:id="@+id/al_et_phonePaw"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"

@@ -150,8 +150,8 @@ public class ConfigUtil {
         }else {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lostCloseTime < 2000) {
-                //((Activity) reference.get()).finish(); //退出此activity
-                ((Activity) reference.get()).moveTaskToBack(true); // 不在退出此activity，放到后台隐藏
+                ((Activity) reference.get()).finish(); //退出此activity
+                //((Activity) reference.get()).moveTaskToBack(true); // 不在退出此activity，放到后台隐藏
             } else {
                 lostCloseTime = 0;
             }

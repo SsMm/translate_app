@@ -9,11 +9,11 @@
     android:orientation="vertical">
 
     <com.zgy.translate.widget.CommonBar
+        android:id="@+id/ar_cb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         bar:bar_title="注册"
-        bar:show_left="true"
-        bar:left_icon="@mipmap/back"/>
+        bar:show_left="true"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -37,7 +37,7 @@
                 android:text="   手机号:"/>
 
             <EditText
-
+                android:id="@+id/ar_et_phoneNum"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
@@ -103,6 +103,7 @@
                 android:text="       密码:"/>
 
             <EditText
+                android:id="@+id/ar_et_paw"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
@@ -127,7 +128,7 @@
                 android:text="@string/phone_msg_again"/>
 
             <EditText
-
+                android:id="@+id/ar_et_pawNext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"

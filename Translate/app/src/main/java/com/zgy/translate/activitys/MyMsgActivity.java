@@ -5,10 +5,14 @@ import android.os.Bundle;
 
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.widget.CommonBar;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MyMsgActivity extends BaseActivity {
+public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarInterface{
+
+    @BindView(R.id.amm_cb) CommonBar commonBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +29,7 @@ public class MyMsgActivity extends BaseActivity {
 
     @Override
     public void initEvent() {
-
+        commonBar.setBarInterface(this);
     }
 
     @Override
@@ -45,6 +49,16 @@ public class MyMsgActivity extends BaseActivity {
 
     @Override
     public void netConnected() {
+
+    }
+
+    @Override
+    public void checkLeftIcon() {
+        finish();
+    }
+
+    @Override
+    public void checkRightIcon() {
 
     }
 }

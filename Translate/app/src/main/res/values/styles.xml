@@ -12,6 +12,12 @@
         <item name="colorPrimaryDark">@color/colorCommon</item>
     </style>
 
+    <style name="SplashTheme" parent="AppThemeNoActionBar">
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowBackground">@mipmap/start_app</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

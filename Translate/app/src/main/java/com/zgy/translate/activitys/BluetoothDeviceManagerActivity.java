@@ -509,6 +509,21 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
 
     }
 
+    @Override
+    public void disConnected() {
+
+    }
+
+    @Override
+    public void disNetConnected() {
+
+    }
+
+    @Override
+    public void netConnected() {
+
+    }
+
     /**与蓝牙耳机建立连接*/
     public class ConnectThread extends Thread{
         private final BluetoothSocket mSocket;

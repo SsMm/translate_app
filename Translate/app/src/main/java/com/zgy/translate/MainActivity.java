@@ -105,4 +105,18 @@ public class MainActivity extends BaseActivity {
     }
 
 
+    @Override
+    public void disConnected() {
+
+    }
+
+    @Override
+    public void disNetConnected() {
+
+    }
+
+    @Override
+    public void netConnected() {
+
+    }
 }

@@ -59,4 +59,19 @@ public class QuestionActivity extends BaseActivity implements CommonBar.CommonBa
     public void checkRightIcon() {
 
     }
+
+    @Override
+    public void disConnected() {
+
+    }
+
+    @Override
+    public void disNetConnected() {
+
+    }
+
+    @Override
+    public void netConnected() {
+
+    }
 }

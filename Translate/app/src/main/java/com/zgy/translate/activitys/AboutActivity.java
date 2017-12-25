@@ -32,4 +32,19 @@ public class AboutActivity extends BaseActivity {
     public void initData() {
 
     }
+
+    @Override
+    public void disConnected() {
+
+    }
+
+    @Override
+    public void disNetConnected() {
+
+    }
+
+    @Override
+    public void netConnected() {
+
+    }
 }

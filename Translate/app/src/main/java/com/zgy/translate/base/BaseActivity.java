@@ -14,7 +14,7 @@ import com.zgy.translate.managers.AppReceiverManager;
  * Created by zhou on 2017/4/27.
  */
 
-public abstract class BaseActivity extends AppCompatActivity{
+public abstract class BaseActivity extends AppCompatActivity implements AppReceiverManager.BluetoothConnectionStateInterface{
 
 
     private AppReceiverManager.BluetoothConnectionStateReceiver bluetoothConnectionStateReceiver; //蓝牙连接状态
@@ -49,7 +49,7 @@ public abstract class BaseActivity extends AppCompatActivity{
 
     /**注册广播接收蓝牙连接状态*/
     private void registerBluetoothConState(){
-        bluetoothConnectionStateReceiver = AppReceiverManager.buildBlueConnStaRec();
+        bluetoothConnectionStateReceiver = AppReceiverManager.buildBlueConnStaRec(this);
         registerReceiver(bluetoothConnectionStateReceiver, AppReceiverManager.connectionStateIntentFilter());
     }
 

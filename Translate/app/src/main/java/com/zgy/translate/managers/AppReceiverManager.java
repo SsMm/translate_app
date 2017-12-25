@@ -28,13 +28,19 @@ import java.io.IOException;
 public class AppReceiverManager {
 
 
-    public static BluetoothConnectionStateReceiver buildBlueConnStaRec(){
-        return new BluetoothConnectionStateReceiver();
+    public static BluetoothConnectionStateReceiver buildBlueConnStaRec(BluetoothConnectionStateInterface stateInterface){
+        return new BluetoothConnectionStateReceiver(stateInterface);
     }
 
 
 
    public static class BluetoothConnectionStateReceiver extends BroadcastReceiver{
+
+       private BluetoothConnectionStateInterface connectionStateInterface;
+
+       public BluetoothConnectionStateReceiver(BluetoothConnectionStateInterface stateInterface){
+           connectionStateInterface = stateInterface;
+       }
 
        @Override
        public void onReceive(Context context, Intent intent) {
@@ -46,13 +52,17 @@ public class AppReceiverManager {
 
                switch (status){
                    case BluetoothAdapter.STATE_DISCONNECTED: //断开连接
-                       ConfigUtil.showToask(context, GlobalConstants.STATE_DISCONNECTED);
+                       connectionStateInterface.disConnected();
+                       //ConfigUtil.showToask(context, GlobalConstants.STATE_DISCONNECTED);
                        break;
                }
            }else if(ConnectivityManager.CONNECTIVITY_ACTION.equals(action)){
                NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
                if(NetworkInfo.State.CONNECTED != info.getState() || !info.isAvailable()){
-                   ConfigUtil.showToask(context, "网络连接异常");
+                   connectionStateInterface.disNetConnected();
+                   //ConfigUtil.showToask(context, "网络连接异常");
+               }else{
+                   connectionStateInterface.netConnected();
                }
            }
 
@@ -94,6 +104,13 @@ public class AppReceiverManager {
        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 
        return intentFilter;
+   }
+
+
+   public  interface BluetoothConnectionStateInterface{
+       void disConnected(); //蓝牙断开
+       void disNetConnected(); //网络连接断开
+       void netConnected(); //网络连接
    }
 
 }

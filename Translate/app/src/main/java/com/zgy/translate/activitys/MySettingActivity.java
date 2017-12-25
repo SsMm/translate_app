@@ -48,4 +48,18 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     }
 
 
+    @Override
+    public void disConnected() {
+
+    }
+
+    @Override
+    public void disNetConnected() {
+
+    }
+
+    @Override
+    public void netConnected() {
+
+    }
 }

@@ -9,8 +9,8 @@
 
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/dimen_30"
+        android:layout_height="@dimen/dimen_30"
         android:layout_marginStart="@dimen/margin_10"
         android:src="@drawable/error" />
 
@@ -20,6 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_10"
         android:textSize="@dimen/text_16"
-        android:textColor="@color/colorBlack" />
+        android:textColor="@color/colorBlack"
+        android:text="网络连接异常"/>
 
 </LinearLayout>

@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -82,16 +83,22 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private static final String UTTERANCE_ID = "appolo";
     private static boolean FROM_PHONE_MIC = true; //默认从手机麦克风出
+    private static final String DISCONNECTED = "dis"; //蓝牙断开连接
+    private static final String NO_FIND_DEVICE = "no_find"; //蓝牙没有连接设备
+    private static final String NO_REQUEST_DEVICE = "no_requ"; //不是要求设备
+    private static final String CONNECTED = "coned"; //连接成功
 
     @BindView(R.id.avt_tv_tranLeft) TextView tv_tranLeft; //翻译左语言
     @BindView(R.id.avt_tv_tranRight) TextView tv_tranRight; //翻译右语言
     @BindView(R.id.avt_rv_tranContent) RecyclerView rv_tran; //显示翻译内容
-    @BindView(R.id.avt_iv_voice) ImageView iv_phoneVoic; //从手机入显示，耳机入隐藏
+    @BindView(R.id.avt_iv_voice) ImageView iv_phoneVoic; //手机录音显示
     @BindView(R.id.avt_ll_showConState) LinearLayout ll_showConState; //连接状态
     @BindView(R.id.avt_iv_showCon_icon) ImageView iv_showConIcon;
     @BindView(R.id.avt_tv_showConText) TextView tv_showConText;
-    @BindView(R.id.avt_unableCon) LinearLayout ll_unableConn; //无网络
+    @BindView(R.id.avt_vs_netCon) ViewStub vs_unableConn; //无网络
     @BindView(R.id.avt_wlv) WaveLineView waveLineView;
+    @BindView(R.id.avt_ll_noFindDevice) LinearLayout ll_noFindDevice; //没有找到蓝牙设备
+    @BindView(R.id.avt_tv_noFindDeviceText) TextView tv_noFindDeviceText; //
 
 
     private EventManager mAsr; //识别
@@ -140,6 +147,22 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     }
 
+    @Override
+    public void disConnected() {
+        //ConfigUtil.showToask(this, GlobalConstants.STATE_DISCONNECTED);
+        deviceConState(DISCONNECTED);
+    }
+
+    @Override
+    public void disNetConnected() {
+        checkNetState(false);
+    }
+
+    @Override
+    public void netConnected() {
+        checkNetState(true);
+    }
+
     /**初始化*/
     private void baseInit(){
         if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
@@ -174,17 +197,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         rv_tran.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rv_tran.setAdapter(voiceTranslateAdapter);
 
-    }
-
-    private void checkNetState(){
-        if(!ConfigUtil.isNetWorkConnected(this)){
-            ll_showConState.setVisibility(View.VISIBLE);
-            ll_unableConn.setVisibility(View.VISIBLE);
-            iv_showConIcon.setVisibility(View.GONE);
-            tv_showConText.setVisibility(View.GONE);
-        }else{
-            ll_showConState.setVisibility(View.GONE);
-        }
     }
 
     /**初始化语音识别*/
@@ -528,44 +540,24 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void noProfile() {
-        ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");
+        //ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");
+        //deviceConState(NO_FIND_DEVICE);
     }
 
     @Override
     public void noRequest() {
-        ConfigUtil.showToask(this, "连接蓝牙不是本公司产品，请重新连接");
+        //ConfigUtil.showToask(this, "连接蓝牙不是本公司产品，请重新连接");
+        deviceConState(NO_REQUEST_DEVICE);
     }
 
     @Override
     public void conState(boolean state) {
+        deviceConState(CONNECTED);
         if(state){
             showConState(true);
         }else{
             ConfigUtil.showToask(this, "连接失败");
         }
-    }
-
-    private void showConState(boolean sta){
-        if(sta){
-            ll_showConState.setVisibility(View.VISIBLE);
-            ll_unableConn.setVisibility(View.GONE);
-            iv_showConIcon.setVisibility(View.VISIBLE);
-            tv_showConText.setVisibility(View.VISIBLE);
-            tv_showConText.setText("连接成功");
-        }
-        checkPoolState();
-        executorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ll_showConState.setVisibility(View.GONE);
-                    }
-                });
-            }
-        }, 2000, TimeUnit.MILLISECONDS);
-
     }
 
     @Override
@@ -738,6 +730,72 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         waveLineView.release();
         animationDrawable = null;
         mBluetoothAdapter = null;
+    }
+
+    /**网络连接状态*/
+    private void checkNetState(boolean state){
+        if(state){
+            vs_unableConn.setVisibility(View.GONE);
+        }else{
+            vs_unableConn.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**蓝牙设备连接情况*/
+    private void deviceConState(String state){
+        switch (state){
+            case DISCONNECTED:
+                ll_noFindDevice.setVisibility(View.VISIBLE);
+                showOrHide(true);
+                break;
+            case NO_FIND_DEVICE:
+                ll_noFindDevice.setVisibility(View.VISIBLE);
+                tv_noFindDeviceText.setText("请连接耳机，方能使用翻译功能");
+                showOrHide(true);
+                break;
+            case NO_REQUEST_DEVICE:
+                ll_noFindDevice.setVisibility(View.VISIBLE);
+                tv_noFindDeviceText.setText("连接蓝牙不是本公司产品，请重新连接");
+                showOrHide(true);
+                break;
+            case CONNECTED:
+                ll_noFindDevice.setVisibility(View.GONE);
+                showOrHide(false);
+                break;
+        }
+    }
+
+    private void showOrHide(boolean con){
+        if(con){
+            rv_tran.setVisibility(View.GONE);
+            iv_phoneVoic.setVisibility(View.GONE);
+        }else{
+            rv_tran.setVisibility(View.VISIBLE);
+            iv_phoneVoic.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void showConState(boolean sta){
+        if(sta){
+            ll_showConState.setVisibility(View.VISIBLE);
+            iv_showConIcon.setVisibility(View.VISIBLE);
+            tv_showConText.setVisibility(View.VISIBLE);
+            tv_showConText.setText("连接成功");
+
+            checkPoolState();
+            executorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ll_showConState.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            }, 2000, TimeUnit.MILLISECONDS);
+        }
+
     }
 
     @Override

@@ -55,6 +55,13 @@
             android:src="@mipmap/setting"/>
     </RelativeLayout>
 
+    <ViewStub
+        android:id="@+id/avt_vs_netCon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/common_unable_to_connect"
+        android:layout_below="@id/avt_rl"/>
+
     <LinearLayout
         android:id="@+id/avt_ll_showConState"
         android:layout_width="match_parent"
@@ -63,10 +70,6 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:visibility="gone">
-
-        <include
-            android:id="@+id/avt_unableCon"
-            layout="@layout/common_unable_to_connect"/>
 
         <ImageView
             android:id="@+id/avt_iv_showCon_icon"
@@ -106,6 +109,33 @@
         android:layout_centerInParent="true"
         wlv:wlvBackgroundColor="@android:color/transparent"
         wlv:wlvLineColor="@color/colorCommon"
-        wlv:wlvMoveSpeed="290"
-        />
+        wlv:wlvMoveSpeed="290"/>
+
+    <LinearLayout
+        android:id="@+id/avt_ll_noFindDevice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/no_find_device"/>
+
+        <TextView
+            android:id="@+id/avt_tv_noFindDeviceText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10"
+            android:lineSpacingExtra="@dimen/dimen_1"
+            android:gravity="center"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colorBlack"
+            android:text="@string/no_find_device_up"/>
+
+    </LinearLayout>
+
 </RelativeLayout>

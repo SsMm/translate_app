@@ -19,5 +19,7 @@
     <string name="often_question">常见问题</string>
     <string name="about">关于</string>
     <string name="exit">退出登录</string>
+    <string name="no_find_device_up">未找到授权的耳机设备\n请前往系统蓝牙设置里进行耳机配对</string>
+    <string name="no_find_device_down">请前往系统蓝牙设置里进行耳机配对</string>
 
 </resources>

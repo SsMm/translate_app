@@ -11,8 +11,13 @@ import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -25,7 +30,6 @@ import java.lang.ref.WeakReference;
 
 public class ConfigUtil {
 
-    private static Ringtone ringtone;
 
     /**
      * Toask
@@ -116,38 +120,6 @@ public class ConfigUtil {
     }
 
     /**
-     * 震动开关
-     * */
-    public static void openVibrate(Context context,long[] pattern){
-        Vibrator vibrator = (Vibrator) context.getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(pattern,-1);
-    }
-
-    /**
-     * 铃声开发
-     * */
-    public static Ringtone openRingTone(Context context, Uri uri){
-        if(ringtone == null){
-            ringtone = RingtoneManager.getRingtone(context.getApplicationContext(),uri);
-            if(ringtone == null){
-                throw new RuntimeException("没有手机铃声");
-            }
-        }
-        return ringtone;
-    }
-
-    /**
-     * 用户是否设置静音模式
-     * */
-    public static boolean isSilentMode(AudioManager audioManager){
-        if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    /**
      * 隐藏键盘
      * */
     public static void hideKeyboard(InputMethodManager inputMethodManager, Activity activity) {
@@ -156,6 +128,15 @@ public class ConfigUtil {
                 inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
         }
+    }
+
+    public static String phoneMsg(Context context){
+        String model = Build.MODEL;
+        String androidId = Settings.Secure.getString(context.getApplicationContext().getContentResolver()
+        , Settings.Secure.ANDROID_ID);
+
+        Log.i("shoujixinx", model + androidId);
+        return model + androidId;
     }
 
     /**

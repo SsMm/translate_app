@@ -15,6 +15,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.zgy.translate.domains.eventbuses.FinishRecorderEB;
+import com.zgy.translate.domains.eventbuses.MonitorRecordAmplitudeEB;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -43,6 +44,9 @@ public class AudioRecordUtil {
 
     private static FileInputStream fileInputStream;
     private static FileOutputStream fileOutputStream;
+
+    private static BufferedOutputStream bufferedOutputStream = null;
+    private static BufferedInputStream bufferedInputStream = null;
 
     private static byte[] mBuffer = new byte[BUFFER_SIZE];
 
@@ -168,7 +172,6 @@ public class AudioRecordUtil {
         mAudioRecord = new AudioRecord(audioSource,
                 sampleRate, channelConfig, audioFormat, Math.max(minBufferSize, BUFFER_SIZE));
 
-        BufferedOutputStream bufferedOutputStream = null;
 
         try {
             mAudioRecord.startRecording();
@@ -185,26 +188,24 @@ public class AudioRecordUtil {
                     return;
                 }
                 long v = 0;
-                for(int i = 0 ; i <mBuffer.length ; i++){
+                /*for(int i = 0 ; i <mBuffer.length ; i++){
                     v += mBuffer[i] * mBuffer[i];
+                }*/
+                for (byte mb : mBuffer){
+                    v += mb * mb;
                 }
                 double mean = v / read;
                 double volume = 10 * Math.log10(mean);
                 int vol = (int) volume;
+                MonitorRecordAmplitudeEB amplitudeEB = new MonitorRecordAmplitudeEB();
+                amplitudeEB.setLevel(vol);
+                EventBus.getDefault().post(amplitudeEB);
                 Log.i("volume", vol +"");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            if(bufferedOutputStream != null){
-                try {
-                    bufferedOutputStream.flush();
-                    bufferedOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
             stopRecord();
         }
     }
@@ -220,6 +221,15 @@ public class AudioRecordUtil {
             try {
                 fileOutputStream.close();
                 fileOutputStream = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(bufferedOutputStream != null){
+            try {
+                bufferedOutputStream.flush();
+                bufferedOutputStream.close();
+                bufferedOutputStream = null;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -373,23 +383,6 @@ public class AudioRecordUtil {
         }
     }
 
-    private static void stopTrack(){
-        if(mAudioTrack != null){
-            mAudioTrack.stop();
-            mAudioTrack.release();
-            mAudioTrack = null;
-        }
-        if(fileInputStream != null){
-            try {
-                fileInputStream.close();
-                fileInputStream = null;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        checkPoolState();
-    }
-
     private static void doPlay2(File pathFile){
 
         mBuffer = new byte[BUFFER_SIZE];
@@ -407,8 +400,6 @@ public class AudioRecordUtil {
         mAudioTrack = new AudioTrack(streamType, sampleRate, channelConfig, audioFormat,
                 Math.max(minBufferSize, BUFFER_SIZE), mode);
 
-        BufferedInputStream bufferedInputStream = null;
-
         try {
 
             bufferedInputStream = new BufferedInputStream(new FileInputStream(pathFile));
@@ -424,16 +415,35 @@ public class AudioRecordUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            try {
-                if(bufferedInputStream != null){
-                    bufferedInputStream.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             stopTrack();
         }
 
+    }
+
+    public static void stopTrack(){
+        if(mAudioTrack != null){
+            mAudioTrack.stop();
+            mAudioTrack.release();
+            mAudioTrack = null;
+        }
+        if(fileInputStream != null){
+            try {
+                fileInputStream.close();
+                fileInputStream = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            if(bufferedInputStream != null){
+                bufferedInputStream.close();
+                bufferedInputStream = null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        checkPoolState();
     }
 
     /**
@@ -477,8 +487,6 @@ public class AudioRecordUtil {
         mAudioTrack = new AudioTrack(streamType, sampleRate, channelConfig, audioFormat,
                 Math.max(minBufferSize, BUFFER_SIZE), mode);
 
-        BufferedInputStream bufferedInputStream = null;
-
         try {
 
             bufferedInputStream = new BufferedInputStream(new FileInputStream(pathFile));
@@ -494,22 +502,23 @@ public class AudioRecordUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            try {
-                if(bufferedInputStream != null){
-                    bufferedInputStream.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             stopCallPlay();
         }
     }
 
-    private static void stopCallPlay(){
+    public static void stopCallPlay(){
         if(mAudioTrack != null){
             mAudioTrack.stop();
             mAudioTrack.release();
             mAudioTrack = null;
+        }
+        try {
+            if(bufferedInputStream != null){
+                bufferedInputStream.close();
+                bufferedInputStream = null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         checkPoolState();
     }

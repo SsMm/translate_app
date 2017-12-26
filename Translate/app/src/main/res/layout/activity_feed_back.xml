@@ -9,11 +9,11 @@
     android:orientation="vertical">
 
     <com.zgy.translate.widget.CommonBar
+        android:id="@+id/afb_cb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         bar:bar_title="意见反馈"
-        bar:show_left="true"
-        bar:left_icon="@mipmap/back"/>
+        bar:show_left="true"/>
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"

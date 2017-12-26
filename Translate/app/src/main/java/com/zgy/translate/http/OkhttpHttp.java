@@ -3,6 +3,7 @@ package com.zgy.translate.http;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 
 import com.zgy.translate.managers.CacheManager;
@@ -52,7 +53,7 @@ public class OkhttpHttp {
         HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
             @Override
             public void log(String message) {
-                //Log.i("message",message);
+                Log.i("message",message);
             }
         });
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -61,23 +62,23 @@ public class OkhttpHttp {
     }
 
     private static Interceptor getInterceptor(Context context){
-        if(interceptor == null){
-            interceptor = new Interceptor() {
-                @Override
-                public Response intercept(Chain chain) throws IOException {
-                    String token = "";
+            if(interceptor == null){
+                interceptor = new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        String token = "";
 
-                    Request request = chain.request();
-                    if(TextUtils.isEmpty(token)){
+                        Request request = chain.request();
+                    /*if(TextUtils.isEmpty(token)){
                         return chain.proceed(request);
+                    }*/
+                        Request finalRequest = request.newBuilder()
+                                .cacheControl(getCacheControl())
+                                .build();
+                        return chain.proceed(finalRequest);
                     }
-                    Request finalRequest = request.newBuilder()
-                            .cacheControl(getCacheControl())
-                            .build();
-                    return chain.proceed(finalRequest);
-                }
-            };
-        }
+                };
+            }
 
         return interceptor;
     }

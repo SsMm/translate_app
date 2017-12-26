@@ -9,6 +9,7 @@
     android:orientation="vertical">
 
     <com.zgy.translate.widget.CommonBar
+        android:id="@+id/afp_cb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         bar:bar_title="修改密码"

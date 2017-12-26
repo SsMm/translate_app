@@ -6,14 +6,6 @@ package com.zgy.translate.base;
 
 public class BaseResponseObject {
 
-    public final static String SUCCESS = "0x00001"; //处理成功
-    public final static String FAILURE = "0x00002"; //处理失败
-    public final static String OFFLINE = "0x00004"; //强制下线
-    public final static String LOGIN_OUT = "0x00005"; //退出登录
-    public final static String TOKEN_ERROR = "0x00006"; //登陆的token错误
-    public final static String PARAM_ERROR = "0x00007"; //参数错误
-
-
 
     private String result;
     private String errorInfo;

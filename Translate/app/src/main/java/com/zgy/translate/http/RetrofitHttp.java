@@ -16,10 +16,9 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class RetrofitHttp {
 
-    //public static final String IP = "101.201.209.61:8080";//
-    public static final String IP = "182.92.111.7";
-    //public static final String IP = "192.168.2.137";
-    private static final String Http = "http://"+IP+"/";
+
+    public static final String IP = "api.toppers.com.cn";
+    private static final String Http = "https://"+IP+"/";
     private static Retrofit retrofit;
 
 

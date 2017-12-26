@@ -9,11 +9,11 @@
     android:orientation="vertical">
 
     <com.zgy.translate.widget.CommonBar
+        android:id="@+id/ap_cb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:bar_title="个性签名"
-        app:show_left="true"
-        app:left_icon="@mipmap/back"/>
+        app:show_left="true"/>
 
     <EditText
         android:layout_width="match_parent"

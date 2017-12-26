@@ -5,10 +5,18 @@ import android.os.Bundle;
 
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.utils.ConfigUtil;
+import com.zgy.translate.utils.RedirectUtil;
+import com.zgy.translate.widget.CommonBar;
+import com.zgy.translate.widget.CommonBar.CommonBarInterface;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class AboutActivity extends BaseActivity {
+public class AboutActivity extends BaseActivity implements CommonBarInterface{
+
+    @BindView(R.id.aa_cb) CommonBar commonBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +33,7 @@ public class AboutActivity extends BaseActivity {
 
     @Override
     public void initEvent() {
-
+        commonBar.setBarInterface(this);
     }
 
     @Override
@@ -47,4 +55,23 @@ public class AboutActivity extends BaseActivity {
     public void netConnected() {
 
     }
+
+    @Override
+    public void checkLeftIcon() {
+        finish();
+    }
+
+    @Override
+    public void checkRightIcon() {
+
+    }
+
+    @OnClick(R.id.aa_cn_update) void update(){
+        ConfigUtil.showToask(this, "没有最新版本");
+    }
+
+    @OnClick(R.id.aa_cn_feed) void feed(){
+        RedirectUtil.redirect(this, FeedBackActivity.class);
+    }
+
 }

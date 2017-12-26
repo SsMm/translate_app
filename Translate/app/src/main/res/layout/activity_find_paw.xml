@@ -12,8 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         bar:bar_title="修改密码"
-        bar:show_left="true"
-        bar:left_icon="@mipmap/back"/>
+        bar:show_left="true"/>
 
     <LinearLayout
         android:layout_width="match_parent"

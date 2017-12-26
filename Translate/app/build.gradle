@@ -15,12 +15,16 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        ndk {
+            //设置支持的SO库架构
+            abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86' , 'x86_64'
+        }
     }
 
-    lintOptions {
+    /*lintOptions {
         checkReleaseBuilds false
         abortOnError false
-    }
+    }*/
 
     // 签名配置
     signingConfigs {
@@ -66,6 +70,11 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+
+    dexOptions {
+        //javaMaxHeapSize "2g"
+        jumboMode = true
+    }
 }
 
 dependencies {
@@ -92,4 +101,5 @@ dependencies {
     compile 'com.android.support:design:26.0.0-alpha1'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.github.Jay-Goo:WaveLineView:v1.0.3'
+    compile project(path: ':lib_imagepicker')
 }

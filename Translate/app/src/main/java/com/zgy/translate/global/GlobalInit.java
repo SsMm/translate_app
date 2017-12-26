@@ -6,14 +6,18 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.util.Log;
 
+import com.imnjh.imagepicker.PickerConfig;
+import com.imnjh.imagepicker.SImagePicker;
 import com.meituan.android.walle.WalleChannelReader;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.zgy.translate.AppApplication;
+import com.zgy.translate.R;
 import com.zgy.translate.activitys.BluetoothDeviceManagerActivity;
 import com.zgy.translate.domains.dtos.BluetoothLeConnectionDTO;
 import com.zgy.translate.domains.dtos.BluetoothSocketDTO;
 import com.zgy.translate.services.BluetoothLeService;
+import com.zgy.translate.utils.GlideImageLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,15 +66,27 @@ public class GlobalInit {
     }
 
     private void baseInit(){
-        //initAndroidAudioConverter();
+        //initBuglyCrashReport();
+        initSImagePicker();
     }
 
     private void initBuglyCrashReport(){
         Beta.canNotifyUserRestart = true;
-        String channel = WalleChannelReader.getChannel(appContext);
-        Bugly.setAppChannel(appContext, channel);
+        //String channel = WalleChannelReader.getChannel(appContext);
+        //Bugly.setAppChannel(appContext, channel);
 
-        Bugly.init(appContext, "", isDebug);
+        Bugly.init(appContext, "ac5bd004b5", isDebug);
+    }
+
+    /**
+     * 初始化相册
+     * */
+    private void initSImagePicker(){
+        SImagePicker.init(new PickerConfig.Builder()
+                .setAppContext(appContext)
+                .setImageLoader(new GlideImageLoader())
+                .setToolbaseColor(R.color.colorCommon)
+                .build());
     }
 
     private void initAndroidAudioConverter(){
@@ -81,11 +97,6 @@ public class GlobalInit {
     private void bindBleService(){
 
     }
-
-
-
-
-
 
     public void onDestroy(){
         //unBindBleService();

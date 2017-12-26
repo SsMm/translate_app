@@ -10,24 +10,24 @@
     android:orientation="vertical">
 
     <com.zgy.translate.widget.CommonBar
+        android:id="@+id/aa_cb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         bar:bar_title="@string/about"
-        bar:show_left="true"
-        bar:left_icon="@mipmap/back"/>
+        bar:show_left="true"/>
 
     <com.zgy.translate.widget.CommonNav
+        android:id="@+id/aa_cn_update"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_20"
-        android:padding="@dimen/padding_10"
+        android:layout_marginTop="@dimen/margin_10"
         bar:nav_leftTitle="版本更新"/>
 
     <com.zgy.translate.widget.CommonNav
+        android:id="@+id/aa_cn_feed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_20"
-        android:padding="@dimen/padding_10"
+        android:layout_marginTop="@dimen/margin_10"
         bar:nav_leftTitle="意见反馈"/>
 
 </LinearLayout>

@@ -16,6 +16,7 @@
         bar:show_left="true"/>
 
     <RelativeLayout
+        android:id="@+id/amm_rl_headerIcoN"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_10"
@@ -63,6 +64,7 @@
             android:orientation="vertical">
 
             <com.zgy.translate.widget.CommonNav
+                android:id="@+id/amm_cn_goPer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 nav:nav_leftTitle="个性签名"
@@ -72,6 +74,7 @@
             <include layout="@layout/common_horizontal_line"/>
 
             <com.zgy.translate.widget.CommonNav
+                android:id="@+id/amm_cn_goName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 nav:nav_leftTitle="姓名"
@@ -81,6 +84,7 @@
             <include layout="@layout/common_horizontal_line"/>
 
             <com.zgy.translate.widget.CommonNav
+                android:id="@+id/amm_cn_goSex"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 nav:nav_leftTitle="性别"
@@ -90,6 +94,7 @@
             <include layout="@layout/common_horizontal_line"/>
 
             <com.zgy.translate.widget.CommonNav
+                android:id="@+id/amm_cn_goBir"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 nav:nav_leftTitle="生日"
@@ -99,13 +104,12 @@
             <include layout="@layout/common_horizontal_line"/>
 
             <com.zgy.translate.widget.CommonNav
+                android:id="@+id/amm_cn_goPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 nav:nav_leftTitle="手机号"
                 nav:nav_show_right="true"
                 nav:nav_rightTitle="112121212"/>
-
-
 
         </LinearLayout>
 

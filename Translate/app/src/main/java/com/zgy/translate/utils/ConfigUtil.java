@@ -18,6 +18,7 @@ import android.os.Environment;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -55,12 +56,17 @@ public class ConfigUtil {
     }
 
     /**alert*/
-    public static void showAlertDialog(Context context, String title, String message, final AlertDialogInterface dialogInterface){
+    public static void showAlertDialog(Context context, String title, String message, View view, final AlertDialogInterface dialogInterface){
         WeakReference<Context> weakReference = new WeakReference<Context>(context);
         AlertDialog.Builder builder = new AlertDialog.Builder(weakReference.get());
         WeakReference<AlertDialog.Builder> builderWeakReference = new WeakReference<AlertDialog.Builder>(builder);
         builderWeakReference.get().setTitle(title);
-        builderWeakReference.get().setMessage(message);
+        if(message != null){
+            builderWeakReference.get().setMessage(message);
+        }
+        if(view != null){
+            builderWeakReference.get().setView(view);
+        }
         builderWeakReference.get().setCancelable(false);
         builderWeakReference.get().setPositiveButton("确认", new DialogInterface.OnClickListener() {
             @Override

@@ -13,8 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         bar:bar_title="常见问题"
-        bar:show_left="true"
-        bar:left_icon="@mipmap/back"/>
+        bar:show_left="true"/>
 
    <android.support.v7.widget.RecyclerView
        android:id="@+id/aq_rv_questionList"

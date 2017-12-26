@@ -24,7 +24,7 @@ public class GlobalConstants {
     public static final String NULL_MSG = "信息不能为空";
     public static final String NULL_PHONE = "手机号不能为空";
 
-
+    public static final String PROVOIDER = "com.zgy.translate.fileProvider";
 
 
 }

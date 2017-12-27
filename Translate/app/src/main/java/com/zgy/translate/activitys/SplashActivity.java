@@ -75,7 +75,7 @@ public class SplashActivity extends BaseActivity{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if(!isLogin()){
+        if(isLogin()){
             if(mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()){ //连接已开
                 ConfigUtil.showToask(this, "请开启蓝牙，连接耳机！");
             }

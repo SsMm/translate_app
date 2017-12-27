@@ -265,9 +265,11 @@ public class AudioRecordUtil {
                     e.printStackTrace();
                 }
 
-                //audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
-                audioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);*/
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                //audioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
+                audioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);
+                ConfigUtil.showToask(context, "开始播放");
+                doPlay2(pathFile);*/
 
                 audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 audioManager.startBluetoothSco();//蓝牙录音的关键，启动SCO连接，耳机话筒才起作用

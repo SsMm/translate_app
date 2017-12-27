@@ -2,12 +2,15 @@ package com.zgy.translate.base;
 
 
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ProgressBar;
 
 import com.zgy.translate.controllers.ActivityController;
 import com.zgy.translate.managers.AppReceiverManager;
+import com.zgy.translate.utils.ConfigUtil;
 
 
 /**
@@ -19,11 +22,14 @@ public abstract class BaseActivity extends AppCompatActivity implements AppRecei
 
     private AppReceiverManager.BluetoothConnectionStateReceiver bluetoothConnectionStateReceiver; //蓝牙连接状态
 
+    public ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityController.addActivity(this);
         registerBluetoothConState();
+        progressDialog = ConfigUtil.showProDialog(this, "请求中...");
     }
 
     public void init(){
@@ -46,6 +52,7 @@ public abstract class BaseActivity extends AppCompatActivity implements AppRecei
         super.onPause();
 
     }
+
 
     /**注册广播接收蓝牙连接状态*/
     private void registerBluetoothConState(){

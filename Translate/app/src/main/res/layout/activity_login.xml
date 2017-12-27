@@ -65,7 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
-                android:inputType="text"
+                android:inputType="textPassword"
                 android:textSize="@dimen/text_16"
                 android:textColor="@color/colorBT"/>
         </LinearLayout>

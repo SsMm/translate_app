@@ -6,7 +6,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 
+import com.zgy.translate.domains.dtos.UserInfoDTO;
 import com.zgy.translate.managers.CacheManager;
+import com.zgy.translate.managers.UserMessageManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,12 +69,16 @@ public class OkhttpHttp {
                     @Override
                     public Response intercept(Chain chain) throws IOException {
                         String token = "";
-
+                        UserInfoDTO userInfoDTO = UserMessageManager.getUserInfo(context);
+                        if(userInfoDTO != null){
+                            token = userInfoDTO.getAppKey();
+                        }
                         Request request = chain.request();
-                    /*if(TextUtils.isEmpty(token)){
-                        return chain.proceed(request);
-                    }*/
+                        if(TextUtils.isEmpty(token)){
+                            return chain.proceed(request);
+                        }
                         Request finalRequest = request.newBuilder()
+                                .header("AppKey", token)
                                 .cacheControl(getCacheControl())
                                 .build();
                         return chain.proceed(finalRequest);

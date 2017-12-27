@@ -2,12 +2,21 @@ package com.zgy.translate.activitys;
 
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.controllers.RequestController;
+import com.zgy.translate.domains.dtos.UserInfoDTO;
+import com.zgy.translate.domains.response.CommonResponse;
+import com.zgy.translate.global.GlobalParams;
+import com.zgy.translate.managers.GlideImageManager;
+import com.zgy.translate.managers.GsonManager;
+import com.zgy.translate.managers.UserMessageManager;
 import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.widget.CommonBar;
 
@@ -17,13 +26,17 @@ import butterknife.OnClick;
 import cn.sharesdk.onekeyshare.OnekeyShare;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MySettingActivity extends BaseActivity implements CommonBar.CommonBarInterface, CompoundButton.OnCheckedChangeListener{
+public class MySettingActivity extends BaseActivity implements CommonBar.CommonBarInterface, CompoundButton.OnCheckedChangeListener,
+        RequestController.RequestCallInterface{
 
     @BindView(R.id.ams_cb) CommonBar commonBar;
     @BindView(R.id.ams_tv_name) TextView tv_name;
     @BindView(R.id.ams_tv_per) TextView tv_per;
     @BindView(R.id.ams_civ_headerIcon) CircleImageView civ_headerIcon;
     @BindView(R.id.ams_cb_choose) CheckBox cb_choose;
+
+    private RequestController requestController;
+    private boolean isExit = false;
 
 
     @Override
@@ -36,12 +49,23 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
 
     @Override
     public void initView() {
-
+        if(UserMessageManager.getUserInfo(this) != null){
+            GlobalParams.userInfoDTO = UserMessageManager.getUserInfo(this);
+            showUser(GlobalParams.userInfoDTO);
+        }else{
+            super.progressDialog.show();
+            requestController = RequestController.getInstance();
+            requestController.init(this)
+                    .addRequest(RequestController.GET_PROFILE, null)
+                    .addCallInterface(this)
+                    .build();
+        }
     }
 
     @Override
     public void initEvent() {
         commonBar.setBarInterface(this);
+        cb_choose.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -82,11 +106,16 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
         switch (compoundButton.getId()){
             case R.id.ams_cb_choose:
+                UserInfoDTO dto = UserMessageManager.getUserInfo(this);
                 if(cb_choose.isChecked()){
-
+                    dto.setMic(true);
                 }else{
-
+                    dto.setMic(false);
                 }
+                UserMessageManager.deleteUserInfo(this);
+                String re = GsonManager.getInstance().toJson(dto);
+                UserMessageManager.saveUserInfo(this, re);
+                break;
         }
     }
 
@@ -102,8 +131,14 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
         RedirectUtil.redirect(this, AboutActivity.class);
     }
 
-    @OnClick(R.id.ams_tv_exit) void exit(){
-
+    @OnClick(R.id.ams_tv_exit) void exi(){
+        isExit = true;
+        requestController = RequestController.getInstance();
+        super.progressDialog.show();
+        requestController.init(this)
+                .addRequest(RequestController.LOGOUT, null)
+                .addCallInterface(this)
+                .build();
     }
 
     /**一键分享*/
@@ -136,4 +171,69 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     }
 
 
+    @Override
+    public void success(CommonResponse response) {
+        super.progressDialog.dismiss();
+        if(isExit){
+            UserMessageManager.deleteUserInfo(this);
+            GlobalParams.userInfoDTO = null;
+            RedirectUtil.redirect(this, LoginActivity.class);
+            finish();
+            return;
+        }
+
+        if(response != null){
+            UserInfoDTO userInfoDTO = new UserInfoDTO();
+            userInfoDTO.setAppKey(response.getAppKey());
+            userInfoDTO.setBirthday(response.getBirthday());
+            userInfoDTO.setIcon(response.getIcon());
+            userInfoDTO.setName(response.getName());
+            userInfoDTO.setSignature(response.getSignature());
+            userInfoDTO.setSex(response.getSex());
+            userInfoDTO.setMic(true);
+            showUser(userInfoDTO);
+            GlobalParams.userInfoDTO = userInfoDTO;
+            String user = GsonManager.getInstance().toJson(userInfoDTO);
+            UserMessageManager.deleteUserInfo(this);
+            UserMessageManager.saveUserInfo(this, user);
+        }
+    }
+
+    @Override
+    public void error(CommonResponse response) {
+        super.progressDialog.dismiss();
+    }
+
+    @Override
+    public void fail(String error) {
+        super.progressDialog.dismiss();
+    }
+
+    private void showUser(UserInfoDTO dto){
+        if(dto.getName() != null){
+            tv_name.setText(dto.getName());
+        }else{
+            tv_name.setText("用户");
+        }
+        if(dto.getSignature() != null){
+            tv_per.setVisibility(View.VISIBLE);
+            tv_per.setText(dto.getSignature());
+        }else{
+            tv_per.setVisibility(View.GONE);
+        }
+        if(dto.getIcon() != null){
+            GlideImageManager.showURLDownloadImage(this, dto.getIcon(), civ_headerIcon);
+        }
+        if(dto.isMic()){
+            cb_choose.setChecked(true);
+        }else{
+            cb_choose.setChecked(false);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        requestController = null;
+    }
 }

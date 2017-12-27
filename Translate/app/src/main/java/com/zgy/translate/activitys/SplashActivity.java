@@ -94,7 +94,7 @@ public class SplashActivity extends BaseActivity{
 
     /**登录情况*/
     private boolean isLogin(){
-        UserInfoDTO userInfoDTO = UserMessageManager.quickGetUserInfo(this);
+        UserInfoDTO userInfoDTO = UserMessageManager.getUserInfo(this);
         if(userInfoDTO == null){
             return false;
         }

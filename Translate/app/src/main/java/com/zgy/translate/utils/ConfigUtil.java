@@ -136,12 +136,13 @@ public class ConfigUtil {
         }
     }
 
-    public static String phoneMsg(Context context){
-        String model = Build.MODEL;
-        String androidId = Settings.Secure.getString(context.getApplicationContext().getContentResolver()
-        , Settings.Secure.ANDROID_ID);
+    public static String phoneDevice(){
+        return Build.MODEL;
+    }
 
-        return model + androidId;
+    public static String phoneMsg(Context context){
+        return Settings.Secure.getString(context.getApplicationContext().getContentResolver()
+        , Settings.Secure.ANDROID_ID);
     }
 
     /**

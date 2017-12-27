@@ -16,6 +16,7 @@ public class UserMessageManager {
     private static final String USER_ID = "userId"; //当前用户idkey
 
     private static final String USER_INFO = "userInfo"; //用户信息key
+    public static final String USER_NAME = "appKey"; //用户保存表名
 
     private UserMessageManager(){}
 
@@ -41,15 +42,15 @@ public class UserMessageManager {
     /**
      * 保存用户信息
      * */
-    public static void saveUserInfo(Context context, String shareName, String data){
-        SharedPreferencesUtil.saveShare(context, USER_INFO, data, shareName);
+    public static void saveUserInfo(Context context, String data){
+        SharedPreferencesUtil.saveShare(context, USER_INFO, data, USER_NAME);
     }
 
     /**
      * 判断当前用户信息
      * */
-    public static boolean isUserInfo(Context context, String name){
-        String result = SharedPreferencesUtil.readShare(context, USER_INFO, name);
+    public static boolean isUserInfo(Context context){
+        String result = SharedPreferencesUtil.readShare(context, USER_INFO, USER_NAME);
         if(TextUtils.isEmpty(result)){
             return false;  //没有用户信息
         }else{
@@ -60,15 +61,15 @@ public class UserMessageManager {
     /**
      * 返回用户信息---字符串形式
      * */
-    public static String getUserInfoToString(Context context, String shareName){
-        return SharedPreferencesUtil.readShare(context, USER_INFO, shareName);
+    public static String getUserInfoToString(Context context){
+        return SharedPreferencesUtil.readShare(context, USER_INFO, USER_NAME);
     }
 
     /**
      * 返回用户信息---对象
      * */
-    public static UserInfoDTO getUserInfo(Context context, String shareName){
-        String result = SharedPreferencesUtil.readShare(context, USER_INFO, shareName);
+    public static UserInfoDTO getUserInfo(Context context){
+        String result = SharedPreferencesUtil.readShare(context, USER_INFO, USER_NAME);
         return GsonManager.getInstance().fromJson(result, UserInfoDTO.class);
     }
 
@@ -77,7 +78,7 @@ public class UserMessageManager {
      * */
     public static UserInfoDTO quickGetUserInfo(Context context){
         if(readLoginUser(context) != null){
-            return getUserInfo(context, readLoginUser(context));
+            return getUserInfo(context);
         }else{
             return null;
         }
@@ -86,8 +87,8 @@ public class UserMessageManager {
     /**
      * 删除用户信息
      * */
-    public static void deleteUserInfo(Context context,String shareName){
-        SharedPreferencesUtil.deleteShare(context,shareName,USER_INFO);
+    public static void deleteUserInfo(Context context){
+        SharedPreferencesUtil.deleteShare(context, USER_NAME, USER_INFO);
     }
 
     /**
@@ -95,7 +96,8 @@ public class UserMessageManager {
      * */
     public static void exitUser(Context context){
         ActivityController.finishActivity();
-        SharedPreferencesUtil.deleteShare(context, USER, USER_ID);
+        //SharedPreferencesUtil.deleteShare(context, USER, USER_ID);
+        deleteUserInfo(context);
     }
 
 }

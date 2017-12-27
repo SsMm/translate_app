@@ -2,11 +2,20 @@ package com.zgy.translate.activitys;
 
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.controllers.RequestController;
+import com.zgy.translate.domains.dtos.UserInfoDTO;
+import com.zgy.translate.domains.request.CommonRequest;
+import com.zgy.translate.domains.response.CommonResponse;
+import com.zgy.translate.global.GlobalInit;
+import com.zgy.translate.global.GlobalParams;
+import com.zgy.translate.managers.GsonManager;
+import com.zgy.translate.managers.UserMessageManager;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
@@ -15,10 +24,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class LoginActivity extends BaseActivity {
+public class LoginActivity extends BaseActivity implements RequestController.RequestCallInterface{
 
     @BindView(R.id.al_et_phoneNum) EditText et_phoneNum; //手机号
     @BindView(R.id.al_et_phonePaw) EditText et_phonePaw; //密码
+
+    private RequestController requestController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +41,7 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     public void initView() {
-
+        requestController = RequestController.getInstance();
     }
 
     @Override
@@ -64,7 +75,16 @@ public class LoginActivity extends BaseActivity {
         if(StringUtil.isEmpty(num) || StringUtil.isEmpty(paw)){
             ConfigUtil.showToask(this, "信息不能为空");
         }else{
-
+            CommonRequest request = new CommonRequest();
+            request.setPhone(num);
+            request.setPassword(paw);
+            request.setAppId("earbud_app");
+            request.setDevice(ConfigUtil.phoneDevice() + ConfigUtil.phoneMsg(this));
+            super.progressDialog.show();
+            requestController.init(this)
+                    .addRequest(RequestController.LOGIN, request)
+                    .addCallInterface(this)
+                    .build();
         }
 
     }
@@ -79,4 +99,44 @@ public class LoginActivity extends BaseActivity {
     }
 
 
+    @Override
+    public void success(CommonResponse response) {
+        super.progressDialog.dismiss();
+        if(response != null){
+            if(UserMessageManager.isUserInfo(this)){
+                UserMessageManager.deleteUserInfo(this);
+            }
+            UserInfoDTO userInfoDTO = new UserInfoDTO();
+            userInfoDTO.setAppKey(response.getAppKey());
+            userInfoDTO.setBirthday(response.getBirthday());
+            userInfoDTO.setIcon(response.getIcon());
+            userInfoDTO.setName(response.getName());
+            userInfoDTO.setSignature(response.getSignature());
+            userInfoDTO.setSex(response.getSex());
+            userInfoDTO.setMic(true);
+            GlobalParams.userInfoDTO = userInfoDTO;
+            String user = GsonManager.getInstance().toJson(userInfoDTO);
+            UserMessageManager.saveUserInfo(this, user);
+            RedirectUtil.redirect(this, VoiceTranslateActivity.class);
+            finish();
+        }
+    }
+
+    @Override
+    public void error(CommonResponse response) {
+        super.progressDialog.dismiss();
+    }
+
+    @Override
+    public void fail(String error) {
+        super.progressDialog.dismiss();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(requestController != null){
+            requestController = null;
+        }
+    }
 }

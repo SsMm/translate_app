@@ -95,6 +95,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
             isSend = true;
             request = new CommonRequest();
             request.setPhone(num);
+            super.progressDialog.show();
             requestController.init(this)
                     .addRequest(RequestController.SEND_CODE, request)
                     .addCallInterface(this).build();
@@ -124,6 +125,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
         request.setPhoneCode(code);
         request.setPassword(paw);
         request.setPasswrodRepeat(pawNext);
+        super.progressDialog.show();
         requestController.init(this)
                 .addRequest(RequestController.REGISTER, request)
                 .addCallInterface(this).build();
@@ -133,6 +135,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
 
     @Override
     public void success(CommonResponse response) {
+        super.progressDialog.dismiss();
         if(isSend){
             ConfigUtil.showToask(this, "发送成功");
             codeTime();
@@ -145,6 +148,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
 
     @Override
     public void error(CommonResponse response) {
+        super.progressDialog.dismiss();
        if(isSend){
            ConfigUtil.showToask(this, "发送失败");
        }
@@ -158,7 +162,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
 
     @Override
     public void fail(String error) {
-        ConfigUtil.showToask(this, error);
+        super.progressDialog.dismiss();
     }
 
 
@@ -182,6 +186,9 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(requestController != null){
+            requestController = null;
+        }
     }
 
 

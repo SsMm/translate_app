@@ -12,6 +12,7 @@ import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
@@ -38,7 +39,11 @@ public interface ApiServiceInterface {
 
     @FormUrlEncoded
     @POST(USERS + "/logout")
-    Call<CommonResponse> logout(@FieldMap Map<String, String> request);
+    Call<CommonResponse> logout();
+
+    @FormUrlEncoded
+    @GET(USERS + "/profile")
+    Call<CommonResponse> profil(); //获取用户信息
 
     @FormUrlEncoded
     @POST(USERS + "/profile")

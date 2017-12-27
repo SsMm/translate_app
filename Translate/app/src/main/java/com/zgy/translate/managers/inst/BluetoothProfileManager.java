@@ -16,8 +16,10 @@ import com.zgy.translate.MainActivity;
 import com.zgy.translate.adapters.BluetoothBondedDeviceAdapter;
 import com.zgy.translate.domains.dtos.BluetoothLeConnectionDTO;
 import com.zgy.translate.domains.dtos.BluetoothSocketDTO;
+import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.global.GlobalGattAttributes;
 import com.zgy.translate.global.GlobalInit;
+import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.managers.inst.inter.BluetoothProfileManagerInterface;
 import com.zgy.translate.utils.BluetoothRecorder;
 import com.zgy.translate.utils.ConfigUtil;
@@ -134,7 +136,7 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
                 mBluetoothA2dp = (BluetoothA2dp) proxy;
                 for (BluetoothDevice device : mBluetoothA2dp.getConnectedDevices()){
                     Log.i("mBluetoothA2dp", device.getName() + device.getAddress());
-                    if(device.getUuids() != null){
+                    /*if(device.getUuids() != null){
                         for (ParcelUuid uuid : device.getUuids()){
                             Log.i("mBluetoothA2dp--uuid", uuid.toString());
                             if(GlobalGattAttributes.DEVICE_SERVICE.equals(uuid.toString())){
@@ -142,6 +144,10 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
                                 break;
                             }
                         }
+                    }*/
+                    if(GlobalConstants.BLUETOOTH_A2DP.equals(device.getName())){
+                        fl = true;
+                        break;
                     }
                 }
                 if(fl){

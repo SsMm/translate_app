@@ -6,8 +6,8 @@
 
     <ImageView
         android:id="@+id/itb_iv_vo"
-        android:layout_width="@dimen/dimen_50"
-        android:layout_height="@dimen/dimen_50"
+        android:layout_width="@dimen/dimen_35"
+        android:layout_height="@dimen/dimen_35"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:src="@mipmap/bluetooth"/>

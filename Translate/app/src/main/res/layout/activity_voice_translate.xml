@@ -55,37 +55,6 @@
             android:src="@mipmap/setting"/>
     </RelativeLayout>
 
-    <ViewStub
-        android:id="@+id/avt_vs_netCon"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout="@layout/common_unable_to_connect"
-        android:layout_below="@id/avt_rl"/>
-
-    <LinearLayout
-        android:id="@+id/avt_ll_showConState"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/avt_rl"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:visibility="gone">
-
-        <ImageView
-            android:id="@+id/avt_iv_showCon_icon"
-            android:layout_width="@dimen/dimen_25"
-            android:layout_height="@dimen/dimen_25"
-            android:src="@mipmap/connect_suc"/>
-
-        <TextView
-            android:id="@+id/avt_tv_showConText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_5"
-            android:textSize="@dimen/text_14"
-            android:textColor="@color/colorBlack" />
-    </LinearLayout>
-
     <ImageView
         android:id="@+id/avt_iv_voice"
         android:layout_width="wrap_content"
@@ -94,13 +63,48 @@
         android:layout_centerHorizontal="true"
         android:src="@drawable/tran_voice"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/avt_rv_tranContent"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/avt_ll_showConState"
+        android:orientation="vertical"
+        android:layout_below="@id/avt_rl"
         android:layout_above="@id/avt_iv_voice">
-    </android.support.v7.widget.RecyclerView>
+
+        <ViewStub
+            android:id="@+id/avt_vs_netCon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout="@layout/common_unable_to_connect"/>
+
+        <LinearLayout
+            android:id="@+id/avt_ll_showConState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/avt_iv_showCon_icon"
+                android:layout_width="@dimen/dimen_25"
+                android:layout_height="@dimen/dimen_25"
+                android:src="@mipmap/connect_suc"/>
+
+            <TextView
+                android:id="@+id/avt_tv_showConText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5"
+                android:textSize="@dimen/text_14"
+                android:textColor="@color/colorBlack" />
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/avt_rv_tranContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </android.support.v7.widget.RecyclerView>
+    </LinearLayout>
 
     <jaygoo.widget.wlv.WaveLineView
         android:id="@+id/avt_wlv"

@@ -33,6 +33,7 @@ import com.zgy.translate.adapters.VoiceTranslateAdapter;
 import com.zgy.translate.adapters.interfaces.VoiceTranslateAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.domains.RecogResult;
+import com.zgy.translate.domains.dtos.UserInfoDTO;
 import com.zgy.translate.domains.dtos.VoiceTransDTO;
 import com.zgy.translate.domains.eventbuses.FinishRecorderEB;
 import com.zgy.translate.domains.eventbuses.MonitorRecordAmplitudeEB;
@@ -43,6 +44,7 @@ import com.zgy.translate.global.GlobalKey;
 import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.http.HttpGet;
 import com.zgy.translate.managers.CacheManager;
+import com.zgy.translate.managers.UserMessageManager;
 import com.zgy.translate.managers.inst.CreateGattManager;
 import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.inst.inter.CreateGattManagerInterface;
@@ -219,7 +221,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     protected void onResume() {
         super.onResume();
         waveLineView.onResume();
+        waveLineView.setVisibility(View.GONE);
         //获取用户手机输出位置
+        UserInfoDTO userInfoDTO = UserMessageManager.getUserInfo(this);
 
         if(true){ //默认从手机麦克风出
             FROM_PHONE_MIC = true;
@@ -241,18 +245,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void onEvent(String name, String params, byte[] bytes, int offset, int length) {
         switch (name){
             case SpeechConstant.CALLBACK_EVENT_ASR_READY: // 引擎准备就绪，可以开始说话
-                if(isPhone){
-                    ConfigUtil.showToask(this, "开始讲话。。。");
-                }
+                ConfigUtil.showToask(this, "开始讲话。。。");
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_BEGIN: // 检测到用户的已经开始说话
-                Log.i("speech--BEGIN", "开始说话");
+                //ConfigUtil.showToask(this, "开始讲话");
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_END: // 检测到用户的已经停止说话
-                if(!isPhone){
-                    stopSpeech();
-                    ConfigUtil.showToask(this, "停止说话");
-                }
+                ConfigUtil.showToask(this, "停止说话");
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL: // 临时识别结果, 长语音模式需要从此消息中取出结果
                 RecogResult recogResult = RecogResult.parseJson(params);
@@ -267,7 +266,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_FINISH: // 识别结束， 最终识别结果或可能的错误
-                if(!isPhone){
+                /*if(!isPhone){
                     Log.i("FINISH后录音结果", inputResult);
                     if(!StringUtil.isEmpty(inputResult)){
                         speechToTransAndSynt(inputResult);
@@ -275,7 +274,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     }else{
                         ConfigUtil.showToask(this, "没有检测到输入，请重新输入");
                     }
-                }
+                }*/
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_LONG_SPEECH:
                 Log.i("长语音结束", "长语音结束");
@@ -410,6 +409,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(!isPhone){
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
+                mAudioManager.setMode(AudioManager.STREAM_MUSIC);
+                //mAudioManager.setMicrophoneMute(false);
+                mAudioManager.setSpeakerphoneOn(true);
                 mSpeechSynthesizer.speak(dst);
                 if(animationDrawable != null){
                     animationDrawable.stop();
@@ -417,11 +419,17 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 showPlayAni(currPlayImage);
             }else{
                 //从听筒出
-                mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+                mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+                mAudioManager.setSpeakerphoneOn(false);
+                mSpeechSynthesizer.speak(dst);
+                //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
             }
         }else{
             //手机入，耳机出
-            mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+            //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+            mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
+            mAudioManager.setSpeakerphoneOn(false);
+            mSpeechSynthesizer.speak(dst);
         }
     }
 
@@ -436,6 +444,15 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void playFinish(FinishRecorderEB eb){
+        if(currPlayImage != null){
+            currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
+        }
+        if(animationDrawable != null && animationDrawable.isRunning()){
+            animationDrawable.stop();
+        }
+    }
+
+    private void stopAni(){
         if(currPlayImage != null){
             currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
         }
@@ -484,10 +501,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             close();
             if(!isPhone && !FROM_PHONE_MIC){
                 //从手机听筒出
-                AudioRecordUtil.startPlayFromCall(this, mediaRecorderPath, mAudioManager);
-            }
-            if(isPhone){
-                //AudioRecordUtil.startTrack(this, mediaRecorderPath, mAudioManager);
                 AudioRecordUtil.startPlayFromCall(this, mediaRecorderPath, mAudioManager);
             }
         }
@@ -549,7 +562,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void noProfile() {
         //ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");
-        //deviceConState(NO_FIND_DEVICE);
+        deviceConState(NO_FIND_DEVICE);
     }
 
     @Override
@@ -576,8 +589,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             isSpeech = true;
             waveLineView.setVisibility(View.VISIBLE);
             waveLineView.startAnim();
-            mediaRecorderPath = getPathFile(false);
-            AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
+            if(isLeftLangCN){
+                toCNSpeech(true);
+            }else{
+                toENSpeech(true);
+            }
         }else if(order.contains("c")){
             //停止
             if(!isSpeech){
@@ -586,13 +602,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             isSpeech = false;
             waveLineView.stopAnim();
             waveLineView.setVisibility(View.GONE);
-            AudioRecordUtil.stopRecord();
             Log.i("ccc", "cccc");
-            if(isLeftLangCN){
-                toCNSpeech(false);
-            }else{
-                toENSpeech(false);
-            }
+            stopSpeech();
         }else if(order.contains("w")){
             Log.i("wwww", "wwww");
         }
@@ -810,7 +821,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         }
                     });
                 }
-            }, 2000, TimeUnit.MILLISECONDS);
+            }, 5000, TimeUnit.MILLISECONDS);
         }
 
     }

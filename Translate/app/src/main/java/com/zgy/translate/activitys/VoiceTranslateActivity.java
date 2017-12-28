@@ -87,9 +87,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private static final String UTTERANCE_ID = "appolo";
     private static boolean FROM_PHONE_MIC = true; //默认从手机麦克风出
     private static final String DISCONNECTED = "dis"; //蓝牙断开连接
+    private static final String A2DP_CONNECTED = "a2dp_con"; //蓝牙连接成功
     private static final String NO_FIND_DEVICE = "no_find"; //蓝牙没有连接设备
     private static final String NO_REQUEST_DEVICE = "no_requ"; //不是要求设备
-    private static final String CONNECTED = "coned"; //连接成功
+    private static final String CONNECTED = "coned"; //ble连接成功
 
     @BindView(R.id.avt_tv_tranLeft) TextView tv_tranLeft; //翻译左语言
     @BindView(R.id.avt_tv_tranRight) TextView tv_tranRight; //翻译右语言
@@ -153,13 +154,15 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void disConnected() {
-        //ConfigUtil.showToask(this, GlobalConstants.STATE_DISCONNECTED);
+        //耳机蓝牙断开连接
         deviceConState(DISCONNECTED);
     }
 
     @Override
     public void connected() {
-        createGattManager.setParams(mBluetoothAdapter).init();
+        //耳机蓝牙连接成功
+        deviceConState(A2DP_CONNECTED);
+        createGattManager.nextGetProfile();
     }
 
     @Override
@@ -198,7 +201,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
         //与gatt建立联系
         createGattManager = new CreateGattManager(this, this);
-
+        createGattManager.setParams(mBluetoothAdapter).init();
 
         voiceTransDTOList = new ArrayList<>();
         voiceTranslateAdapter = new VoiceTranslateAdapter(this, voiceTransDTOList, this);
@@ -228,10 +231,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onResume() {
         super.onResume();
-        createGattManager.setParams(mBluetoothAdapter).init();
         waveLineView.onResume();
-        waveLineView.setVisibility(View.VISIBLE);
-        waveLineView.setVisibility(View.GONE);
         //获取用户手机输出位置
         UserInfoDTO userInfoDTO;
         if(GlobalParams.userInfoDTO != null){
@@ -745,6 +745,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         waveLineView.release();
         animationDrawable = null;
         mBluetoothAdapter = null;
+        currPlayImage = null;
     }
 
     /**
@@ -765,7 +766,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         switch (state){
             case DISCONNECTED:
                 ll_noFindDevice.setVisibility(View.VISIBLE);
+                tv_noFindDeviceText.setText("请连接耳机，方能使用翻译功能");
                 showOrHide(true);
+                break;
+            case A2DP_CONNECTED:
+                ll_noFindDevice.setVisibility(View.GONE);
+                showOrHide(false);
                 break;
             case NO_FIND_DEVICE:
                 ll_noFindDevice.setVisibility(View.VISIBLE);
@@ -800,7 +806,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             iv_showConIcon.setVisibility(View.VISIBLE);
             tv_showConText.setVisibility(View.VISIBLE);
             tv_showConText.setText("连接成功");
-
+            ConfigUtil.showToask(this, "连接成功");
             checkPoolState();
             executorService.schedule(new Runnable() {
                 @Override
@@ -812,7 +818,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         }
                     });
                 }
-            }, 5000, TimeUnit.MILLISECONDS);
+            }, 10000, TimeUnit.MILLISECONDS);
         }
 
     }

@@ -116,7 +116,8 @@ public class RevisePhoneActivity extends BaseActivity implements CommonBar.Commo
         request.setPhoneCode(code);
         RequestController.getInstance().init(this)
                 .addRequest(RequestController.CHANGE_PHONE, request)
-                .addCallInterface(this);
+                .addCallInterface(this)
+                .build();
     }
 
     @Override

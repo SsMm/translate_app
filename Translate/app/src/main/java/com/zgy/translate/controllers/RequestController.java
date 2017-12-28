@@ -154,7 +154,7 @@ public class RequestController {
                callResponse = apiServiceInterface.reset_password(requestMap);
                break;
            case CHANGE_ICON:
-               RequestBody body = RequestBody.create(MediaType.parse("multipart/form-data"), request.getFile());
+               RequestBody body = RequestBody.create(MediaType.parse("image/jpg"), request.getFile());
                MultipartBody.Part part = MultipartBody.Part.createFormData("file", request.getFile().getName(), body);
                callResponse = apiServiceInterface.change_icon(part);
                break;

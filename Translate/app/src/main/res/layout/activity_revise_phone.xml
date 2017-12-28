@@ -55,7 +55,7 @@
             android:padding="@dimen/padding_10">
 
             <TextView
-                android:id="@+id/ar_tv_code"
+                android:id="@+id/arp_tv_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -80,8 +80,8 @@
                 android:id="@+id/arp_et_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/ar_tv_code"
-                android:layout_toStartOf="@id/ar_tv_sendCode"
+                android:layout_toEndOf="@id/arp_tv_code"
+                android:layout_toStartOf="@id/arp_tv_sendCode"
                 android:layout_centerVertical="true"
                 android:background="@null"
                 android:inputType="text"

@@ -285,6 +285,7 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
         super.progressDialog.dismiss();
         if(response != null) {
             if(isIcon){
+                isIcon = false;
                 UserInfoDTO userInfoDTO = UserMessageManager.getUserInfo(this);
                 userInfoDTO.setIcon(response.getIcon());
                 GlobalParams.userInfoDTO = userInfoDTO;

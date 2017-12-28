@@ -3,14 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@color/colorOrange"
+    android:background="#fcebeb"
     android:gravity="center_vertical"
     android:padding="@dimen/padding_10">
 
 
     <ImageView
-        android:layout_width="@dimen/dimen_30"
-        android:layout_height="@dimen/dimen_30"
+        android:layout_width="@dimen/dimen_20"
+        android:layout_height="@dimen/dimen_20"
         android:layout_marginStart="@dimen/margin_10"
         android:src="@drawable/error" />
 
@@ -21,6 +21,6 @@
         android:layout_marginStart="@dimen/margin_10"
         android:textSize="@dimen/text_16"
         android:textColor="@color/colorBlack"
-        android:text="网络连接异常"/>
+        android:text="网络连接不可用"/>
 
 </LinearLayout>

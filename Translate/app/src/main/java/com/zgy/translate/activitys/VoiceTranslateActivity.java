@@ -128,6 +128,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private volatile ImageView currPlayImage;
 
     private volatile boolean isClick = false; //false是录完音自动播放，true是点击在此播放
+    private boolean isNet = true; //网络连接情况
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,11 +164,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void disNetConnected() {
+        isNet = false;
         checkNetState(false);
     }
 
     @Override
     public void netConnected() {
+        isNet = true;
         checkNetState(true);
     }
 
@@ -565,6 +568,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void gattOrder(String order) {
+        if(!isNet){
+            ConfigUtil.showToask(this, "网络异常，功能无法使用");
+            return;
+        }
         if(order.contains("o")){
             Log.i("oooo", "oooo"); //启动
             isPhone = false;
@@ -595,6 +602,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * 开始录音
      * */
     @OnClick(R.id.avt_iv_voice) void startInput(){
+        if(!isNet){
+            ConfigUtil.showToask(this, "网络异常，功能无法使用");
+            return;
+        }
         //从手机入
         isPhone = true;
         if(!isSpeech){
@@ -736,7 +747,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         mBluetoothAdapter = null;
     }
 
-    /**网络连接状态*/
+    /**
+     * 网络连接状态
+     * */
     private void checkNetState(boolean state){
         if(state){
             vs_unableConn.setVisibility(View.GONE);
@@ -745,7 +758,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
     }
 
-    /**蓝牙设备连接情况*/
+    /**
+     * 蓝牙设备连接情况
+     * */
     private void deviceConState(String state){
         switch (state){
             case DISCONNECTED:

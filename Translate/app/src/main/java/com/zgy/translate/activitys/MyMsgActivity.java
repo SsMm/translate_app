@@ -123,6 +123,15 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(GlobalParams.userInfoDTO == null){
+            GlobalParams.userInfoDTO = UserMessageManager.getUserInfo(this);
+        }
+        showMsg(GlobalParams.userInfoDTO);
+    }
+
     private void baseInit(){
         imageInst = new ImageInst();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
@@ -137,11 +146,6 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
         }, "1970-01-01 00:00", nowDate);
         customDatePicker.showSpecificTime(false);
         customDatePicker.setIsLoop(true);
-        if(GlobalParams.userInfoDTO != null){
-            showMsg(GlobalParams.userInfoDTO);
-        }else{
-            showMsg(UserMessageManager.getUserInfo(this));
-        }
     }
 
     /**更换头像*/

@@ -48,10 +48,6 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
 
     @Override
     public void initView() {
-        if(GlobalParams.userInfoDTO == null){
-            GlobalParams.userInfoDTO = UserMessageManager.getUserInfo(this);
-        }
-        showUser(GlobalParams.userInfoDTO);
     }
 
     @Override
@@ -88,6 +84,15 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     @Override
     public void netConnected() {
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(GlobalParams.userInfoDTO == null){
+            GlobalParams.userInfoDTO = UserMessageManager.getUserInfo(this);
+        }
+        showUser(GlobalParams.userInfoDTO);
     }
 
     @OnClick(R.id.ams_rl_baseMsg) void msg(){

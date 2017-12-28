@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.zgy.translate.managers.NullOnEmptyConverterFactory;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -31,6 +32,7 @@ public class RetrofitHttp {
                     Gson gson = new GsonBuilder().setLenient().create();
                     retrofit = new Retrofit.Builder()
                             .baseUrl(Http)
+                            .addConverterFactory(new NullOnEmptyConverterFactory())
                             .addConverterFactory(GsonConverterFactory.create(gson))
                             .addConverterFactory(ScalarsConverterFactory.create())
                             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

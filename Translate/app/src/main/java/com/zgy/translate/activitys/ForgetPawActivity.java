@@ -26,7 +26,7 @@ import butterknife.OnClick;
 public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonBarInterface, RequestController.RequestCallInterface{
 
     @BindView(R.id.afpp_cb) CommonBar commonBar;
-    @BindView(R.id.afpp_tv_phone) TextView tv_phone;
+    @BindView(R.id.afpp_et_phone) EditText et_phone;
     @BindView(R.id.afpp_et_phoneCode) EditText et_code;
     @BindView(R.id.afpp_tv_sendCode) TextView tv_sendCode;
 
@@ -42,10 +42,6 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
 
     @Override
     public void initView() {
-        if(GlobalParams.userInfoDTO == null){
-            GlobalParams.userInfoDTO = UserMessageManager.getUserInfo(this);
-        }
-        tv_phone.setText(GlobalParams.userInfoDTO.getPhone());
     }
 
     @Override
@@ -84,14 +80,19 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
     }
 
     @OnClick(R.id.afpp_tv_sendCode) void sendCode(){
+        String phone = et_phone.getText().toString();
         if(isSend){
             ConfigUtil.showToask(this, GlobalConstants.SEND_CODE);
+            return;
+        }
+        if(StringUtil.isEmpty(phone)){
+            ConfigUtil.showToask(this, GlobalConstants.NULL_PHONE);
             return;
         }
         isSend = true;
         super.progressDialog.show();
         CommonRequest request = new CommonRequest();
-        request.setPhone(tv_phone.getText().toString());
+        request.setPhone(phone);
         RequestController.getInstance().init(this)
                 .addRequest(RequestController.SEND_PASSWORD_CODE, request)
                 .addCallInterface(this)
@@ -101,12 +102,14 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
 
     @OnClick(R.id.afpp_tv_next) void next(){
         String code = et_code.getText().toString();
-        if(StringUtil.isEmpty(code)){
+        String phone = et_phone.getText().toString();
+        if(StringUtil.isEmpty(code) || StringUtil.isEmpty(phone)){
             ConfigUtil.showToask(this, GlobalConstants.NULL_MSG);
             return;
         }
         Bundle bundle = new Bundle();
         bundle.putString("code", code);
+        bundle.putString("phone", phone);
         RedirectUtil.redirect(this, FindPawActivity.class, bundle);
         finish();
     }

@@ -12,6 +12,7 @@ import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.controllers.RequestController;
 import com.zgy.translate.domains.dtos.UserInfoDTO;
+import com.zgy.translate.domains.request.CommonRequest;
 import com.zgy.translate.domains.response.CommonResponse;
 import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.managers.GlideImageManager;
@@ -132,8 +133,10 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     @OnClick(R.id.ams_tv_exit) void exi(){
         isExit = true;
         super.progressDialog.show();
+        CommonRequest request = new CommonRequest();
+        request.setPhone(UserMessageManager.getUserInfo(this).getPhone());
         RequestController.getInstance().init(this)
-                .addRequest(RequestController.LOGOUT, null)
+                .addRequest(RequestController.LOGOUT, request)
                 .addCallInterface(this)
                 .build();
     }

@@ -32,6 +32,7 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
     @BindView(R.id.afp_et_pawAgain) EditText et_pawAgain;
 
     private String code;
+    private String phone;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,12 +44,9 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
 
     @Override
     public void initView() {
-        if(GlobalParams.userInfoDTO == null){
-            GlobalParams.userInfoDTO = UserMessageManager.getUserInfo(this);
-        }
-        tv_phone.setText(GlobalParams.userInfoDTO.getPhone());
+        phone = getIntent().getStringExtra("phone");
         code = getIntent().getStringExtra("code");
-        Log.i("code", code);
+        tv_phone.setText(phone);
     }
 
     @Override
@@ -101,7 +99,7 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
         CommonRequest request = new CommonRequest();
         request.setPassword(paw);
         request.setPasswrodRepeat(pasAg);
-        request.setPhone(tv_phone.getText().toString());
+        request.setPhone(phone);
         request.setPhoneCode(code);
         RequestController.getInstance().init(this)
                 .addRequest(RequestController.RESET_PASSWORD, request)

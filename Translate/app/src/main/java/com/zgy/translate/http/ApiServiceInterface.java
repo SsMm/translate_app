@@ -39,7 +39,7 @@ public interface ApiServiceInterface {
 
     @FormUrlEncoded
     @POST(USERS + "/logout")
-    Call<CommonResponse> logout();
+    Call<CommonResponse> logout(@FieldMap Map<String, String> request);
 
     @FormUrlEncoded
     @GET(USERS + "/profile")

@@ -36,10 +36,12 @@
                 android:textColor="@color/colorBT"
                 android:text="   手机号:"/>
 
-            <TextView
-                android:id="@+id/afpp_tv_phone"
+            <EditText
+                android:id="@+id/afpp_et_phone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@null"
+                android:inputType="phone"
                 android:textSize="@dimen/text_16"
                 android:textColor="@color/colorBT"/>
         </LinearLayout>

@@ -155,15 +155,15 @@ public class RequestController {
                break;
            case CHANGE_ICON:
                RequestBody body;
-               if(request.getFile().getName().equals(".jpg")){
+               if(request.getFile().getName().contains(".jpg")){
                    body = RequestBody.create(MediaType.parse("image/jpg"), request.getFile());
-               }else if(request.getFile().getName().equals(".jpeg")){
+               }else if(request.getFile().getName().contains(".jpeg")){
                    body = RequestBody.create(MediaType.parse("image/jpeg"), request.getFile());
-               }else if(request.getFile().getName().equals(".png")){
+               }else if(request.getFile().getName().contains(".png")){
                    body = RequestBody.create(MediaType.parse("image/png"), request.getFile());
-               }else if(request.getFile().getName().equals(".bmp")){
+               }else if(request.getFile().getName().contains(".bmp")){
                    body = RequestBody.create(MediaType.parse("image/bmp"), request.getFile());
-               }else if(request.getFile().getName().equals(".gif")){
+               }else if(request.getFile().getName().contains(".gif")){
                     body = RequestBody.create(MediaType.parse("image/gif"), request.getFile());
                 }else{
                    body = RequestBody.create(MediaType.parse("multipart/form-data"), request.getFile());

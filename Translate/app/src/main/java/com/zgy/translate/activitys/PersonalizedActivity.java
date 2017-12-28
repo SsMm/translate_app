@@ -57,6 +57,11 @@ public class PersonalizedActivity extends BaseActivity implements CommonBar.Comm
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

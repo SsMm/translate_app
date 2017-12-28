@@ -66,6 +66,11 @@ public class QuestionActivity extends BaseActivity implements CommonBar.CommonBa
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

@@ -404,6 +404,11 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

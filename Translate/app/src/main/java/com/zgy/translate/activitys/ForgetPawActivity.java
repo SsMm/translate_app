@@ -60,6 +60,11 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

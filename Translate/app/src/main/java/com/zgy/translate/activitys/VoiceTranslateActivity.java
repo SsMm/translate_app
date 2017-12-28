@@ -157,6 +157,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     }
 
     @Override
+    public void connected() {
+        createGattManager.setParams(mBluetoothAdapter).init();
+    }
+
+    @Override
     public void disNetConnected() {
         checkNetState(false);
     }
@@ -190,7 +195,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
         //与gatt建立联系
         createGattManager = new CreateGattManager(this, this);
-        createGattManager.setParams(mBluetoothAdapter).init();
 
 
         voiceTransDTOList = new ArrayList<>();
@@ -221,7 +225,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onResume() {
         super.onResume();
+        createGattManager.setParams(mBluetoothAdapter).init();
         waveLineView.onResume();
+        waveLineView.setVisibility(View.VISIBLE);
         waveLineView.setVisibility(View.GONE);
         //获取用户手机输出位置
         UserInfoDTO userInfoDTO;
@@ -389,6 +395,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 dto.setLanDst(dst);
                 voiceTransDTOList.add(dto);
                 voiceTranslateAdapter.notifyItemInserted(voiceTransDTOList.size() - 1);
+                rv_tran.scrollToPosition(voiceTransDTOList.size() - 1);
             }
         });
 
@@ -531,6 +538,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
     }
 
+    /**
+     * 连接情况
+     * */
     @Override
     public void noProfile() {
         //ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");

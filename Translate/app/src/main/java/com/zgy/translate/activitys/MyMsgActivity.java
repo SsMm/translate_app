@@ -106,6 +106,11 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

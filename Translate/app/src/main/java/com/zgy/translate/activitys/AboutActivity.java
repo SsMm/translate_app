@@ -47,6 +47,11 @@ public class AboutActivity extends BaseActivity implements CommonBarInterface{
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

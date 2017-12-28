@@ -125,6 +125,11 @@ public class SplashActivity extends BaseActivity{
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

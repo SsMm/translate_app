@@ -55,6 +55,9 @@ public class AppReceiverManager {
                        connectionStateInterface.disConnected();
                        //ConfigUtil.showToask(context, GlobalConstants.STATE_DISCONNECTED);
                        break;
+                   case BluetoothAdapter.STATE_CONNECTED: //连接上
+                       connectionStateInterface.connected();
+                       break;
                }
            }else if(ConnectivityManager.CONNECTIVITY_ACTION.equals(action)){
                NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
@@ -109,6 +112,7 @@ public class AppReceiverManager {
 
    public  interface BluetoothConnectionStateInterface{
        void disConnected(); //蓝牙断开
+       void connected(); //连接上
        void disNetConnected(); //网络连接断开
        void netConnected(); //网络连接
    }

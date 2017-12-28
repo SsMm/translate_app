@@ -63,6 +63,11 @@ public class RevisePhoneActivity extends BaseActivity implements CommonBar.Commo
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

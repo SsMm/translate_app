@@ -60,6 +60,11 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

@@ -515,6 +515,11 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

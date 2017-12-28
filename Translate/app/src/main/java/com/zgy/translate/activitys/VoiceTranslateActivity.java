@@ -124,8 +124,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private CreateGattManager createGattManager;
     private BluetoothAdapter mBluetoothAdapter;
-    private AnimationDrawable animationDrawable;
-    private ImageView currPlayImage;
+    private volatile AnimationDrawable animationDrawable;
+    private volatile ImageView currPlayImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -824,21 +824,33 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     }
 
     private void showPlayAni(){
-        if(currPlayImage == null){
-            return;
-        }
-        currPlayImage.setImageResource(R.drawable.tts_voice_playing);
-        animationDrawable = (AnimationDrawable) currPlayImage.getDrawable();
-        animationDrawable.start();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(currPlayImage == null){
+                    return;
+                }
+                currPlayImage.setImageResource(R.drawable.tts_voice_playing);
+                animationDrawable = (AnimationDrawable) currPlayImage.getDrawable();
+                animationDrawable.start();
+            }
+        });
+
     }
 
     private void stopAni(){
-        if(currPlayImage != null){
-            currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
-        }
-        if(animationDrawable != null && animationDrawable.isRunning()){
-            animationDrawable.stop();
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(currPlayImage != null){
+                    currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
+                }
+                if(animationDrawable != null && animationDrawable.isRunning()){
+                    animationDrawable.stop();
+                }
+            }
+        });
+
     }
 
     private void showPermission(){

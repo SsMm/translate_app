@@ -35,7 +35,6 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     @BindView(R.id.ams_civ_headerIcon) CircleImageView civ_headerIcon;
     @BindView(R.id.ams_cb_choose) CheckBox cb_choose;
 
-    private RequestController requestController;
     private boolean isExit = false;
 
 
@@ -49,17 +48,10 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
 
     @Override
     public void initView() {
-        if(UserMessageManager.getUserInfo(this) != null){
+        if(GlobalParams.userInfoDTO == null){
             GlobalParams.userInfoDTO = UserMessageManager.getUserInfo(this);
-            showUser(GlobalParams.userInfoDTO);
-        }else{
-            super.progressDialog.show();
-            requestController = RequestController.getInstance();
-            requestController.init(this)
-                    .addRequest(RequestController.GET_PROFILE, null)
-                    .addCallInterface(this)
-                    .build();
         }
+        showUser(GlobalParams.userInfoDTO);
     }
 
     @Override
@@ -134,9 +126,8 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
 
     @OnClick(R.id.ams_tv_exit) void exi(){
         isExit = true;
-        requestController = RequestController.getInstance();
         super.progressDialog.show();
-        requestController.init(this)
+        RequestController.getInstance().init(this)
                 .addRequest(RequestController.LOGOUT, null)
                 .addCallInterface(this)
                 .build();
@@ -180,23 +171,6 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
             GlobalParams.userInfoDTO = null;
             RedirectUtil.redirect(this, LoginActivity.class);
             finish();
-            return;
-        }
-
-        if(response != null){
-            UserInfoDTO userInfoDTO = new UserInfoDTO();
-            userInfoDTO.setAppKey(response.getAppKey());
-            userInfoDTO.setBirthday(response.getBirthday());
-            userInfoDTO.setIcon(response.getIcon());
-            userInfoDTO.setName(response.getName());
-            userInfoDTO.setSignature(response.getSignature());
-            userInfoDTO.setSex(response.getSex());
-            userInfoDTO.setMic(true);
-            showUser(userInfoDTO);
-            GlobalParams.userInfoDTO = userInfoDTO;
-            String user = GsonManager.getInstance().toJson(userInfoDTO);
-            UserMessageManager.deleteUserInfo(this);
-            UserMessageManager.saveUserInfo(this, user);
         }
     }
 
@@ -235,6 +209,5 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        requestController = null;
     }
 }

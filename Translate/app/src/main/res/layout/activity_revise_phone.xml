@@ -37,7 +37,7 @@
                 android:text="   手机号:"/>
 
             <EditText
-
+                android:id="@+id/arp_et_phone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
@@ -64,18 +64,20 @@
                 android:text="   验证码:"/>
 
             <TextView
-                android:id="@+id/ar_tv_sendCode"
+                android:id="@+id/arp_tv_sendCode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:minWidth="100dp"
                 android:layout_alignParentEnd="true"
                 android:background="@drawable/bg_button"
+                android:gravity="center"
                 android:padding="@dimen/padding_5"
                 android:textSize="@dimen/text_16"
                 android:textColor="@color/colorCommon"
                 android:text="发送验证码"/>
 
             <EditText
-
+                android:id="@+id/arp_et_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/ar_tv_code"
@@ -89,7 +91,7 @@
     </LinearLayout>
 
     <TextView
-
+        android:id="@+id/arp_tv_sumbit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dimen_50"

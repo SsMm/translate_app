@@ -73,7 +73,6 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     private EditText et_name;
     private CustomDatePicker customDatePicker;
     private String nowDate;
-    private RequestController requestController;
     private CommonRequest request;
 
     @Override
@@ -125,7 +124,6 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     }
 
     private void baseInit(){
-        requestController = RequestController.getInstance();
         imageInst = new ImageInst();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
         nowDate = sdf.format(new Date());
@@ -260,7 +258,7 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
 
                 break;
         }
-        requestController.init(this)
+        RequestController.getInstance().init(this)
                 .addRequest(RequestController.PROFILE, request)
                 .addCallInterface(this).build();
     }
@@ -316,10 +314,9 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
                 cn_goPer.setRightTitle("");
             }
             if(!StringUtil.isEmpty(dto.getBirthday())){
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
-                String time = sdf.format(sdf.parse(dto.getBirthday()));
-                Log.i("bir---", dto.getBirthday());
-                cn_goBir.setRightTitle(time);
+                //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+                //String time = sdf.format(sdf.parse(dto.getBirthday()));
+                cn_goBir.setRightTitle(dto.getBirthday());
             }else{
                 cn_goBir.setRightTitle(nowDate.split(" ")[0]);
             }
@@ -360,6 +357,5 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
             customDatePicker = null;
         }
         request = null;
-        requestController = null;
     }
 }

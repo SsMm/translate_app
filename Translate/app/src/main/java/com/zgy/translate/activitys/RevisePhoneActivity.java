@@ -127,24 +127,13 @@ public class RevisePhoneActivity extends BaseActivity implements CommonBar.Commo
             codeTime();
         }
         if(isSumbit){
-            if(response != null) {
-                if (UserMessageManager.isUserInfo(this)) {
-                    UserMessageManager.deleteUserInfo(this);
-                }
-                UserInfoDTO userInfoDTO = new UserInfoDTO();
-                userInfoDTO.setAppKey(GlobalParams.userInfoDTO.getAppKey());
-                userInfoDTO.setBirthday(response.getBirthday());
-                userInfoDTO.setIcon(response.getIcon());
-                userInfoDTO.setName(response.getName());
-                userInfoDTO.setSignature(response.getSignature());
-                userInfoDTO.setSex(response.getSex());
-                userInfoDTO.setMic(GlobalParams.userInfoDTO.isMic());
-                userInfoDTO.setPhone(response.getPhone());
-                GlobalParams.userInfoDTO = userInfoDTO;
-                String user = GsonManager.getInstance().toJson(userInfoDTO);
-                UserMessageManager.saveUserInfo(this, user);
-                finish();
-            }
+            UserInfoDTO userInfoDTO = UserMessageManager.getUserInfo(this);
+            userInfoDTO.setPhone(et_phone.getText().toString());
+            GlobalParams.userInfoDTO = userInfoDTO;
+            UserMessageManager.deleteUserInfo(this);
+            String user = GsonManager.getInstance().toJson(userInfoDTO);
+            UserMessageManager.saveUserInfo(this, user);
+            finish();
         }
     }
 

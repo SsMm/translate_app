@@ -114,6 +114,7 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
             userInfoDTO.setSignature(response.getSignature());
             userInfoDTO.setSex(response.getSex());
             userInfoDTO.setMic(true);
+            userInfoDTO.setPhone(et_phoneNum.getText().toString());
             GlobalParams.userInfoDTO = userInfoDTO;
             String user = GsonManager.getInstance().toJson(userInfoDTO);
             UserMessageManager.saveUserInfo(this, user);

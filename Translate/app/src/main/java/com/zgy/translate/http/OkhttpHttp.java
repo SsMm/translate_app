@@ -70,9 +70,10 @@ public class OkhttpHttp {
                     public Response intercept(Chain chain) throws IOException {
                         String token = "";
                         UserInfoDTO userInfoDTO = UserMessageManager.getUserInfo(context);
-                        if(userInfoDTO != null){
+                        if(userInfoDTO != null && userInfoDTO.getAppKey() != null){
                             token = userInfoDTO.getAppKey();
                         }
+                        Log.i("token--", token);
                         Request request = chain.request();
                         if(TextUtils.isEmpty(token)){
                             return chain.proceed(request);

@@ -223,13 +223,19 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         waveLineView.onResume();
         waveLineView.setVisibility(View.GONE);
         //获取用户手机输出位置
-        UserInfoDTO userInfoDTO = UserMessageManager.getUserInfo(this);
+        UserInfoDTO userInfoDTO;
+        if(GlobalParams.userInfoDTO != null){
+           userInfoDTO = GlobalParams.userInfoDTO;
+        }else{
+            userInfoDTO = UserMessageManager.getUserInfo(this);
+        }
 
-        if(true){ //默认从手机麦克风出
+        if(userInfoDTO.isMic()){ //默认从手机麦克风出
             FROM_PHONE_MIC = true;
         }else{
             FROM_PHONE_MIC = false;
         }
+
     }
 
     @Override
@@ -396,10 +402,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void goTTS(String dst, ImageView imageView) {
         currPlayImage = imageView;
         createSynthesizer(dst);
-        if(animationDrawable != null){
-            animationDrawable.stop();
-        }
-        showPlayAni(imageView);
     }
 
     /**
@@ -413,10 +415,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 //mAudioManager.setMicrophoneMute(false);
                 mAudioManager.setSpeakerphoneOn(true);
                 mSpeechSynthesizer.speak(dst);
-                if(animationDrawable != null){
-                    animationDrawable.stop();
-                }
-                showPlayAni(currPlayImage);
             }else{
                 //从听筒出
                 mAudioManager.setMode(AudioManager.MODE_IN_CALL);
@@ -433,14 +431,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
     }
 
-    private void showPlayAni(ImageView imageView){
-        if(imageView == null){
-            return;
-        }
-        imageView.setImageResource(R.drawable.tts_voice_playing);
-        animationDrawable = (AnimationDrawable) imageView.getDrawable();
-        animationDrawable.start();
-    }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void playFinish(FinishRecorderEB eb){
@@ -452,14 +442,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
     }
 
-    private void stopAni(){
-        if(currPlayImage != null){
-            currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
-        }
-        if(animationDrawable != null && animationDrawable.isRunning()){
-            animationDrawable.stop();
-        }
-    }
 
     /**
      * 语音合成回调
@@ -828,7 +810,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void onSpeechStart(String s) {
-
+        showPlayAni();
     }
 
     @Override
@@ -838,7 +820,25 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void onSpeechFinish(String s) {
+        stopAni();
+    }
 
+    private void showPlayAni(){
+        if(currPlayImage == null){
+            return;
+        }
+        currPlayImage.setImageResource(R.drawable.tts_voice_playing);
+        animationDrawable = (AnimationDrawable) currPlayImage.getDrawable();
+        animationDrawable.start();
+    }
+
+    private void stopAni(){
+        if(currPlayImage != null){
+            currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
+        }
+        if(animationDrawable != null && animationDrawable.isRunning()){
+            animationDrawable.stop();
+        }
     }
 
     private void showPermission(){

@@ -11,7 +11,8 @@ public class UserInfoDTO {
     private String icon;
     private String signature;
     private String appKey;
-    private boolean mic;
+    private boolean mic = true; //扬声器还是听筒
+    private String phone;
 
     public String getName() {
         return name;
@@ -67,5 +68,13 @@ public class UserInfoDTO {
 
     public boolean isMic() {
         return mic;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPhone() {
+        return phone;
     }
 }

@@ -100,19 +100,19 @@ public class RequestController {
         if(tag == REGISTER || tag == RESET_PASSWORD){
             requestMap.put(KEY_PHONE_CODE, request.getPhoneCode());
         }
-        if(tag == PROFILE){
+        if(tag == PROFILE && request.getSex() != null){
             requestMap.put(KEY_SEX, request.getSex());
         }
-        if(tag == PROFILE){
+        if(tag == PROFILE && request.getSignature() != null){
             requestMap.put(KEY_SIGNATURE, request.getSignature());
         }
-        if(tag == PROFILE){
+        if(tag == PROFILE && request.getName() != null){
             requestMap.put(KEY_NAME, request.getName());
         }
-        if(tag == PROFILE){
+        if(tag == PROFILE && request.getIcon() != null){
             requestMap.put(KEY_ICON, request.getIcon());
         }
-        if(tag == PROFILE){
+        if(tag == PROFILE && request.getBirthday() != null){
             requestMap.put(KEY_BIRTHDAY, request.getBirthday());
         }
         Log.i("remap--", requestMap.size() + "");

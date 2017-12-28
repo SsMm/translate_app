@@ -114,6 +114,7 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
                 }
                 UserMessageManager.deleteUserInfo(this);
                 String re = GsonManager.getInstance().toJson(dto);
+                GlobalParams.userInfoDTO = dto;
                 UserMessageManager.saveUserInfo(this, re);
                 break;
         }

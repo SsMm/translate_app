@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -11,20 +12,30 @@ import android.widget.TextView;
 import com.imnjh.imagepicker.activity.PhotoPickerActivity;
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.base.BaseResponseObject;
+import com.zgy.translate.controllers.RequestController;
+import com.zgy.translate.domains.dtos.UserInfoDTO;
+import com.zgy.translate.domains.request.CommonRequest;
+import com.zgy.translate.domains.response.CommonResponse;
 import com.zgy.translate.global.GlobalConstants;
+import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.managers.CacheManager;
 import com.zgy.translate.managers.GlideImageManager;
+import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.MultiMediaManager;
+import com.zgy.translate.managers.UserMessageManager;
 import com.zgy.translate.managers.inst.ImageInst;
 import com.zgy.translate.utils.ActionSheet;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.OptItem;
 import com.zgy.translate.utils.RedirectUtil;
+import com.zgy.translate.utils.StringUtil;
 import com.zgy.translate.widget.CommonBar;
 import com.zgy.translate.widget.CommonNav;
 import com.zgy.translate.widget.CustomDatePicker;
 
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +46,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarInterface, ConfigUtil.AlertDialogInterface {
+public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarInterface, ConfigUtil.AlertDialogInterface,
+        RequestController.RequestCallInterface{
+
+    private static final String NAME = "name";
+    private static final String BIR = "bir";
+    private static final String SEX = "sex";
+    private static final String ICON = "icon";
 
     public static final int REQUEST_CODE = 9;//相册选择后返回值
     public static final int PHOTO = 0; //拍照
@@ -56,6 +73,8 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     private EditText et_name;
     private CustomDatePicker customDatePicker;
     private String nowDate;
+    private RequestController requestController;
+    private CommonRequest request;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,20 +125,25 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     }
 
     private void baseInit(){
+        requestController = RequestController.getInstance();
         imageInst = new ImageInst();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
         nowDate = sdf.format(new Date());
-        cn_goBir.setRightTitle(nowDate.split(" ")[0]);
 
         customDatePicker = new CustomDatePicker(this, new CustomDatePicker.ResultHandler() {
             @Override
             public void handle(String time) {
-                cn_goBir.setRightTitle(time.split(" ")[0]);
+                callRequest(BIR, time.split(" ")[0]);
+               //cn_goBir.setRightTitle(time.split(" ")[0]);
             }
         }, "1970-01-01 00:00", nowDate);
         customDatePicker.showSpecificTime(false);
         customDatePicker.setIsLoop(true);
-
+        if(GlobalParams.userInfoDTO != null){
+            showMsg(GlobalParams.userInfoDTO);
+        }else{
+            showMsg(UserMessageManager.getUserInfo(this));
+        }
     }
 
     /**更换头像*/
@@ -181,7 +205,7 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     @Override
     public void confirmDialog() {
         String name = et_name.getText().toString();
-        cn_goName.setRightTitle(name);
+        callRequest(NAME, name);
     }
 
     @Override
@@ -196,14 +220,14 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
                     @Override
                     public void onClick(View view) {
                         actionSheet.dismiss();
-                        cn_goSex.setRightTitle("男");
+                        callRequest(SEX, "MALE");
                     }
                 }),
                 new OptItem("女", R.color.colorCommon, new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         actionSheet.dismiss();
-                        cn_goSex.setRightTitle("女");
+                        callRequest(SEX, "FEMALE");
                     }
                 })
         );
@@ -218,6 +242,110 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
         RedirectUtil.redirect(this, RevisePhoneActivity.class);
     }
 
+    /**统一请求*/
+    private void callRequest(String tag, String data){
+        super.progressDialog.show();
+        request = new CommonRequest();
+        switch (tag){
+            case NAME:
+                request.setName(data);
+                break;
+            case SEX:
+                request.setSex(data);
+                break;
+            case BIR:
+                request.setBirthday(data);
+                break;
+            case ICON:
+
+                break;
+        }
+        requestController.init(this)
+                .addRequest(RequestController.PROFILE, request)
+                .addCallInterface(this).build();
+    }
+
+    @Override
+    public void success(CommonResponse response) {
+        super.progressDialog.dismiss();
+        if(response != null) {
+            if (UserMessageManager.isUserInfo(this)) {
+                UserMessageManager.deleteUserInfo(this);
+            }
+            UserInfoDTO userInfoDTO = new UserInfoDTO();
+            userInfoDTO.setAppKey(GlobalParams.userInfoDTO.getAppKey());
+            userInfoDTO.setBirthday(response.getBirthday());
+            userInfoDTO.setIcon(response.getIcon());
+            userInfoDTO.setName(response.getName());
+            userInfoDTO.setSignature(response.getSignature());
+            userInfoDTO.setSex(response.getSex());
+            userInfoDTO.setMic(GlobalParams.userInfoDTO.isMic());
+            userInfoDTO.setPhone(response.getPhone());
+            GlobalParams.userInfoDTO = userInfoDTO;
+            String user = GsonManager.getInstance().toJson(userInfoDTO);
+            UserMessageManager.saveUserInfo(this, user);
+            showMsg(userInfoDTO);
+        }
+    }
+
+    @Override
+    public void error(CommonResponse response) {
+        super.progressDialog.dismiss();
+    }
+
+    @Override
+    public void fail(String error) {
+        super.progressDialog.dismiss();
+    }
+
+    /**显示用户信息*/
+    private void showMsg(UserInfoDTO dto){
+        try {
+
+            if(!StringUtil.isEmpty(dto.getName())){
+                cn_goName.setRightTitle(dto.getName());
+            }else{
+                cn_goName.setRightTitle("用户");
+            }
+            if(!StringUtil.isEmpty(dto.getIcon())){
+                GlideImageManager.showURLDownloadImage(this, dto.getIcon(), civ_headerIcon);
+            }
+            if(!StringUtil.isEmpty(dto.getSignature())){
+                cn_goPer.setRightTitle(dto.getSignature());
+            }else{
+                cn_goPer.setRightTitle("");
+            }
+            if(!StringUtil.isEmpty(dto.getBirthday())){
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+                String time = sdf.format(sdf.parse(dto.getBirthday()));
+                Log.i("bir---", dto.getBirthday());
+                cn_goBir.setRightTitle(time);
+            }else{
+                cn_goBir.setRightTitle(nowDate.split(" ")[0]);
+            }
+            if(!StringUtil.isEmpty(dto.getSex())){
+                switch (dto.getSex()){
+                    case "MALE":
+                        cn_goSex.setRightTitle("男");
+                        break;
+                    case "FEMALE":
+                        cn_goSex.setRightTitle("女");
+                        break;
+                    default:
+                        cn_goSex.setRightTitle("");
+                        break;
+                }
+            }
+            if(!StringUtil.isEmpty(dto.getPhone())){
+                cn_goPhoto.setRightTitle(dto.getPhone());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -231,7 +359,7 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
         if(customDatePicker != null){
             customDatePicker = null;
         }
+        request = null;
+        requestController = null;
     }
-
-
 }

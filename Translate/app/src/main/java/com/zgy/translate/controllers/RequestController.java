@@ -115,6 +115,9 @@ public class RequestController {
         if(tag == PROFILE && request.getBirthday() != null){
             requestMap.put(KEY_BIRTHDAY, request.getBirthday());
         }
+        if(tag == LOGOUT){
+            requestMap.put(KEY_PHONE, request.getPhone());
+        }
         Log.i("remap--", requestMap.size() + "");
         switch (tag){
            case SEND_CODE:
@@ -127,7 +130,7 @@ public class RequestController {
                callResponse = apiServiceInterface.login(requestMap);
                break;
            case LOGOUT:
-              callResponse = apiServiceInterface.logout();
+              callResponse = apiServiceInterface.logout(requestMap);
                break;
             case GET_PROFILE:
                 callResponse = apiServiceInterface.profil();
@@ -183,6 +186,7 @@ public class RequestController {
             public void onFailure(Call<CommonResponse> call, Throwable t) {
                 callInterface.fail(t.toString());
                 ConfigUtil.showToask(mContext, t.toString());
+                Log.i("failure----", t.toString());
             }
         });
     }

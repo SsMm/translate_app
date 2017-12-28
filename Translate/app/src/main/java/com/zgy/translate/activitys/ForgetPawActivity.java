@@ -123,11 +123,13 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
     @Override
     public void error(CommonResponse response) {
         super.progressDialog.dismiss();
+        isSend = false;
     }
 
     @Override
     public void fail(String error) {
         super.progressDialog.dismiss();
+        isSend = false;
     }
 
     private void codeTime() {

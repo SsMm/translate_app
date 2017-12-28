@@ -150,6 +150,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
     public void error(CommonResponse response) {
         super.progressDialog.dismiss();
        if(isSend){
+           isSend = false;
            ConfigUtil.showToask(this, "发送失败");
        }
        if(isRegister){
@@ -163,6 +164,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
     @Override
     public void fail(String error) {
         super.progressDialog.dismiss();
+        isSend = false;
     }
 
 

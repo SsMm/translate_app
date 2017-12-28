@@ -428,7 +428,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 mSpeechSynthesizer.speak(dst);
             }else{
                 //从听筒出
-                mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+                mAudioManager.setMode(AudioManager.STREAM_MUSIC);
                 mAudioManager.setSpeakerphoneOn(false);
                 mSpeechSynthesizer.speak(dst);
                 //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);

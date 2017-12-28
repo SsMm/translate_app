@@ -116,7 +116,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private ScheduledExecutorService executorService;
 
-    private VoiceTranslateAdapter voiceTranslateAdapter;
+    private volatile VoiceTranslateAdapter voiceTranslateAdapter;
     private List<VoiceTransDTO> voiceTransDTOList;
     private volatile boolean isPhone; //判断是否从手机入
     private boolean isSpeech = false; //是否在输入录音
@@ -126,6 +126,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private BluetoothAdapter mBluetoothAdapter;
     private volatile AnimationDrawable animationDrawable;
     private volatile ImageView currPlayImage;
+
+    private volatile boolean isClick = false; //false是录完音自动播放，true是点击在此播放
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,7 +144,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void initEvent() {
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -341,9 +342,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            /*if(voiceTranslateAdapter.getCurrPlayImage() != null){
-                                currPlayImage = voiceTranslateAdapter.getCurrPlayImage();
-                            }*/
+                            isClick = false;
                             createSynthesizer(dst);
                         }
                     });
@@ -400,6 +399,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * */
     @Override
     public void goTTS(String dst, ImageView imageView) {
+        isClick = true;
+        stopAni();
         currPlayImage = imageView;
         createSynthesizer(dst);
     }
@@ -428,17 +429,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
             mAudioManager.setSpeakerphoneOn(false);
             mSpeechSynthesizer.speak(dst);
-        }
-    }
-
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void playFinish(FinishRecorderEB eb){
-        if(currPlayImage != null){
-            currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
-        }
-        if(animationDrawable != null && animationDrawable.isRunning()){
-            animationDrawable.stop();
         }
     }
 
@@ -591,11 +581,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void fromBlueVolume(MonitorRecordAmplitudeEB eb){
-        waveLineView.setVolume(eb.getLevel());
-    }
-
     /**
      * 开始录音
      * */
@@ -710,7 +695,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
         if(mAsr != null){
             mAsr.unregisterListener(this);
             mAsr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
@@ -827,9 +811,16 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if(!isClick){
+                    stopAni();
+                    if(voiceTranslateAdapter.getCurrPlayImage() != null){
+                        currPlayImage = voiceTranslateAdapter.getCurrPlayImage();
+                    }
+                }
                 if(currPlayImage == null){
                     return;
                 }
+
                 currPlayImage.setImageResource(R.drawable.tts_voice_playing);
                 animationDrawable = (AnimationDrawable) currPlayImage.getDrawable();
                 animationDrawable.start();
@@ -842,11 +833,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if(currPlayImage != null){
-                    currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
-                }
+
                 if(animationDrawable != null && animationDrawable.isRunning()){
                     animationDrawable.stop();
+                    if(currPlayImage != null){
+                        currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
+                    }
                 }
             }
         });

@@ -214,7 +214,7 @@ public class AudioRecordUtil {
         mIsRecording = false;
         if(mAudioRecord != null){
             mAudioRecord.stop();
-            mAudioRecord.release();
+            //mAudioRecord.release();
             mAudioRecord = null;
         }
         if(fileOutputStream != null){

@@ -156,6 +156,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void disConnected() {
         //耳机蓝牙断开连接
         deviceConState(DISCONNECTED);
+        waveLineView.stopAnim();
+        waveLineView.setVisibility(View.GONE);
     }
 
     @Override
@@ -268,6 +270,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_END: // 检测到用户的已经停止说话
                 ConfigUtil.showToask(this, "停止说话");
+                /*if(!isPhone){
+                    stopSpeech();
+                }*/
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL: // 临时识别结果, 长语音模式需要从此消息中取出结果
                 RecogResult recogResult = RecogResult.parseJson(params);
@@ -578,6 +583,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             isSpeech = true;
             waveLineView.setVisibility(View.VISIBLE);
             waveLineView.startAnim();
+            /*mediaRecorderPath = getPathFile(false);
+            AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);*/
             if(isLeftLangCN){
                 toCNSpeech(true);
             }else{
@@ -593,6 +600,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             waveLineView.setVisibility(View.GONE);
             Log.i("ccc", "cccc");
             stopSpeech();
+            /*AudioRecordUtil.stopRecord();
+            if(isLeftLangCN){
+                toCNSpeech(false);
+            }else{
+                toENSpeech(false);
+            }*/
         }else if(order.contains("w")){
             Log.i("wwww", "wwww");
         }

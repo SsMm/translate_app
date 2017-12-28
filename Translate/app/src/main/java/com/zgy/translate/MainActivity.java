@@ -111,6 +111,11 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    public void connected() {
+
+    }
+
+    @Override
     public void disNetConnected() {
 
     }

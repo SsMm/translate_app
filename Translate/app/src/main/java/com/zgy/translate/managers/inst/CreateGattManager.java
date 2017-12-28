@@ -94,6 +94,12 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
 
     }
 
+    public void nextGetProfile(){
+        if(profileManager != null){
+            profileManager.getBluetoothProfile();
+        }
+    }
+
     /**
      * 获取蓝牙连接信息
      * */
@@ -107,7 +113,8 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
         if(result){
             scanLeDevice(true);
         }else{
-            gattManagerInterface.noRequest();
+            //gattManagerInterface.noRequest();
+            profileManager.getBluetoothProfile();
         }
     }
 

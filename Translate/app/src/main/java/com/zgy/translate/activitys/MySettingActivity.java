@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.controllers.ActivityController;
 import com.zgy.translate.controllers.RequestController;
 import com.zgy.translate.domains.dtos.UserInfoDTO;
 import com.zgy.translate.domains.request.CommonRequest;
@@ -177,6 +178,7 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
         if(isExit){
             UserMessageManager.deleteUserInfo(this);
             GlobalParams.userInfoDTO = null;
+            ActivityController.finishActivity();
             RedirectUtil.redirect(this, LoginActivity.class);
             finish();
         }

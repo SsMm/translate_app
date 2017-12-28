@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,6 +38,8 @@ public class RequestController {
     public static final int RESET_PASSWORD = 7; //用户重制密码
     public static final int CHANGE_ICON = 8; //修改用户头像
     public static final int GET_PROFILE = 9; //获取用户信息
+    public static final int CHANGE_PHONE_CODE = 10; //发送更改手机号验证码
+    public static final int CHANGE_PHONE = 11; //绑定新手机号
 
 
     private static final String KEY_PHONE = "Phone";
@@ -82,7 +87,8 @@ public class RequestController {
         }
         clearRequestMap();
         requestMap = new HashMap<>();
-        if(tag == SEND_CODE || tag == REGISTER || tag == LOGIN || tag == SEND_PASSWORD_CODE || tag == RESET_PASSWORD){
+        if(tag == SEND_CODE || tag == REGISTER || tag == LOGIN || tag == SEND_PASSWORD_CODE || tag == RESET_PASSWORD
+                || tag == CHANGE_PHONE_CODE || tag == CHANGE_PHONE){
             requestMap.put(KEY_PHONE, request.getPhone());
         }
         if(tag == LOGIN){
@@ -97,7 +103,7 @@ public class RequestController {
         if(tag == REGISTER || tag == PASSWORD || tag == RESET_PASSWORD){
             requestMap.put(KEY_PASSWPRD_REPEAT, request.getPasswrodRepeat());
         }
-        if(tag == REGISTER || tag == RESET_PASSWORD){
+        if(tag == REGISTER || tag == RESET_PASSWORD || tag == CHANGE_PHONE){
             requestMap.put(KEY_PHONE_CODE, request.getPhoneCode());
         }
         if(tag == PROFILE && request.getSex() != null){
@@ -118,6 +124,7 @@ public class RequestController {
         if(tag == LOGOUT){
             requestMap.put(KEY_PHONE, request.getPhone());
         }
+
         Log.i("remap--", requestMap.size() + "");
         switch (tag){
            case SEND_CODE:
@@ -147,8 +154,16 @@ public class RequestController {
                callResponse = apiServiceInterface.reset_password(requestMap);
                break;
            case CHANGE_ICON:
-               callResponse = apiServiceInterface.change_icon(requestMap);
+               RequestBody body = RequestBody.create(MediaType.parse("multipart/form-data"), request.getFile());
+               MultipartBody.Part part = MultipartBody.Part.createFormData("file", request.getFile().getName(), body);
+               callResponse = apiServiceInterface.change_icon(part);
                break;
+            case CHANGE_PHONE_CODE:
+                callResponse = apiServiceInterface.change_phone_code(requestMap);
+                break;
+            case CHANGE_PHONE:
+                callResponse = apiServiceInterface.change_phone(requestMap);
+                break;
        }
         return this;
     }

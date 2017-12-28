@@ -2,6 +2,8 @@ package com.zgy.translate.domains.request;
 
 import com.zgy.translate.base.BaseDomain;
 
+import java.io.File;
+
 /**
  * Created by zhouguangyue on 2017/12/26.
  */
@@ -19,7 +21,7 @@ public class CommonRequest extends BaseDomain{
     private String Password;
     private String PasswrodRepeat;
     private String Device;
-    private String file;
+    private File file;
 
     public String getName() {
         return Name;
@@ -117,11 +119,11 @@ public class CommonRequest extends BaseDomain{
         Device = device;
     }
 
-    public String getFile() {
+    public File getFile() {
         return file;
     }
 
-    public void setFile(String file) {
+    public void setFile(File file) {
         this.file = file;
     }
 }

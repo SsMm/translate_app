@@ -75,6 +75,8 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     private String nowDate;
     private CommonRequest request;
 
+    private boolean isIcon = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,12 +186,17 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK){
             if(requestCode == PHOTO){
+                isIcon = true;
+                callRequest(ICON, null);
                 MultiMediaManager.updateImages(this, photoUri);
-                GlideImageManager.showFileDownloadImage(this, photoFile.getAbsolutePath(), civ_headerIcon);
+                //GlideImageManager.showFileDownloadImage(this, photoFile.getAbsolutePath(), civ_headerIcon);
             }else if(requestCode ==  REQUEST_CODE){
                 List<String> path = data.getStringArrayListExtra(PhotoPickerActivity.EXTRA_RESULT_SELECTION);
                 if(path != null && path.size() > 0){
-                    GlideImageManager.showFileDownloadImage(this, path.get(0), civ_headerIcon);
+                    photoFile = new File(path.get(0));
+                    isIcon = true;
+                    callRequest(ICON, null);
+                    //GlideImageManager.showFileDownloadImage(this, path.get(0), civ_headerIcon);
                 }
             }
         }
@@ -259,8 +266,14 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
                 request.setBirthday(data);
                 break;
             case ICON:
-
+                request.setFile(photoFile);
                 break;
+        }
+        if(tag.equals(ICON)){
+            RequestController.getInstance().init(this)
+                    .addRequest(RequestController.CHANGE_ICON, request)
+                    .addCallInterface(this).build();
+            return;
         }
         RequestController.getInstance().init(this)
                 .addRequest(RequestController.PROFILE, request)
@@ -271,6 +284,16 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     public void success(CommonResponse response) {
         super.progressDialog.dismiss();
         if(response != null) {
+            if(isIcon){
+                UserInfoDTO userInfoDTO = UserMessageManager.getUserInfo(this);
+                userInfoDTO.setIcon(response.getIcon());
+                GlobalParams.userInfoDTO = userInfoDTO;
+                String user = GsonManager.getInstance().toJson(userInfoDTO);
+                UserMessageManager.deleteUserInfo(this);
+                UserMessageManager.saveUserInfo(this, user);
+                showMsg(userInfoDTO);
+                return;
+            }
             if (UserMessageManager.isUserInfo(this)) {
                 UserMessageManager.deleteUserInfo(this);
             }
@@ -293,11 +316,13 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     @Override
     public void error(CommonResponse response) {
         super.progressDialog.dismiss();
+        isIcon = false;
     }
 
     @Override
     public void fail(String error) {
         super.progressDialog.dismiss();
+        isIcon = false;
     }
 
     /**显示用户信息*/

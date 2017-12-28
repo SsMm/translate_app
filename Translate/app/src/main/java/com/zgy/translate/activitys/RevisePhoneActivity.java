@@ -96,10 +96,10 @@ public class RevisePhoneActivity extends BaseActivity implements CommonBar.Commo
         isSend = true;
         CommonRequest request = new CommonRequest();
         request.setPhone(num);
-        /*RequestController.getInstance().init(this)
-                .addRequest()
+        RequestController.getInstance().init(this)
+                .addRequest(RequestController.CHANGE_PHONE_CODE, request)
                 .addCallInterface(this)
-                .build();*/
+                .build();
     }
 
     @OnClick(R.id.arp_tv_sumbit) void sumbit(){
@@ -113,8 +113,9 @@ public class RevisePhoneActivity extends BaseActivity implements CommonBar.Commo
         isSumbit = true;
         CommonRequest request = new CommonRequest();
         request.setPhone(num);
+        request.setPhoneCode(code);
         RequestController.getInstance().init(this)
-                .addRequest(RequestController.PROFILE, request)
+                .addRequest(RequestController.CHANGE_PHONE, request)
                 .addCallInterface(this);
     }
 
@@ -149,11 +150,13 @@ public class RevisePhoneActivity extends BaseActivity implements CommonBar.Commo
     @Override
     public void error(CommonResponse response) {
         super.progressDialog.dismiss();
+        isSend = false;
     }
 
     @Override
     public void fail(String error) {
         super.progressDialog.dismiss();
+        isSend = false;
     }
 
     private void codeTime() {

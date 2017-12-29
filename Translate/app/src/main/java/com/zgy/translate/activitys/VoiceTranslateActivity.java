@@ -131,6 +131,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private volatile boolean isClick = false; //false是录完音自动播放，true是点击在此播放
     private boolean isNet = true; //网络连接情况
+    private boolean isBluetoothConned = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +158,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void disConnected() {
         //耳机蓝牙断开连接
+        //createGattManager.disconnectGatt();
+        isBluetoothConned = false;
         deviceConState(DISCONNECTED);
         showVolmn(false);
     }
@@ -164,7 +167,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void connected() {
         //耳机蓝牙连接成功
-        deviceConState(A2DP_CONNECTED);
+        //deviceConState(A2DP_CONNECTED);
+        isBluetoothConned = true;
         createGattManager.nextGetProfile();
     }
 
@@ -562,14 +566,19 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * */
     @Override
     public void bluetoothOff() {
+        isBluetoothConned = false;
         deviceConState(BLUETOOTH_OFF);
         showVolmn(false);
+        ConfigUtil.showToask(this, "请打开蓝牙,连接耳机,方能使用翻译功能");
     }
 
     @Override
     public void noProfile() {
         //ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");
         deviceConState(NO_FIND_DEVICE);
+        if(isBluetoothConned){
+            createGattManager.nextGetProfile();
+        }
     }
 
     @Override
@@ -809,7 +818,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 checkDisOrConn(false, null);
                 break;
             case NO_FIND_DEVICE:
-                checkDisOrConn(true, "请连接耳机，方能使用翻译功能");
+                checkDisOrConn(true, "请检查耳机连接是否正确，方能使用翻译功能");
                 break;
             case NO_REQUEST_DEVICE:
                 checkDisOrConn(true, "连接蓝牙不是本公司产品，请重新连接");

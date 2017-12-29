@@ -505,6 +505,11 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     }
 
     @Override
+    public void deviceConning() {
+
+    }
+
+    @Override
     public void getA2DPProfileFinish(boolean result) {
 
     }

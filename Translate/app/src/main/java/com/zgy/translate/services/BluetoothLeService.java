@@ -84,7 +84,7 @@ public class BluetoothLeService extends Service {
         if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
                 && mBluetoothGatt != null){
             if(mBluetoothGatt.connect()){
-                ConfigUtil.showToask(this, "连接中...");
+                ConfigUtil.showToask(this, "该设备已连接,请等待显示连接成功后使用");
                 return true;
             }else {
                 return false;
@@ -111,6 +111,7 @@ public class BluetoothLeService extends Service {
             return;
         }
         mBluetoothGatt.disconnect();
+        mBluetoothDeviceAddress = null;
     }
 
     public void close(){
@@ -119,6 +120,7 @@ public class BluetoothLeService extends Service {
         }
         mBluetoothGatt.close();
         mBluetoothGatt = null;
+        mBluetoothDeviceAddress = null;
     }
 
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {

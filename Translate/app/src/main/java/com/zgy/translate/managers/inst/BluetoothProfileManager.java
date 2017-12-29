@@ -61,27 +61,30 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
 
         int flag = -1;
         int a2dp = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP);
-        int headset = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET);
-        int health = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEALTH);
+        //int headset = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET);
+
         int gatt = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.GATT);
         int gatt_service = mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.GATT_SERVER);
 
-        if(BluetoothProfile.STATE_CONNECTED == a2dp){
+        if(BluetoothProfile.STATE_CONNECTING == a2dp){
             flag = a2dp;
-        }else if(BluetoothProfile.STATE_CONNECTED == headset){
-            flag = headset;
-        }else if(BluetoothProfile.STATE_CONNECTED == health){
-            flag = health;
+        }else if(BluetoothProfile.STATE_CONNECTING == gatt){
+            flag = gatt;
+        }else if(BluetoothProfile.STATE_CONNECTED == a2dp){
+            flag = a2dp;
         }else if(BluetoothProfile.STATE_CONNECTED == gatt){
             flag = gatt;
-        }else if(a2dp == 0 && headset == 0 && health == 0 && gatt == 0){
+        }else if(a2dp == 0 && gatt == 0){
             flag = 0;
         }
 
-        Log.i("flag--", flag +","+ a2dp +","+ headset +","+ health+","+ gatt + "，" + gatt_service);
+        Log.i("flag--", flag +","+ a2dp +","+ gatt + "，" + gatt_service);
 
         if(flag == 0){
             managerInterface.noProfile();
+        }else if(flag == 1){
+            //连接中
+            managerInterface.deviceConning();
         }else if(flag != -1){
             mBluetoothAdapter.getProfileProxy(mContext, this, flag);
         }
@@ -146,7 +149,7 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
                             }
                         }
                     }*/
-                    if(GlobalConstants.BLUETOOTH_A2DP.equals(device.getName())){
+                    if(device.getName() != null && GlobalConstants.BLUETOOTH_A2DP.equals(device.getName())){
                         fl = true;
                         break;
                     }

@@ -101,11 +101,18 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
         }
     }
 
+    public void disconnectGatt(){
+        if(mBluetoothLeService != null){
+            mBluetoothLeService.disconnect();
+            mBluetoothLeService.close();
+        }
+    }
     /**
      * 获取蓝牙连接信息
      * */
     @Override
     public void bluetoothOff() {
+        //disconnectGatt();
         gattManagerInterface.bluetoothOff();
     }
 
@@ -115,18 +122,17 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
     }
 
     @Override
+    public void deviceConning() {
+        //连接中
+        profileManager.getBluetoothProfile();
+    }
+
+    @Override
     public void getA2DPProfileFinish(boolean result) {
         if(result){
             scanLeDevice(true);
         }else{
-            if(findNum <= 5){
-                findNum++;
-                profileManager.getBluetoothProfile();
-            }else{
-                findNum = 0;
-                gattManagerInterface.noRequest();
-            }
-
+            gattManagerInterface.noRequest();
         }
     }
 

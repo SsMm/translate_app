@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.zgy.translate.activitys.BleBluetoothDeviceManagerActivity;
 import com.zgy.translate.activitys.BluetoothDeviceManagerActivity;
@@ -52,11 +53,19 @@ public class AppReceiverManager {
 
                switch (status){
                    case BluetoothAdapter.STATE_DISCONNECTED: //断开连接
+                       Log.i("blue------", "断开连接");
                        connectionStateInterface.disConnected();
                        //ConfigUtil.showToask(context, GlobalConstants.STATE_DISCONNECTED);
                        break;
                    case BluetoothAdapter.STATE_CONNECTED: //连接上
+                       Log.i("blue------", "连接上");
                        connectionStateInterface.connected();
+                       break;
+                   case BluetoothAdapter.STATE_TURNING_ON:
+                       Log.i("blue------", "打开");
+                       break;
+                   case BluetoothAdapter.STATE_TURNING_OFF:
+                       Log.i("blue------", "断开");
                        break;
                }
            }else if(ConnectivityManager.CONNECTIVITY_ACTION.equals(action)){
@@ -66,6 +75,16 @@ public class AppReceiverManager {
                    //ConfigUtil.showToask(context, "网络连接异常");
                }else{
                    connectionStateInterface.netConnected();
+               }
+           }else if(BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)){
+               int status = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, 0);
+               switch (status){
+                   case BluetoothAdapter.STATE_ON:
+                       Log.i("blue----------", "打开");
+                       break;
+                   case BluetoothAdapter.STATE_OFF:
+                       Log.i("blue---------", "断开");
+                       break;
                }
            }
 
@@ -102,7 +121,7 @@ public class AppReceiverManager {
    /**连接状态*/
    public static IntentFilter connectionStateIntentFilter(){
        final IntentFilter intentFilter = new IntentFilter();
-
+       intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
        intentFilter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 

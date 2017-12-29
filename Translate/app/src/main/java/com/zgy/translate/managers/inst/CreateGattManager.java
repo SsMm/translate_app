@@ -49,6 +49,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
     private CreateGattManagerInterface gattManagerInterface;
     private GattUpdateReceiverManager gattUpdateReceiverManager;
     private ScheduledExecutorService autoCloseScanExecutorService;
+    private int findNum = 0;
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -104,6 +105,11 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
      * 获取蓝牙连接信息
      * */
     @Override
+    public void bluetoothOff() {
+        gattManagerInterface.bluetoothOff();
+    }
+
+    @Override
     public void noProfile() {
         gattManagerInterface.noProfile();
     }
@@ -113,8 +119,14 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
         if(result){
             scanLeDevice(true);
         }else{
-            //gattManagerInterface.noRequest();
-            profileManager.getBluetoothProfile();
+            if(findNum <= 5){
+                findNum++;
+                profileManager.getBluetoothProfile();
+            }else{
+                findNum = 0;
+                gattManagerInterface.noRequest();
+            }
+
         }
     }
 

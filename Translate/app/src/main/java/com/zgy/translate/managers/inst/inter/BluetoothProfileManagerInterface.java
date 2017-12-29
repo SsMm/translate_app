@@ -8,9 +8,8 @@ import android.bluetooth.BluetoothGatt;
 
 public interface BluetoothProfileManagerInterface {
 
+    void bluetoothOff(); //关闭蓝牙
     void noProfile(); //没有连接任何蓝牙设备
-
     void getA2DPProfileFinish(boolean result);
-
     void getBLEProfileFinish(BluetoothGatt gatt, boolean result);
 }

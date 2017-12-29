@@ -119,6 +119,7 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
             Log.i("mBluetoothHeadset", "没有连接");
         }else if(profile == BluetoothProfile.A2DP){
             mBluetoothA2dp = null;
+            managerInterface.bluetoothOff();
             Log.i("A2DP", "没有连接A2DP");
         }else if(profile == BluetoothProfile.HEALTH){
             mBluetoothHealth = null;

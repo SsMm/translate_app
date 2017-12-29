@@ -495,6 +495,11 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     }
 
     @Override
+    public void bluetoothOff() {
+
+    }
+
+    @Override
     public void noProfile() {
 
     }

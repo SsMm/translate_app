@@ -86,8 +86,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private static final String UTTERANCE_ID = "appolo";
     private static boolean FROM_PHONE_MIC = true; //默认从手机麦克风出
-    private static final String DISCONNECTED = "dis"; //蓝牙断开连接
-    private static final String A2DP_CONNECTED = "a2dp_con"; //蓝牙连接成功
+    private static final String BLUETOOTH_OFF = "off"; //蓝牙关闭
+    private static final String DISCONNECTED = "dis"; //耳机断开连接
+    private static final String A2DP_CONNECTED = "a2dp_con"; //耳机连接成功
     private static final String NO_FIND_DEVICE = "no_find"; //蓝牙没有连接设备
     private static final String NO_REQUEST_DEVICE = "no_requ"; //不是要求设备
     private static final String CONNECTED = "coned"; //ble连接成功
@@ -537,6 +538,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @OnClick(R.id.avt_iv_setting) void sett(){
         stopSpeech();
         AudioRecordUtil.stopRecord();
+        showVolmn(false);
         RedirectUtil.redirect(this, MySettingActivity.class);
     }
 
@@ -558,6 +560,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     /**
      * 连接情况
      * */
+    @Override
+    public void bluetoothOff() {
+        deviceConState(BLUETOOTH_OFF);
+        showVolmn(false);
+    }
+
     @Override
     public void noProfile() {
         //ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");
@@ -791,29 +799,35 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * */
     private void deviceConState(String state){
         switch (state){
+            case BLUETOOTH_OFF:
+                checkDisOrConn(true, "请打开蓝牙,连接耳机,方能使用翻译功能");
+                break;
             case DISCONNECTED:
-                ll_noFindDevice.setVisibility(View.VISIBLE);
-                tv_noFindDeviceText.setText("请连接耳机，方能使用翻译功能");
-                showOrHide(true);
+                checkDisOrConn(true, "请连接耳机，方能使用翻译功能");
                 break;
             case A2DP_CONNECTED:
-                ll_noFindDevice.setVisibility(View.GONE);
-                showOrHide(false);
+                checkDisOrConn(false, null);
                 break;
             case NO_FIND_DEVICE:
-                ll_noFindDevice.setVisibility(View.VISIBLE);
-                tv_noFindDeviceText.setText("请连接耳机，方能使用翻译功能");
-                showOrHide(true);
+                checkDisOrConn(true, "请连接耳机，方能使用翻译功能");
                 break;
             case NO_REQUEST_DEVICE:
-                ll_noFindDevice.setVisibility(View.VISIBLE);
-                tv_noFindDeviceText.setText("连接蓝牙不是本公司产品，请重新连接");
-                showOrHide(true);
+                checkDisOrConn(true, "连接蓝牙不是本公司产品，请重新连接");
                 break;
             case CONNECTED:
-                ll_noFindDevice.setVisibility(View.GONE);
-                showOrHide(false);
+                checkDisOrConn(false, null);
                 break;
+        }
+    }
+
+    private void checkDisOrConn(boolean flag, String s){
+        if(flag){
+            ll_noFindDevice.setVisibility(View.VISIBLE);
+            tv_noFindDeviceText.setText(s);
+            showOrHide(true);
+        }else{
+            ll_noFindDevice.setVisibility(View.GONE);
+            showOrHide(false);
         }
     }
 

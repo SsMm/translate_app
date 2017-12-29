@@ -68,6 +68,11 @@ public class GlobalInit {
     private void baseInit(){
         //initBuglyCrashReport();
         initSImagePicker();
+        initShareSDK();
+    }
+
+    private void initShareSDK(){
+
     }
 
     private void initBuglyCrashReport(){

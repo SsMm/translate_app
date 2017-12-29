@@ -146,6 +146,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void initEvent() {
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -156,8 +157,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void disConnected() {
         //耳机蓝牙断开连接
         deviceConState(DISCONNECTED);
-        waveLineView.stopAnim();
-        waveLineView.setVisibility(View.GONE);
+        showVolmn(false);
     }
 
     @Override
@@ -317,6 +317,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     /**语音识别后自动翻译合成*/
     private void speechToTransAndSynt(String result){
+        super.progressDialog.show();
         checkPoolState();
         executorService.submit(new Runnable() {
             @Override
@@ -334,6 +335,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 if(StringUtil.isEmpty(trans)){
                     ConfigUtil.showToask(VoiceTranslateActivity.this, "找不到翻译结果，请重新再试！");
                     stopSpeech();
+                    VoiceTranslateActivity.super.progressDialog.dismiss();
                     return;
                 }
                 Log.i("翻译结果", trans);
@@ -361,6 +363,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         }
                     });
                 } catch (UnsupportedEncodingException e) {
+                    VoiceTranslateActivity.super.progressDialog.dismiss();
                     e.printStackTrace();
                 }
             }
@@ -414,6 +417,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * */
     @Override
     public void goTTS(String dst, ImageView imageView) {
+        if(!isNet){
+            ConfigUtil.showToask(this, "网络异常，功能无法使用");
+            return;
+        }
         isClick = true;
         stopAni();
         currPlayImage = imageView;
@@ -424,17 +431,20 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * 语音合成
      * */
     private void createSynthesizer(String dst){
+        super.progressDialog.dismiss();
         if(!isPhone){
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
                 mAudioManager.setMode(AudioManager.STREAM_MUSIC);
                 //mAudioManager.setMicrophoneMute(false);
                 mAudioManager.setSpeakerphoneOn(true);
+                mAudioManager.setBluetoothScoOn(false);
                 mSpeechSynthesizer.speak(dst);
             }else{
                 //从听筒出
                 mAudioManager.setMode(AudioManager.STREAM_MUSIC);
                 mAudioManager.setSpeakerphoneOn(false);
+                mAudioManager.setBluetoothScoOn(false);
                 mSpeechSynthesizer.speak(dst);
                 //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
             }
@@ -443,6 +453,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
             mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
             mAudioManager.setSpeakerphoneOn(false);
+            mAudioManager.setBluetoothScoOn(false);
             mSpeechSynthesizer.speak(dst);
         }
     }
@@ -526,8 +537,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @OnClick(R.id.avt_iv_setting) void sett(){
         stopSpeech();
         AudioRecordUtil.stopRecord();
-        AudioRecordUtil.stopTrack();
-        AudioRecordUtil.stopCallPlay();
         RedirectUtil.redirect(this, MySettingActivity.class);
     }
 
@@ -567,6 +576,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(state){
             showConState(true);
         }else{
+            showVolmn(false);
             ConfigUtil.showToask(this, "连接失败");
         }
     }
@@ -581,10 +591,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             Log.i("oooo", "oooo"); //启动
             isPhone = false;
             isSpeech = true;
-            waveLineView.setVisibility(View.VISIBLE);
-            waveLineView.startAnim();
-            /*mediaRecorderPath = getPathFile(false);
-            AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);*/
+            showVolmn(true);
+            //mediaRecorderPath = getPathFile(false);
+            //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
             if(isLeftLangCN){
                 toCNSpeech(true);
             }else{
@@ -596,12 +605,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 return;
             }
             isSpeech = false;
-            waveLineView.stopAnim();
-            waveLineView.setVisibility(View.GONE);
+            showVolmn(false);
             Log.i("ccc", "cccc");
             stopSpeech();
-            /*AudioRecordUtil.stopRecord();
-            if(isLeftLangCN){
+            //AudioRecordUtil.stopRecord();
+            /*if(isLeftLangCN){
                 toCNSpeech(false);
             }else{
                 toENSpeech(false);
@@ -609,6 +617,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else if(order.contains("w")){
             Log.i("wwww", "wwww");
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void blueVolume(MonitorRecordAmplitudeEB eb){
+        waveLineView.setVolume(eb.getLevel());
     }
 
     /**
@@ -624,8 +637,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(!isSpeech){
             //开始录音
             isSpeech = true;
-            waveLineView.setVisibility(View.VISIBLE);
-            waveLineView.startAnim();
+            showVolmn(true);
             if(isLeftLangCN){
                 //左中
                 toCNSpeech(true);
@@ -636,8 +648,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else{
             //结束录音
             isSpeech = false;
-            waveLineView.stopAnim();
-            waveLineView.setVisibility(View.GONE);
+            showVolmn(false);
             stopSpeech();
         }
     }
@@ -729,6 +740,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        EventBus.getDefault().unregister(this);
         if(mAsr != null){
             mAsr.unregisterListener(this);
             mAsr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
@@ -754,8 +766,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             createGattManager.onMyDestroy();
             createGattManager = null;
         }
-
-        waveLineView.release();
+        if(waveLineView != null){
+            waveLineView.release();
+            waveLineView = null;
+        }
         animationDrawable = null;
         mBluetoothAdapter = null;
         currPlayImage = null;
@@ -904,5 +918,14 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 });
     }
 
+    private void showVolmn(boolean flag){
+        if(flag){
+            waveLineView.setVisibility(View.VISIBLE);
+            waveLineView.startAnim();
+        }else{
+            waveLineView.stopAnim();
+            waveLineView.setVisibility(View.GONE);
+        }
+    }
 
 }

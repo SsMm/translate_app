@@ -184,8 +184,15 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
 
     }
 
+    public void closeProfileProxy(){
+        if(mBluetoothProfile != null){
+            mBluetoothAdapter.closeProfileProxy(pro, mBluetoothProfile);
+            pro = 0;
+            mBluetoothProfile = null;
+        }
+    }
+
     public void onMyDestroy(){
-        mBluetoothAdapter.closeProfileProxy(pro, mBluetoothProfile);
         bluetoothManager = null;
         mBluetoothAdapter = null;
     }

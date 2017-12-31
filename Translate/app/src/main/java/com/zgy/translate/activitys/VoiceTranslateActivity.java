@@ -87,11 +87,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private static final String UTTERANCE_ID = "appolo";
     private static boolean FROM_PHONE_MIC = true; //默认从手机麦克风出
     private static final String BLUETOOTH_OFF = "off"; //蓝牙关闭
-    private static final String DISCONNECTED = "dis"; //耳机断开连接
+    private static final String A2DP_DISCONNECTED = "dis"; //耳机断开连接
     private static final String A2DP_CONNECTED = "a2dp_con"; //耳机连接成功
     private static final String NO_FIND_DEVICE = "no_find"; //蓝牙没有连接设备
     private static final String NO_REQUEST_DEVICE = "no_requ"; //不是要求设备
-    private static final String CONNECTED = "coned"; //ble连接成功
+    private static final String BLE_CONNECTED = "coned"; //ble连接成功
+    private static final String BLE_DISCONNECTED = "ble_dis"; //ble断开连接
 
     @BindView(R.id.avt_tv_tranLeft) TextView tv_tranLeft; //翻译左语言
     @BindView(R.id.avt_tv_tranRight) TextView tv_tranRight; //翻译右语言
@@ -160,14 +161,14 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         //耳机蓝牙断开连接
         //createGattManager.disconnectGatt();
         isBluetoothConned = false;
-        deviceConState(DISCONNECTED);
+        deviceConState(A2DP_DISCONNECTED);
         showVolmn(false);
     }
 
     @Override
     public void connected() {
         //耳机蓝牙连接成功
-        //deviceConState(A2DP_CONNECTED);
+        deviceConState(A2DP_CONNECTED);
         isBluetoothConned = true;
         createGattManager.nextGetProfile();
     }
@@ -589,10 +590,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void conState(boolean state) {
-        deviceConState(CONNECTED);
         if(state){
+            deviceConState(BLE_CONNECTED);
             showConState(true);
         }else{
+            deviceConState(BLE_DISCONNECTED);
             showVolmn(false);
             ConfigUtil.showToask(this, "连接失败");
         }
@@ -811,11 +813,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             case BLUETOOTH_OFF:
                 checkDisOrConn(true, "请打开蓝牙,连接耳机,方能使用翻译功能");
                 break;
-            case DISCONNECTED:
+            case A2DP_DISCONNECTED:
                 checkDisOrConn(true, "请连接耳机，方能使用翻译功能");
                 break;
             case A2DP_CONNECTED:
-                checkDisOrConn(false, null);
+                checkDisOrConn(true, "耳机连接成功，等待连接翻译功能...");
                 break;
             case NO_FIND_DEVICE:
                 checkDisOrConn(true, "请检查耳机连接是否正确，方能使用翻译功能");
@@ -823,8 +825,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             case NO_REQUEST_DEVICE:
                 checkDisOrConn(true, "连接蓝牙不是本公司产品，请重新连接");
                 break;
-            case CONNECTED:
+            case BLE_CONNECTED:
                 checkDisOrConn(false, null);
+                break;
+            case BLE_DISCONNECTED:
+                checkDisOrConn(true, "断开连接，请等待连接...");
                 break;
         }
     }

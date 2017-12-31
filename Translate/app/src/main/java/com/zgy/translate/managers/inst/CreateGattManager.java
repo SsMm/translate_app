@@ -130,6 +130,11 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
     @Override
     public void getA2DPProfileFinish(boolean result) {
         if(result){
+            profileManager.closeProfileProxy();
+            if(connDevice != null){
+                mBluetoothLeService.connect(connDevice.getAddress());
+                return;
+            }
             scanLeDevice(true);
         }else{
             gattManagerInterface.noRequest();
@@ -298,6 +303,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
 
     public void onMyDestroy(){
         if(profileManager != null){
+            profileManager.closeProfileProxy();
             profileManager.onMyDestroy();
             profileManager = null;
         }
@@ -316,5 +322,6 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
             autoCloseScanExecutorService = null;
         }
         mBluetoothAdapter = null;
+        connDevice = null;
     }
 }

@@ -121,7 +121,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private volatile VoiceTranslateAdapter voiceTranslateAdapter;
     private List<VoiceTransDTO> voiceTransDTOList;
-    private volatile boolean isPhone; //判断是否从手机入
+    private volatile boolean isPhone = true; //判断是否从手机入
     private boolean isSpeech = false; //是否在输入录音
     private boolean isLeftLangCN = true; //左翻译语言是中文
 
@@ -602,6 +602,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             ConfigUtil.showToask(this, "网络异常，功能无法使用");
             return;
         }
+        if(isSpeech && isPhone){
+            ConfigUtil.showToask(this, "请从手机控制");
+            return;
+        }
         if(order.contains("o")){
             Log.i("oooo", "oooo"); //启动
             isPhone = false;
@@ -647,6 +651,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @OnClick(R.id.avt_iv_voice) void startInput(){
         if(!isNet){
             ConfigUtil.showToask(this, "网络异常，功能无法使用");
+            return;
+        }
+        if(isSpeech && !isPhone){
+            ConfigUtil.showToask(this, "请从耳机控制");
             return;
         }
         //从手机入

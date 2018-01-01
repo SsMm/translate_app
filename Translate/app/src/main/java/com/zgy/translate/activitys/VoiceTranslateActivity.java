@@ -3,6 +3,10 @@ package com.zgy.translate.activitys;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioManager;
@@ -611,15 +615,25 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             isPhone = false;
             isSpeech = true;
             showVolmn(true);
-            //mediaRecorderPath = getPathFile(false);
-            //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
-            mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
-            mAudioManager.setMicrophoneMute(false);
-            if(isLeftLangCN){
-                toCNSpeech(true);
-            }else{
-                toENSpeech(true);
-            }
+            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            mAudioManager.startBluetoothSco();
+            registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+                    if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
+                        mAudioManager.setBluetoothScoOn(true);
+                        mAudioManager.setMicrophoneMute(false);
+                        if(isLeftLangCN){
+                            toCNSpeech(true);
+                        }else{
+                            toENSpeech(true);
+                        }
+                        unregisterReceiver(this);
+                    }
+                }
+            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
+
         }else if(order.contains("c")){
             //停止
             if(!isSpeech){
@@ -628,13 +642,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             isSpeech = false;
             showVolmn(false);
             Log.i("ccc", "cccc");
+            mAudioManager.stopBluetoothSco();
+            mAudioManager.setBluetoothScoOn(false);
             stopSpeech();
-            //AudioRecordUtil.stopRecord();
-            /*if(isLeftLangCN){
-                toCNSpeech(false);
-            }else{
-                toENSpeech(false);
-            }*/
         }else if(order.contains("w")){
             Log.i("wwww", "wwww");
         }

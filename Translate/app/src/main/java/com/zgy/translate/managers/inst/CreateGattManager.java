@@ -179,6 +179,9 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
 
     /**操作开始关闭搜索*/
     private void scanLeDevice(final boolean enable){
+        if(mBluetoothAdapter == null){
+            return;
+        }
         if(!mBluetoothAdapter.isEnabled()){
             ConfigUtil.showToask(mContext, "请开启蓝牙");
             return;

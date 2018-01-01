@@ -44,7 +44,10 @@ android {
         }
 
         debug {
-
+            storeFile file('debug.keystore')
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
         }
     }
 
@@ -57,6 +60,7 @@ android {
         debug {
             debuggable true
             minifyEnabled false
+            signingConfig signingConfigs.debug
         }
     }
 

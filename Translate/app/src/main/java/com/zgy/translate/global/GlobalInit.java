@@ -11,6 +11,8 @@ import com.imnjh.imagepicker.SImagePicker;
 import com.meituan.android.walle.WalleChannelReader;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
+import com.umeng.commonsdk.UMConfigure;
+import com.umeng.socialize.PlatformConfig;
 import com.zgy.translate.AppApplication;
 import com.zgy.translate.R;
 import com.zgy.translate.activitys.BluetoothDeviceManagerActivity;
@@ -69,18 +71,27 @@ public class GlobalInit {
         //initBuglyCrashReport();
         initSImagePicker();
         initShareSDK();
+        initSharePlat();
     }
 
     private void initShareSDK(){
-
+        UMConfigure.init(appContext, "59892f08310c9307b60023d0", "Umeng", UMConfigure.DEVICE_TYPE_PHONE, null);
     }
 
     private void initBuglyCrashReport(){
         Beta.canNotifyUserRestart = true;
         //String channel = WalleChannelReader.getChannel(appContext);
         //Bugly.setAppChannel(appContext, channel);
-
+        //UMConfigure.init(appContext, "", channel, UMConfigure.DEVICE_TYPE_PHONE, null);
         Bugly.init(appContext, "ac5bd004b5", isDebug);
+    }
+
+    /**
+     * 初始化分享平台
+     * */
+    private void initSharePlat(){
+        PlatformConfig.setWeixin("wxdc1e388c3822c80b", "3baf1193c85774b3fd9d18447d76cab0");
+        PlatformConfig.setQQZone("100424468", "c7394704798a158208a74ab60104f0ba");
     }
 
     /**

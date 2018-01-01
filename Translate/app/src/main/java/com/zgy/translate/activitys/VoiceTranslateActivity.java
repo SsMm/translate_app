@@ -442,15 +442,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
                 mAudioManager.setMode(AudioManager.STREAM_MUSIC);
-                //mAudioManager.setMicrophoneMute(false);
                 mAudioManager.setSpeakerphoneOn(true);
-                mAudioManager.setBluetoothScoOn(false);
                 mSpeechSynthesizer.speak(dst);
             }else{
                 //从听筒出
                 mAudioManager.setMode(AudioManager.STREAM_MUSIC);
                 mAudioManager.setSpeakerphoneOn(false);
-                mAudioManager.setBluetoothScoOn(false);
                 mSpeechSynthesizer.speak(dst);
                 //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
             }
@@ -459,7 +456,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
             mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
             mAudioManager.setSpeakerphoneOn(false);
-            mAudioManager.setBluetoothScoOn(false);
             mSpeechSynthesizer.speak(dst);
         }
     }
@@ -613,6 +609,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             showVolmn(true);
             //mediaRecorderPath = getPathFile(false);
             //AudioRecordUtil.startRecord(mediaRecorderPath, this, mAudioManager);
+            mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
+            mAudioManager.setMicrophoneMute(false);
             if(isLeftLangCN){
                 toCNSpeech(true);
             }else{
@@ -657,6 +655,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //开始录音
             isSpeech = true;
             showVolmn(true);
+            mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
+            mAudioManager.setMicrophoneMute(true);
             if(isLeftLangCN){
                 //左中
                 toCNSpeech(true);
@@ -922,6 +922,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
                 if(animationDrawable != null && animationDrawable.isRunning()){
                     animationDrawable.stop();
+                    mSpeechSynthesizer.stop();
                     if(currPlayImage != null){
                         currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
                     }

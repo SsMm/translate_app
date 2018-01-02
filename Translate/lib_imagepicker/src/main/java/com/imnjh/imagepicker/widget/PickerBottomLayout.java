@@ -44,10 +44,10 @@ public class PickerBottomLayout extends FrameLayout {
 
   private void init(Context context) {
     inflate(context, R.layout.picker_bottom_layout, this);
-    send = (TextView) findViewById(R.id.send);
-    originalSize = (TextView) findViewById(R.id.original_size);
+    send = findViewById(R.id.send);
+    originalSize = findViewById(R.id.original_size);
     originalContainer = findViewById(R.id.original_container);
-    originalCheckbox = (android.widget.CheckBox) findViewById(R.id.original_checkbox);
+    originalCheckbox = findViewById(R.id.original_checkbox);
     originalCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override
       public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

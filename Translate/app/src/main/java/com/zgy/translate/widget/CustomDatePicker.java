@@ -101,15 +101,15 @@ public class CustomDatePicker {
     }
 
     private void initView() {
-        year_pv = (DatePickerView) datePickerDialog.findViewById(R.id.year_pv);
-        month_pv = (DatePickerView) datePickerDialog.findViewById(R.id.month_pv);
-        day_pv = (DatePickerView) datePickerDialog.findViewById(R.id.day_pv);
-        hour_pv = (DatePickerView) datePickerDialog.findViewById(R.id.hour_pv);
-        minute_pv = (DatePickerView) datePickerDialog.findViewById(R.id.minute_pv);
-        tv_cancle = (TextView) datePickerDialog.findViewById(R.id.tv_cancle);
-        tv_select = (TextView) datePickerDialog.findViewById(R.id.tv_select);
-        hour_text = (TextView) datePickerDialog.findViewById(R.id.hour_text);
-        minute_text = (TextView) datePickerDialog.findViewById(R.id.minute_text);
+        year_pv = datePickerDialog.findViewById(R.id.year_pv);
+        month_pv = datePickerDialog.findViewById(R.id.month_pv);
+        day_pv = datePickerDialog.findViewById(R.id.day_pv);
+        hour_pv = datePickerDialog.findViewById(R.id.hour_pv);
+        minute_pv = datePickerDialog.findViewById(R.id.minute_pv);
+        tv_cancle = datePickerDialog.findViewById(R.id.tv_cancle);
+        tv_select = datePickerDialog.findViewById(R.id.tv_select);
+        hour_text = datePickerDialog.findViewById(R.id.hour_text);
+        minute_text = datePickerDialog.findViewById(R.id.minute_text);
 
         tv_cancle.setOnClickListener(new View.OnClickListener() {
             @Override

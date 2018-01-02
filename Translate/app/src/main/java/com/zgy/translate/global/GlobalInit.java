@@ -73,11 +73,11 @@ public class GlobalInit {
         //initBuglyCrashReport();
         initSImagePicker();
         initShareSDK();
-        initSharePlat();
+        //initSharePlat();
     }
 
     private void initShareSDK(){
-        UMConfigure.init(appContext, "59892f08310c9307b60023d0", "Umeng", UMConfigure.DEVICE_TYPE_PHONE, null);
+        UMConfigure.init(appContext, "59892f08310c9307b60023d0", null, UMConfigure.DEVICE_TYPE_PHONE, "");
     }
 
     /**

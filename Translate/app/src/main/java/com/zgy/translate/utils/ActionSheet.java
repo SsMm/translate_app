@@ -63,8 +63,8 @@ public class ActionSheet extends Dialog {
     private void initView(){
         LinearLayout contentView = (LinearLayout) LayoutInflater.from(mContext.getApplicationContext())
                 .inflate(R.layout.layout_actionsheet, null);
-        itemContainer = (LinearLayout)contentView.findViewById(R.id.layout_actionsheet_items_container);
-        layout_cancel = (LinearLayout)contentView.findViewById(R.id.layout_cancel);
+        itemContainer = contentView.findViewById(R.id.layout_actionsheet_items_container);
+        layout_cancel = contentView.findViewById(R.id.layout_cancel);
         setContentView(contentView);
 
         getWindow().setGravity(Gravity.BOTTOM);

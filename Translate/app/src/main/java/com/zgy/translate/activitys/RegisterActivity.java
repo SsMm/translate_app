@@ -1,10 +1,12 @@
 package com.zgy.translate.activitys;
 
+import android.Manifest;
 import android.os.CountDownTimer;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.controllers.RequestController;
@@ -50,6 +52,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
     @Override
     public void initView() {
         commonLoginManager = new CommonLoginManager(this, this);
+        showPermission();
     }
 
     @Override
@@ -221,5 +224,20 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
     @Override
     public void loginFail() {
         super.progressDialog.dismiss();
+    }
+
+    private void showPermission(){
+        RxPermissions rxPermissions = new RxPermissions(this);
+
+        rxPermissions.request(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                .subscribe(granted -> {
+                    if(!granted){
+                        ConfigUtil.showToask(this, "请在手机设置中打开相应权限！");
+                    }
+                });
     }
 }

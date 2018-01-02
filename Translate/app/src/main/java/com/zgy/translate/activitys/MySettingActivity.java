@@ -13,6 +13,8 @@ import com.umeng.socialize.ShareAction;
 import com.umeng.socialize.UMShareAPI;
 import com.umeng.socialize.UMShareListener;
 import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.media.UMImage;
+import com.umeng.socialize.media.UMWeb;
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.controllers.ActivityController;
@@ -24,8 +26,11 @@ import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.managers.GlideImageManager;
 import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.UserMessageManager;
+import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.widget.CommonBar;
+
+import java.net.URLDecoder;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -154,31 +159,35 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     private static final String TEXT = "我有一副超棒的蓝牙耳机，跟专用的翻译APP结合使用，很智能，功能多，操作方便，推荐给你。";
     private static final String TITLE = "蓝牙智能耳机翻译APP";
     private static final String URL = "http://www.sharesdk.cn";
-    private static final String ICON_URL = "http://usermgr.oss-cn-beijing.aliyuncs.com/73af738ea11cc3270b92d57346b6dc9aedcddff5.jpeg";
 
     /**一键分享*/
     private void showShare() {
-        new ShareAction(this).withText(TEXT)
-                .setDisplayList(SHARE_MEDIA.WEIXIN, SHARE_MEDIA.QQ, SHARE_MEDIA.QZONE)
+        UMImage image = new UMImage(MySettingActivity.this, GlobalParams.userInfoDTO.getIcon());
+        UMWeb web = new UMWeb(URL);
+        web.setTitle(TITLE);
+        web.setDescription(TEXT);
+        web.setThumb(image);
+        new ShareAction(MySettingActivity.this).withMedia(web)
+                .setDisplayList(SHARE_MEDIA.WEIXIN, SHARE_MEDIA.QQ, SHARE_MEDIA.QZONE, SHARE_MEDIA.SMS, SHARE_MEDIA.EMAIL)
                 .setCallback(new UMShareListener() {
                     @Override
                     public void onStart(SHARE_MEDIA share_media) {
-
+                        Log.i("onStart", "onStart");
                     }
 
                     @Override
                     public void onResult(SHARE_MEDIA share_media) {
-
+                        ConfigUtil.showToask(MySettingActivity.this, "分享成功");
                     }
 
                     @Override
                     public void onError(SHARE_MEDIA share_media, Throwable throwable) {
-
+                        ConfigUtil.showToask(MySettingActivity.this, "分享失败" + throwable.getMessage());
                     }
 
                     @Override
                     public void onCancel(SHARE_MEDIA share_media) {
-
+                        ConfigUtil.showToask(MySettingActivity.this, "取消分享");
                     }
                 }).open();
     }
@@ -236,5 +245,6 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        UMShareAPI.get(this).release();
     }
 }

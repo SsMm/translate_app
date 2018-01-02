@@ -85,7 +85,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
 
         //初始化服务
         Intent gattServiceIntent = new Intent(mContext.getApplicationContext(), BluetoothLeService.class);
-        mContext.bindService(gattServiceIntent, mServiceConnection, mContext.BIND_AUTO_CREATE);
+        mContext.bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
         //注册
         gattUpdateReceiverManager = new GattUpdateReceiverManager(mContext);

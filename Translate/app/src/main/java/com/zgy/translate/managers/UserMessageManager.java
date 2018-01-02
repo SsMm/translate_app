@@ -51,11 +51,7 @@ public class UserMessageManager {
      * */
     public static boolean isUserInfo(Context context){
         String result = SharedPreferencesUtil.readShare(context, USER_INFO, USER_NAME);
-        if(TextUtils.isEmpty(result)){
-            return false;  //没有用户信息
-        }else{
-            return true;  //有用户信息
-        }
+        return !TextUtils.isEmpty(result);
     }
 
     /**

@@ -180,7 +180,7 @@ public final class StringUtil {
 	}
 
 	public static String concate(String... array) {
-		return join((String) null, array);
+		return join(null, array);
 	}
 
 	public static <T> String join(StringGetter<T> getter, String separator, T... array) {
@@ -201,8 +201,8 @@ public final class StringUtil {
 		return join(getter, null, array);
 	}
 
-	public static interface StringGetter<T> {
-		public String get(T t);
+	public interface StringGetter<T> {
+		String get(T t);
 	}
 
 	// copy from oplayer

@@ -32,7 +32,7 @@ public class SquareRelativeLayout extends RelativeLayout {
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
-    checkBox = (CheckBox) findViewById(R.id.checkbox);
+    checkBox = findViewById(R.id.checkbox);
   }
 
   public void setPhotoView(ImageView imageView) {

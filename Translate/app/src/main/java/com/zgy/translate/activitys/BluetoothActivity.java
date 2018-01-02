@@ -19,10 +19,10 @@ public class BluetoothActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
 
-        startRecordBut = (Button) findViewById(R.id.but_startRecord);
-        stopRecordBut = (Button) findViewById(R.id.but_stopRecord);
-        startPlayBut = (Button) findViewById(R.id.but_startPlay);
-        stopPlayBut = (Button) findViewById(R.id.but_stopPlay);
+        startRecordBut = findViewById(R.id.but_startRecord);
+        stopRecordBut = findViewById(R.id.but_stopRecord);
+        startPlayBut = findViewById(R.id.but_startPlay);
+        stopPlayBut = findViewById(R.id.but_stopPlay);
 
         bluetoothRecorder = new BluetoothRecorder();
 

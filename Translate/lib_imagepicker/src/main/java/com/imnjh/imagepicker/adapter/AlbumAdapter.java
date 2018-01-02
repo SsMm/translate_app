@@ -42,7 +42,7 @@ public class AlbumAdapter extends CursorAdapter {
           LayoutInflater.from(parent.getContext()).inflate(R.layout.item_album_selected,
               parent, false);
     }
-    TextView albumName = (TextView) convertView.findViewById(android.R.id.text1);
+    TextView albumName = convertView.findViewById(android.R.id.text1);
     Album album = Album.valueOf(getCursor());
     albumName.setText(album.getDisplayName());
     return convertView;
@@ -66,8 +66,8 @@ public class AlbumAdapter extends CursorAdapter {
     TextView photoCount;
 
     public AlbumViewHolder(View itemView) {
-      albumTitle = (TextView) itemView.findViewById(R.id.album_name);
-      photoCount = (TextView) itemView.findViewById(R.id.photo_count);
+      albumTitle = itemView.findViewById(R.id.album_name);
+      photoCount = itemView.findViewById(R.id.photo_count);
     }
   }
 }

@@ -114,7 +114,7 @@
         android:layout_centerInParent="true"
         android:background="@color/colorText"
         android:orientation="horizontal"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <jaygoo.widget.wlv.WaveLineView
             android:id="@+id/avt_wlv"

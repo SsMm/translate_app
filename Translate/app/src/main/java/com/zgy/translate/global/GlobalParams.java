@@ -22,6 +22,8 @@ public class GlobalParams {
     public static UserInfoDTO userInfoDTO; //用户基本信息
     public static String DEMO_PATH = "btrecorder" + ".3gp";
 
+    public static String BLUETOOTH_MAC; //蓝牙mac地址
+
 
 
 }

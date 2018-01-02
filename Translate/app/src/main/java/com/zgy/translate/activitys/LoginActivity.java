@@ -1,11 +1,13 @@
 package com.zgy.translate.activitys;
 
 
+import android.Manifest;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
 import com.zgy.translate.controllers.RequestController;
@@ -29,7 +31,6 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
     @BindView(R.id.al_et_phoneNum) EditText et_phoneNum; //手机号
     @BindView(R.id.al_et_phonePaw) EditText et_phonePaw; //密码
 
-    private RequestController requestController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +42,7 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
 
     @Override
     public void initView() {
-        requestController = RequestController.getInstance();
+        showPermission();
     }
 
     @Override
@@ -86,7 +87,7 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
             request.setAppId("earbud_app");
             request.setDevice(ConfigUtil.phoneDevice() + ConfigUtil.phoneMsg(this));
             super.progressDialog.show();
-            requestController.init(this)
+            RequestController.getInstance().init(this)
                     .addRequest(RequestController.LOGIN, request)
                     .addCallInterface(this)
                     .build();
@@ -138,11 +139,23 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
         super.progressDialog.dismiss();
     }
 
+    private void showPermission(){
+        RxPermissions rxPermissions = new RxPermissions(this);
+
+        rxPermissions.request(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                .subscribe(granted -> {
+                    if(!granted){
+                        ConfigUtil.showToask(this, "请在手机设置中打开相应权限！");
+                    }
+                });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(requestController != null){
-            requestController = null;
-        }
     }
 }

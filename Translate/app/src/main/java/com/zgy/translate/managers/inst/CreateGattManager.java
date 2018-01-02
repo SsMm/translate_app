@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.global.GlobalGattAttributes;
+import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.managers.inst.inter.BluetoothProfileManagerInterface;
 import com.zgy.translate.managers.inst.inter.CreateGattManagerInterface;
 import com.zgy.translate.receivers.interfaces.BluetoothLeGattUpdateReceiverInterface;
@@ -154,12 +155,17 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             Log.i("device", device.getName() + device.getAddress());
-            if(device.getUuids() != null){
-                for (ParcelUuid parcelUuid : device.getUuids()){
-                    Log.i("ParcelUuid", parcelUuid.getUuid().toString());
-                }
+            if(device.getName() == null){
+                return;
             }
-            if(device.getName() != null && GlobalConstants.BLUETOOTH_BLE.equals(device.getName())){
+            String mac = GlobalParams.BLUETOOTH_MAC;
+            String m = null;
+            if(mac != null){
+                String[] ma = mac.split(":");
+                m = "C0" + ":" + ma[1] + ":" + ma[2] + ":" + ma[3] + ":" + ma[4] + ":" + ma[5];
+                Log.i("ma-----", m);
+            }
+            if(device.getAddress().equals(m) && GlobalConstants.BLUETOOTH_BLE.equals(device.getName())){
                 if(mScanning){
                     scanLeDevice(false);
                 }

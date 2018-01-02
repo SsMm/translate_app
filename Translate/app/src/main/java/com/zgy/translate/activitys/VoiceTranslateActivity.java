@@ -107,6 +107,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @BindView(R.id.avt_iv_showCon_icon) ImageView iv_showConIcon;
     @BindView(R.id.avt_tv_showConText) TextView tv_showConText;
     @BindView(R.id.avt_vs_netCon) ViewStub vs_unableConn; //无网络
+    @BindView(R.id.avt_ll_wlv) LinearLayout ll_showWlv; //显示波浪
     @BindView(R.id.avt_wlv) WaveLineView waveLineView;
     @BindView(R.id.avt_ll_noFindDevice) LinearLayout ll_noFindDevice; //没有找到蓝牙设备
     @BindView(R.id.avt_tv_noFindDeviceText) TextView tv_noFindDeviceText; //
@@ -138,7 +139,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private volatile boolean isClick = false; //false是录完音自动播放，true是点击在此播放
     private boolean isNet = true; //网络连接情况
-    private boolean isBluetoothConned = false;
+    private boolean isBluetoothConned = false; //蓝牙连接
+    private boolean isBLEConned = false; //Ble连接
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,7 +157,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void initEvent() {
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -256,11 +257,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             userInfoDTO = UserMessageManager.getUserInfo(this);
         }
 
-        if(userInfoDTO.isMic()){ //默认从手机麦克风出
-            FROM_PHONE_MIC = true;
-        }else{
-            FROM_PHONE_MIC = false;
-        }
+        //默认从手机麦克风出
+        FROM_PHONE_MIC = userInfoDTO.isMic();
 
     }
 
@@ -449,7 +447,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(!isPhone){
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
-                mAudioManager.setMode(AudioManager.STREAM_MUSIC);
+                mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                mAudioManager.setMicrophoneMute(false);
                 mAudioManager.setSpeakerphoneOn(true);
                 mSpeechSynthesizer.speak(dst);
             }else{
@@ -462,8 +461,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else{
             //手机入，耳机出
             //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
-            mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
+            mAudioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
             mAudioManager.setSpeakerphoneOn(false);
+            if(!mAudioManager.isBluetoothA2dpOn()){
+                mAudioManager.setBluetoothA2dpOn(true);
+            }
+            mAudioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);
             mSpeechSynthesizer.speak(dst);
         }
     }
@@ -652,11 +655,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void blueVolume(MonitorRecordAmplitudeEB eb){
-        waveLineView.setVolume(eb.getLevel());
-    }
-
     /**
      * 开始录音
      * */
@@ -687,9 +685,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                //介绍录音
                 //结束录音
                 isSpeech = false;
+                showVolmn(false);
+                stopSpeech();
+                break;
+            default:
                 showVolmn(false);
                 stopSpeech();
                 break;
@@ -783,7 +784,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
         if(mAsr != null){
             mAsr.unregisterListener(this);
             mAsr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
@@ -850,9 +850,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 checkDisOrConn(true, "连接蓝牙不是本公司产品，请重新连接");
                 break;
             case BLE_CONNECTED:
+                isBLEConned = true;
                 checkDisOrConn(false, null);
                 break;
             case BLE_DISCONNECTED:
+                isBLEConned = false;
                 showVolmn(false);
                 ConfigUtil.showToask(this, "连接失败");
                 checkDisOrConn(true, "断开连接，请等待连接...");
@@ -978,11 +980,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private void showVolmn(boolean flag){
         if(flag){
+            ll_showWlv.setVisibility(View.VISIBLE);
             waveLineView.setVisibility(View.VISIBLE);
             waveLineView.startAnim();
         }else{
             waveLineView.stopAnim();
             waveLineView.setVisibility(View.GONE);
+            ll_showWlv.setVisibility(View.GONE);
         }
     }
 

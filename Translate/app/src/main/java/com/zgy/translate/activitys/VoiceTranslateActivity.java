@@ -16,6 +16,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.ImageView;
@@ -86,7 +87,7 @@ import jaygoo.widget.wlv.WaveLineView;
 
 
 public class VoiceTranslateActivity extends BaseActivity implements EventListener, SpeechSynthesizerListener,
-        VoiceTranslateAdapterInterface, CreateGattManagerInterface{
+        VoiceTranslateAdapterInterface, CreateGattManagerInterface, View.OnTouchListener{
 
     private static final String UTTERANCE_ID = "appolo";
     private static boolean FROM_PHONE_MIC = true; //默认从手机麦克风出
@@ -109,6 +110,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @BindView(R.id.avt_wlv) WaveLineView waveLineView;
     @BindView(R.id.avt_ll_noFindDevice) LinearLayout ll_noFindDevice; //没有找到蓝牙设备
     @BindView(R.id.avt_tv_noFindDeviceText) TextView tv_noFindDeviceText; //
+
 
 
     private EventManager mAsr; //识别
@@ -219,6 +221,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         voiceTranslateAdapter = new VoiceTranslateAdapter(this, voiceTransDTOList, this);
         rv_tran.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         rv_tran.setAdapter(voiceTranslateAdapter);
+
+        iv_phoneVoic.setOnTouchListener(this);
 
     }
 
@@ -623,7 +627,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
                     if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
                         mAudioManager.setBluetoothScoOn(true);
-                        mAudioManager.setMicrophoneMute(false);
                         if(isLeftLangCN){
                             toCNSpeech(true);
                         }else{
@@ -658,38 +661,42 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     /**
      * 开始录音
      * */
-    @OnClick(R.id.avt_iv_voice) void startInput(){
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
         if(!isNet){
             ConfigUtil.showToask(this, "网络异常，功能无法使用");
-            return;
+            return false;
         }
         if(isSpeech && !isPhone){
             ConfigUtil.showToask(this, "请从耳机控制");
-            return;
+            return false;
         }
-        //从手机入
-        isPhone = true;
-        if(!isSpeech){
-            //开始录音
-            isSpeech = true;
-            showVolmn(true);
-            mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
-            mAudioManager.setMicrophoneMute(true);
-            if(isLeftLangCN){
-                //左中
-                toCNSpeech(true);
-            }else{
-                //左英
-                toENSpeech(true);
-            }
-        }else{
-            //结束录音
-            isSpeech = false;
-            showVolmn(false);
-            stopSpeech();
+        switch (motionEvent.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                //开始录音
+                isPhone = true;
+                isSpeech = true;
+                showVolmn(true);
+                mAudioManager.stopBluetoothSco();
+                mAudioManager.setBluetoothScoOn(false);
+                if(isLeftLangCN){
+                    //左中
+                    toCNSpeech(true);
+                }else{
+                    //左英
+                    toENSpeech(true);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                //介绍录音
+                //结束录音
+                isSpeech = false;
+                showVolmn(false);
+                stopSpeech();
+                break;
         }
+        return true;
     }
-
 
     /**中文输入*/
     private void toCNSpeech(boolean flag){

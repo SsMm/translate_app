@@ -9,6 +9,7 @@ import android.util.Log;
 import com.imnjh.imagepicker.PickerConfig;
 import com.imnjh.imagepicker.SImagePicker;
 import com.meituan.android.walle.WalleChannelReader;
+import com.squareup.leakcanary.LeakCanary;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.umeng.commonsdk.UMConfigure;
@@ -68,6 +69,7 @@ public class GlobalInit {
     }
 
     private void baseInit(){
+        initLeakCanary();
         //initBuglyCrashReport();
         initSImagePicker();
         initShareSDK();
@@ -76,6 +78,16 @@ public class GlobalInit {
 
     private void initShareSDK(){
         UMConfigure.init(appContext, "59892f08310c9307b60023d0", "Umeng", UMConfigure.DEVICE_TYPE_PHONE, null);
+    }
+
+    /**
+     * 初始化LeakCanary
+     * */
+    private void initLeakCanary(){
+        if(LeakCanary.isInAnalyzerProcess(appContext)){
+            return;
+        }
+        LeakCanary.install(appApplication);
     }
 
     private void initBuglyCrashReport(){

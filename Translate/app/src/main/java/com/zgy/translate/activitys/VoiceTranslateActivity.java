@@ -574,6 +574,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         isBluetoothConned = false;
         deviceConState(BLUETOOTH_OFF);
         showVolmn(false);
+        stopSpeech();
         ConfigUtil.showToask(this, "请打开蓝牙,连接耳机,方能使用翻译功能");
     }
 
@@ -599,8 +600,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             showConState(true);
         }else{
             deviceConState(BLE_DISCONNECTED);
-            showVolmn(false);
-            ConfigUtil.showToask(this, "连接失败");
         }
     }
 
@@ -854,7 +853,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 checkDisOrConn(false, null);
                 break;
             case BLE_DISCONNECTED:
+                showVolmn(false);
+                ConfigUtil.showToask(this, "连接失败");
                 checkDisOrConn(true, "断开连接，请等待连接...");
+                if(isSpeech){
+                    stopSpeech();
+                }
                 break;
         }
     }

@@ -116,7 +116,6 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
         bundle.putString("code", code);
         bundle.putString("phone", phone);
         RedirectUtil.redirect(this, FindPawActivity.class, bundle);
-        finish();
     }
 
     @Override

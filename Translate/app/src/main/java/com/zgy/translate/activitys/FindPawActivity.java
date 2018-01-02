@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.zgy.translate.R;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.controllers.ActivityController;
 import com.zgy.translate.controllers.RequestController;
 import com.zgy.translate.domains.dtos.UserInfoDTO;
 import com.zgy.translate.domains.request.CommonRequest;
@@ -139,6 +140,7 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
     public void loginSuccess() {
         super.progressDialog.dismiss();
         ConfigUtil.showToask(this, "登录成功");
+        ActivityController.finishActivity();
         RedirectUtil.redirect(this, VoiceTranslateActivity.class);
         finish();
     }

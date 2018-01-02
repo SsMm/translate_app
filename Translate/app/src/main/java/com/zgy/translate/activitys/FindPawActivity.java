@@ -16,7 +16,10 @@ import com.zgy.translate.global.GlobalConstants;
 import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.UserMessageManager;
+import com.zgy.translate.managers.inst.CommonLoginManager;
+import com.zgy.translate.managers.inst.inter.CommonLoginManagerInterface;
 import com.zgy.translate.utils.ConfigUtil;
+import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
 import com.zgy.translate.widget.CommonBar;
 
@@ -24,7 +27,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class FindPawActivity extends BaseActivity implements CommonBar.CommonBarInterface, RequestController.RequestCallInterface{
+public class FindPawActivity extends BaseActivity implements CommonBar.CommonBarInterface, RequestController.RequestCallInterface,
+        CommonLoginManagerInterface{
 
     @BindView(R.id.afp_cb) CommonBar commonBar;
     @BindView(R.id.afp_tv_phone) TextView tv_phone;
@@ -33,6 +37,8 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
 
     private String code;
     private String phone;
+    private String paw;
+    private CommonLoginManager commonLoginManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +53,7 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
         phone = getIntent().getStringExtra("phone");
         code = getIntent().getStringExtra("code");
         tv_phone.setText(phone);
+        commonLoginManager = new CommonLoginManager(this, this);
     }
 
     @Override
@@ -56,7 +63,6 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
 
     @Override
     public void initData() {
-
     }
 
     @Override
@@ -90,7 +96,7 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
     }
 
     @OnClick(R.id.afp_tv_submit) void submit(){
-        String paw = et_paw.getText().toString();
+        paw = et_paw.getText().toString();
         String pasAg = et_pawAgain.getText().toString();
         if(StringUtil.isEmpty(paw) || StringUtil.isEmpty(pasAg)){
             ConfigUtil.showToask(this, GlobalConstants.NULL_MSG);
@@ -114,9 +120,9 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
 
     @Override
     public void success(CommonResponse response) {
-        super.progressDialog.dismiss();
         ConfigUtil.showToask(this, "修改成功");
-        finish();
+        commonLoginManager.comLogin(phone, paw);
+        ConfigUtil.showToask(this, "正在登录...");
     }
 
     @Override
@@ -127,5 +133,29 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
     @Override
     public void fail(String error) {
         super.progressDialog.dismiss();
+    }
+
+    @Override
+    public void loginSuccess() {
+        super.progressDialog.dismiss();
+        ConfigUtil.showToask(this, "登录成功");
+        RedirectUtil.redirect(this, VoiceTranslateActivity.class);
+        finish();
+    }
+
+    @Override
+    public void loginError() {
+        super.progressDialog.dismiss();
+    }
+
+    @Override
+    public void loginFail() {
+        super.progressDialog.dismiss();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        commonLoginManager = null;
     }
 }

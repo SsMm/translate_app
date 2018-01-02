@@ -20,8 +20,8 @@
 
         <ImageView
             android:id="@+id/itb_iv_goTTS"
-            android:layout_width="@dimen/dimen_30"
-            android:layout_height="@dimen/dimen_30"
+            android:layout_width="@dimen/dimen_25"
+            android:layout_height="@dimen/dimen_25"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="@dimen/margin_10"
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_toStartOf="@id/itb_iv_goTTS"
             android:textSize="@dimen/text_16"
-            android:textColor="#5acba8"/>
+            android:textColor="#80cef9"/>
 
         <TextView
             android:id="@+id/itb_tv_dst"

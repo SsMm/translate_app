@@ -214,7 +214,6 @@ public class RequestController {
             public void onFailure(Call<CommonResponse> call, Throwable t) {
                 callInterface.fail(t.toString());
                 ConfigUtil.showToask(mContext, t.toString());
-                Log.i("failure----", t.toString());
             }
         });
     }

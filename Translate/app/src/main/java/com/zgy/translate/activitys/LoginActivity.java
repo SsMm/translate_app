@@ -97,11 +97,13 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
 
     @OnClick(R.id.al_tv_register) void register(){
         RedirectUtil.redirect(this, RegisterActivity.class);
+        finish();
     }
 
     /**忘记密码*/
     @OnClick(R.id.al_ll_forgetMsg) void forget(){
         RedirectUtil.redirect(this, ForgetPawActivity.class);
+        finish();
     }
 
 

@@ -107,14 +107,24 @@
         </android.support.v7.widget.RecyclerView>
     </LinearLayout>
 
-    <jaygoo.widget.wlv.WaveLineView
-        android:id="@+id/avt_wlv"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
+    <LinearLayout
+        android:id="@+id/avt_ll_wlv"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        wlv:wlvBackgroundColor="@android:color/transparent"
-        wlv:wlvLineColor="@color/colorCommon"
-        wlv:wlvMoveSpeed="290"/>
+        android:background="@color/colorText"
+        android:orientation="horizontal"
+        android:visibility="visible">
+
+        <jaygoo.widget.wlv.WaveLineView
+            android:id="@+id/avt_wlv"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            wlv:wlvBackgroundColor="@android:color/transparent"
+            wlv:wlvLineColor="@color/colorBlack"
+            wlv:wlvMoveSpeed="290"/>
+    </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/avt_ll_noFindDevice"

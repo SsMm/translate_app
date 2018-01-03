@@ -77,7 +77,7 @@ public class BluetoothLeService extends Service {
 
     public synchronized boolean connect(final String address){
         if(mBluetoothAdapter == null || address == null){
-            Log.i(TAG, "BluetoothAdapter not initialized or unspecified address.");
+            ConfigUtil.showToask(this, "连接地址为空!");
             return false;
         }
 
@@ -93,7 +93,6 @@ public class BluetoothLeService extends Service {
 
         final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         if (device == null) {
-            Log.i(TAG, "Device not found.  Unable to connect.");
             ConfigUtil.showToask(this, "没有发现该设备，不能连接");
             return false;
         }

@@ -442,7 +442,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             if(FROM_PHONE_MIC){ //从麦克风出
                 mAudioManager.setMode(AudioManager.STREAM_MUSIC);
                 //mAudioManager.setMicrophoneMute(false);
-                mAudioManager.setBluetoothScoOn(false);
                 mAudioManager.setSpeakerphoneOn(true);
                 mSpeechSynthesizer.speak(dst);
             }else{
@@ -854,6 +853,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             case BLE_DISCONNECTED:
                 isBLEConned = false;
                 showVolmn(false);
+                stopAni();
                 ConfigUtil.showToask(this, "连接失败");
                 checkDisOrConn(true, "断开连接，请等待连接...");
                 if(isSpeech){
@@ -981,8 +981,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             @Override
             public void run() {
                 if(flag){
-                    ll_showWlv.setVisibility(View.VISIBLE);
                     waveLineView.setVisibility(View.VISIBLE);
+                    ll_showWlv.setBackgroundColor(getResources().getColor(R.color.colorText));
+                    ll_showWlv.setVisibility(View.VISIBLE);
                     waveLineView.startAnim();
                 }else{
                     waveLineView.stopAnim();

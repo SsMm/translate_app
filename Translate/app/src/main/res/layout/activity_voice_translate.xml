@@ -112,9 +112,9 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:background="@color/colorText"
+        android:background="@android:color/transparent"
         android:orientation="horizontal"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <jaygoo.widget.wlv.WaveLineView
             android:id="@+id/avt_wlv"
@@ -123,6 +123,7 @@
             wlv:wlvBackgroundColor="@android:color/transparent"
             wlv:wlvLineColor="@color/colorBlack"
             wlv:wlvMoveSpeed="290"/>
+
     </LinearLayout>
 
 

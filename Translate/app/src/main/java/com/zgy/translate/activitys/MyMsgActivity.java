@@ -2,6 +2,7 @@ package com.zgy.translate.activitys;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +27,7 @@ import com.zgy.translate.managers.MultiMediaManager;
 import com.zgy.translate.managers.UserMessageManager;
 import com.zgy.translate.managers.inst.ImageInst;
 import com.zgy.translate.utils.ActionSheet;
+import com.zgy.translate.utils.ByteConstants;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.OptItem;
 import com.zgy.translate.utils.RedirectUtil;
@@ -45,6 +47,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
+import top.zibin.luban.Luban;
+import top.zibin.luban.OnCompressListener;
 
 public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarInterface, ConfigUtil.AlertDialogInterface,
         RequestController.RequestCallInterface{
@@ -192,19 +196,50 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
         if(resultCode == RESULT_OK){
             if(requestCode == PHOTO){
                 isIcon = true;
-                callRequest(ICON, null);
                 MultiMediaManager.updateImages(this, photoUri);
-                //GlideImageManager.showFileDownloadImage(this, photoFile.getAbsolutePath(), civ_headerIcon);
+                thumbImage();
             }else if(requestCode ==  REQUEST_CODE){
                 List<String> path = data.getStringArrayListExtra(PhotoPickerActivity.EXTRA_RESULT_SELECTION);
                 if(path != null && path.size() > 0){
                     photoFile = new File(path.get(0));
                     isIcon = true;
-                    callRequest(ICON, null);
-                    //GlideImageManager.showFileDownloadImage(this, path.get(0), civ_headerIcon);
+                    thumbImage();
                 }
             }
         }
+    }
+
+    private void thumbImage(){
+        Luban.with(this)
+                .load(photoFile.getAbsoluteFile())
+                .ignoreBy(100)
+                .setTargetDir(getPath())
+                .setCompressListener(new OnCompressListener() {
+                    @Override
+                    public void onStart() {
+
+                    }
+
+                    @Override
+                    public void onSuccess(File file) {
+                        photoFile = file;
+                        callRequest(ICON, null);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                }).launch();
+    }
+
+    private String getPath() {
+        String path = Environment.getExternalStorageDirectory() + "/appolo/image/";
+        File file = new File(path);
+        if (file.mkdirs()) {
+            return path;
+        }
+        return path;
     }
 
     @OnClick(R.id.amm_cn_goPer) void per(){

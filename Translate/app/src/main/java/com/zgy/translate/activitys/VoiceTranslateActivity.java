@@ -983,7 +983,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             public void run() {
                 if(flag){
                     waveLineView.setVisibility(View.VISIBLE);
-                    ll_showWlv.setBackgroundColor(getResources().getColor(R.color.colorText));
+                    ll_showWlv.setBackgroundColor(getResources().getColor(R.color.colorBlack));
                     ll_showWlv.setVisibility(View.VISIBLE);
                     waveLineView.startAnim();
                 }else{

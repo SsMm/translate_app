@@ -166,7 +166,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void disConnected() {
         //耳机蓝牙断开连接
-        //createGattManager.disconnectGatt();
+        createGattManager.disconnectGatt();
         isBluetoothConned = false;
         deviceConState(A2DP_DISCONNECTED);
         showVolmn(false);
@@ -571,6 +571,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         deviceConState(BLUETOOTH_OFF);
         showVolmn(false);
         stopSpeech();
+        stopAni();
         ConfigUtil.showToask(this, "请打开蓝牙,连接耳机,方能使用翻译功能");
     }
 

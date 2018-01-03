@@ -103,6 +103,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
     }
 
     public void disconnectGatt(){
+        connDevice = null;
         if(mBluetoothLeService != null){
             mBluetoothLeService.disconnect();
             mBluetoothLeService.close();
@@ -225,7 +226,9 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
     public void gattDisconnected() {
         gattManagerInterface.conState(false);
         mBluetoothLeService.disconnect();
-        mBluetoothLeService.connect(connDevice.getAddress());
+        if(connDevice != null){
+            mBluetoothLeService.connect(connDevice.getAddress());
+        }
     }
 
     @Override

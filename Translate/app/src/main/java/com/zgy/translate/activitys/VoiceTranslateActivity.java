@@ -441,7 +441,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
                 mAudioManager.setMode(AudioManager.STREAM_MUSIC);
-                mAudioManager.setMicrophoneMute(false);
+                //mAudioManager.setMicrophoneMute(false);
+                mAudioManager.setBluetoothScoOn(false);
                 mAudioManager.setSpeakerphoneOn(true);
                 mSpeechSynthesizer.speak(dst);
             }else{
@@ -542,7 +543,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * */
     @OnClick(R.id.avt_iv_setting) void sett(){
         stopSpeech();
-        AudioRecordUtil.stopRecord();
+        stopAni();
         showVolmn(false);
         RedirectUtil.redirect(this, MySettingActivity.class);
     }

@@ -225,6 +225,9 @@ public class RequestController {
         }
     }
 
+    public void removeCallInterface(){
+        callInterface = null;
+    }
 
 
     public interface RequestCallInterface{

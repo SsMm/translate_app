@@ -159,5 +159,6 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
     protected void onDestroy() {
         super.onDestroy();
         commonLoginManager = null;
+        RequestController.getInstance().removeCallInterface();
     }
 }

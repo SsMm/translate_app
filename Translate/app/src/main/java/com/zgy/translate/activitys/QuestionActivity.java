@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import com.zgy.translate.R;
 import com.zgy.translate.adapters.QuestionAdapter;
 import com.zgy.translate.base.BaseActivity;
+import com.zgy.translate.controllers.RequestController;
 import com.zgy.translate.widget.CommonBar;
 
 import butterknife.BindView;
@@ -78,5 +79,11 @@ public class QuestionActivity extends BaseActivity implements CommonBar.CommonBa
     @Override
     public void netConnected() {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        RequestController.getInstance().removeCallInterface();
     }
 }

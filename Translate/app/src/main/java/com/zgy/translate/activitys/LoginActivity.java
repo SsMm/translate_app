@@ -159,5 +159,6 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        RequestController.getInstance().removeCallInterface();
     }
 }

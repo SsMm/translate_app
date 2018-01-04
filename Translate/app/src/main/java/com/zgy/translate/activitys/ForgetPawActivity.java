@@ -158,6 +158,7 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        RequestController.getInstance().removeCallInterface();
     }
 
     private void showPermission(){

@@ -173,5 +173,6 @@ public class RevisePhoneActivity extends BaseActivity implements CommonBar.Commo
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        RequestController.getInstance().removeCallInterface();
     }
 }

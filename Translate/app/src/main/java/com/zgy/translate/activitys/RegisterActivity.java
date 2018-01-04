@@ -205,6 +205,7 @@ public class RegisterActivity extends BaseActivity implements CommonBar.CommonBa
         super.onDestroy();
         request = null;
         commonLoginManager = null;
+        RequestController.getInstance().removeCallInterface();
     }
 
 

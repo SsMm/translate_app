@@ -225,8 +225,9 @@ public class RequestController {
         }
     }
 
-    public void removeCallInterface(){
+    public void removeParams(){
         callInterface = null;
+        mContext = null;
     }
 
 

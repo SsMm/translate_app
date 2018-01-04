@@ -427,6 +427,6 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
             customDatePicker = null;
         }
         request = null;
-        RequestController.getInstance().removeCallInterface();
+        RequestController.getInstance().removeParams();
     }
 }

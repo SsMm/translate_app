@@ -84,6 +84,6 @@ public class QuestionActivity extends BaseActivity implements CommonBar.CommonBa
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RequestController.getInstance().removeCallInterface();
+        RequestController.getInstance().removeParams();
     }
 }

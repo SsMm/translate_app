@@ -136,6 +136,6 @@ public class PersonalizedActivity extends BaseActivity implements CommonBar.Comm
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RequestController.getInstance().removeCallInterface();
+        RequestController.getInstance().removeParams();
     }
 }

@@ -247,6 +247,6 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     protected void onDestroy() {
         super.onDestroy();
         UMShareAPI.get(this).release();
-        RequestController.getInstance().removeCallInterface();
+        RequestController.getInstance().removeParams();
     }
 }

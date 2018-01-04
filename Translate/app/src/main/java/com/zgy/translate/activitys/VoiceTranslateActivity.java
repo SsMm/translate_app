@@ -305,6 +305,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             case SpeechConstant.CALLBACK_EVENT_ASR_LONG_SPEECH:
                 Log.i("长语音结束", "长语音结束");
                 Log.i("结束后录音结果", inputResult);
+                showVolmn(false);
                 if(!StringUtil.isEmpty(inputResult)){
                     speechToTransAndSynt(inputResult);
                     inputResult = "";
@@ -440,13 +441,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(!isPhone){
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
-                mAudioManager.setMode(AudioManager.STREAM_MUSIC);
+                mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 //mAudioManager.setMicrophoneMute(false);
                 mAudioManager.setSpeakerphoneOn(true);
                 mSpeechSynthesizer.speak(dst);
             }else{
                 //从听筒出
-                mAudioManager.setMode(AudioManager.STREAM_MUSIC);
+                mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 mAudioManager.setSpeakerphoneOn(false);
                 mSpeechSynthesizer.speak(dst);
                 //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
@@ -622,6 +623,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
                     if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
                         mAudioManager.setBluetoothScoOn(true);
+                        mAudioManager.setMicrophoneMute(false);
                         if(isLeftLangCN){
                             toCNSpeech(true);
                         }else{
@@ -631,18 +633,15 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     }
                 }
             }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
-
         }else if(order.contains("c")){
             //停止
             if(!isSpeech){
                 return;
             }
             isSpeech = false;
-            showVolmn(false);
             Log.i("ccc", "cccc");
             mAudioManager.stopBluetoothSco();
             mAudioManager.setBluetoothScoOn(false);
-            mAudioManager.setMicrophoneMute(true);
             stopSpeech();
         }else if(order.contains("w")){
             Log.i("wwww", "wwww");
@@ -667,7 +666,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 //开始录音
                 isPhone = true;
                 isSpeech = true;
-                mAudioManager.setMode(AudioManager.STREAM_VOICE_CALL);
+                mAudioManager.setMode(AudioManager.MODE_NORMAL);
                 mAudioManager.setMicrophoneMute(true);
                 if(isLeftLangCN){
                     //左中
@@ -680,7 +679,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             case MotionEvent.ACTION_UP:
                 //结束录音
                 isSpeech = false;
-                showVolmn(false);
                 stopSpeech();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -969,7 +967,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.READ_PHONE_STATE)
                 .subscribe(granted -> {
                     if(!granted){
                         ConfigUtil.showToask(this, "请在手机设置中打开相应权限！");

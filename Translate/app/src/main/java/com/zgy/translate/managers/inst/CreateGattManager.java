@@ -295,7 +295,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
                         mBluetoothLeService.setCharacteristicNotification(mNotifyCharacteristic, false);
                         mNotifyCharacteristic = null;
                     }
-                    mBluetoothLeService.readCharacteristic(characteristic);
+                    //mBluetoothLeService.readCharacteristic(characteristic);
                 }
                 if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
                     Log.i("可通知", "可通知");

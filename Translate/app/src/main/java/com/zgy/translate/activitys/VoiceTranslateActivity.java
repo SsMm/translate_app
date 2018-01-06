@@ -462,7 +462,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             }
             mAudioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP,
                     AudioManager.ROUTE_BLUETOOTH);*/
+            mAudioManager.stopBluetoothSco();
+            mAudioManager.setBluetoothScoOn(false);
             mAudioManager.setMode(AudioManager.MODE_NORMAL);
+            setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
             mAudioManager.setSpeakerphoneOn(false);
             mSpeechSynthesizer.speak(dst);
         }
@@ -618,7 +621,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             Log.i("oooo", "oooo"); //启动
             isPhone = false;
             isSpeech = true;
-            /*mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             mAudioManager.startBluetoothSco();
             registerReceiver(new BroadcastReceiver() {
                 @Override
@@ -635,12 +638,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         unregisterReceiver(this);
                     }
                 }
-            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));*/
-            if(isLeftLangCN){
-                toCNSpeech(true);
-            }else{
-                toENSpeech(true);
-            }
+            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
         }else if(order.contains("c")){
             //停止
             if(!isSpeech){
@@ -648,8 +646,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             }
             isSpeech = false;
             Log.i("ccc", "cccc");
-           //mAudioManager.stopBluetoothSco();
-            //mAudioManager.setBluetoothScoOn(false);
+            mAudioManager.stopBluetoothSco();
+            mAudioManager.setBluetoothScoOn(false);
             stopSpeech();
         }else if(order.contains("w")){
             Log.i("wwww", "wwww");
@@ -666,7 +664,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             return false;
         }
         if(isSpeech && !isPhone){
-            ConfigUtil.showToask(this, "请从耳机控制");
+            ConfigUtil.showToask(this, "请从耳机控制,可能耳机录音没有关闭，请再次按下耳机控制键");
             return false;
         }
         switch (motionEvent.getAction()){

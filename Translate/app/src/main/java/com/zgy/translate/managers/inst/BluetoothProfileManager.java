@@ -151,6 +151,7 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
                     }*/
                     if(device.getName() != null && GlobalConstants.BLUETOOTH_A2DP.equals(device.getName())){
                         GlobalParams.BLUETOOTH_MAC = device.getAddress();
+                        GlobalParams.BlUETOOTH_DEVICE = device;
                         fl = true;
                         break;
                     }

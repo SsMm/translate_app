@@ -1,5 +1,6 @@
 package com.zgy.translate.global;
 
+import android.bluetooth.BluetoothDevice;
 import android.os.Environment;
 
 import com.zgy.translate.domains.dtos.UserInfoDTO;
@@ -23,6 +24,7 @@ public class GlobalParams {
     public static String DEMO_PATH = "btrecorder" + ".3gp";
 
     public static String BLUETOOTH_MAC; //蓝牙mac地址
+    public static BluetoothDevice BlUETOOTH_DEVICE; // 连接蓝牙
 
 
 

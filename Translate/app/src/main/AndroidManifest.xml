@@ -36,37 +36,35 @@
         android:theme="@style/AppThemeNoActionBar"
         tools:replace="android:theme">
 
-        <!--友盟-->
+        <!-- 友盟 -->
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity
             android:name="com.tencent.tauth.AuthActivity"
             android:launchMode="singleTask"
-            android:noHistory="true" >
-
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="tencent100424468" />
             </intent-filter>
         </activity>
-
         <activity
             android:name="com.tencent.connect.common.AssistActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <meta-data
             android:name="UMENG_APPKEY"
-            android:value="561cae6ae0f55abd990035bf" >
-        </meta-data>
+            android:value="561cae6ae0f55abd990035bf"></meta-data>
 
         <!-- baidu 语音识别 -->
         <meta-data
@@ -95,24 +93,34 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-
-        <activity android:name=".MainActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.BluetoothActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.BluetoothDeviceManagerActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.VoiceTranslateActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.BleBluetoothDeviceManagerActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.BluetoothActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.BluetoothDeviceManagerActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.VoiceTranslateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.BleBluetoothDeviceManagerActivity"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".services.BluetoothLeService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".activitys.SplashActivity"
+        <service
+            android:name=".services.BluetoothService"
+            android:enabled="true"
+            android:exported="true"/>
+
+        <activity
+            android:name=".activitys.SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -121,28 +129,41 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activitys.LoginActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.QuestionActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.RegisterActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.ForgetPawActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.FindPawActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.RevisePhoneActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.MySettingActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.AboutActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.FeedBackActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.MyMsgActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activitys.PersonalizedActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".activitys.LoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.QuestionActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.RegisterActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.ForgetPawActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.FindPawActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.RevisePhoneActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.MySettingActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.AboutActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.FeedBackActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.MyMsgActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activitys.PersonalizedActivity"
+            android:screenOrientation="portrait" />
+
+
     </application>
 
 </manifest>

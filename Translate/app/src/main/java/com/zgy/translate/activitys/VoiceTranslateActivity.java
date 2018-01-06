@@ -442,12 +442,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
                 mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                //mAudioManager.setMicrophoneMute(false);
                 mAudioManager.setSpeakerphoneOn(true);
                 mSpeechSynthesizer.speak(dst);
             }else{
                 //从听筒出
                 mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
                 mAudioManager.setSpeakerphoneOn(false);
                 mSpeechSynthesizer.speak(dst);
                 //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
@@ -455,12 +455,15 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }else{
             //手机入，耳机出
             //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
-            mAudioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
+            /*mAudioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
             mAudioManager.setSpeakerphoneOn(false);
             if(!mAudioManager.isBluetoothA2dpOn()){
                 mAudioManager.setBluetoothA2dpOn(true);
             }
-            mAudioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP, AudioManager.ROUTE_BLUETOOTH);
+            mAudioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP,
+                    AudioManager.ROUTE_BLUETOOTH);*/
+            mAudioManager.setMode(AudioManager.MODE_NORMAL);
+            mAudioManager.setSpeakerphoneOn(false);
             mSpeechSynthesizer.speak(dst);
         }
     }
@@ -615,7 +618,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             Log.i("oooo", "oooo"); //启动
             isPhone = false;
             isSpeech = true;
-            mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+            /*mAudioManager.setMode(AudioManager.MODE_IN_CALL);
             mAudioManager.startBluetoothSco();
             registerReceiver(new BroadcastReceiver() {
                 @Override
@@ -632,7 +635,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         unregisterReceiver(this);
                     }
                 }
-            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
+            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));*/
+            if(isLeftLangCN){
+                toCNSpeech(true);
+            }else{
+                toENSpeech(true);
+            }
         }else if(order.contains("c")){
             //停止
             if(!isSpeech){
@@ -640,8 +648,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             }
             isSpeech = false;
             Log.i("ccc", "cccc");
-            mAudioManager.stopBluetoothSco();
-            mAudioManager.setBluetoothScoOn(false);
+           //mAudioManager.stopBluetoothSco();
+            //mAudioManager.setBluetoothScoOn(false);
             stopSpeech();
         }else if(order.contains("w")){
             Log.i("wwww", "wwww");

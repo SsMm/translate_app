@@ -621,7 +621,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             Log.i("oooo", "oooo"); //启动
             isPhone = false;
             isSpeech = true;
-            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            /*mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             mAudioManager.startBluetoothSco();
             registerReceiver(new BroadcastReceiver() {
                 @Override
@@ -638,7 +638,14 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         unregisterReceiver(this);
                     }
                 }
-            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
+            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));*/
+            mAudioManager.setMode(AudioManager.MODE_NORMAL);
+            mAudioManager.setMicrophoneMute(true);
+            if(isLeftLangCN){
+                toCNSpeech(true);
+            }else{
+                toENSpeech(true);
+            }
         }else if(order.contains("c")){
             //停止
             if(!isSpeech){

@@ -50,6 +50,7 @@ import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.http.HttpGet;
 import com.zgy.translate.managers.CacheManager;
 import com.zgy.translate.managers.UserMessageManager;
+import com.zgy.translate.managers.inst.CreateBlueManager;
 import com.zgy.translate.managers.inst.CreateGattManager;
 import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.inst.inter.CreateGattManagerInterface;
@@ -133,6 +134,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private boolean isLeftLangCN = true; //左翻译语言是中文
 
     private CreateGattManager createGattManager;
+    private CreateBlueManager createBlueManager;
     private BluetoothAdapter mBluetoothAdapter;
     private volatile AnimationDrawable animationDrawable;
     private volatile ImageView currPlayImage;
@@ -166,7 +168,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void disConnected() {
         //耳机蓝牙断开连接
-        createGattManager.disconnectGatt();
+        if(createGattManager != null){
+            createGattManager.disconnectGatt();
+        }
+        if(createBlueManager != null){
+            createBlueManager.closeSocket();
+        }
+
         isBluetoothConned = false;
         deviceConState(A2DP_DISCONNECTED);
         showVolmn(false);
@@ -177,7 +185,14 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         //耳机蓝牙连接成功
         deviceConState(A2DP_CONNECTED);
         isBluetoothConned = true;
-        createGattManager.nextGetProfile();
+        if(createGattManager != null){
+            createGattManager.nextGetProfile();
+        }
+
+        if(createBlueManager != null){
+            createBlueManager.nextGetProfile();
+        }
+
     }
 
     @Override
@@ -213,8 +228,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         initTTs();
 
         //与gatt建立联系
-        createGattManager = new CreateGattManager(this, this);
-        createGattManager.setParams(mBluetoothAdapter).init();
+        //createGattManager = new CreateGattManager(this, this);
+        //createGattManager.setParams(mBluetoothAdapter).init();
+
+        createBlueManager = new CreateBlueManager(this, this);
+        createBlueManager.init();
 
         voiceTransDTOList = new ArrayList<>();
         voiceTranslateAdapter = new VoiceTranslateAdapter(this, voiceTransDTOList, this);
@@ -587,7 +605,14 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         //ConfigUtil.showToask(this, "请连接耳机，方能使用翻译功能");
         deviceConState(NO_FIND_DEVICE);
         if(isBluetoothConned){
-            createGattManager.nextGetProfile();
+            if(createGattManager != null){
+                createGattManager.nextGetProfile();
+            }
+
+            if(createBlueManager != null){
+                createBlueManager.nextGetProfile();
+            }
+
         }
     }
 
@@ -621,7 +646,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             Log.i("oooo", "oooo"); //启动
             isPhone = false;
             isSpeech = true;
-            /*mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             mAudioManager.startBluetoothSco();
             registerReceiver(new BroadcastReceiver() {
                 @Override
@@ -638,9 +663,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         unregisterReceiver(this);
                     }
                 }
-            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));*/
-            mAudioManager.setMode(AudioManager.MODE_NORMAL);
-            mAudioManager.setMicrophoneMute(true);
+            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
+            //mAudioManager.setMode(AudioManager.MODE_NORMAL);
+            //mAudioManager.setMicrophoneMute(true);
             if(isLeftLangCN){
                 toCNSpeech(true);
             }else{
@@ -814,6 +839,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(createGattManager != null){
             createGattManager.onMyDestroy();
             createGattManager = null;
+        }
+        if(createBlueManager != null){
+            createBlueManager.onMyDestroy();
+            createBlueManager = null;
         }
         if(waveLineView != null){
             waveLineView.release();

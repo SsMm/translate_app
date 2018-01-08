@@ -664,11 +664,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
             //mAudioManager.setMode(AudioManager.MODE_NORMAL);
             //mAudioManager.setMicrophoneMute(true);
-            if(isLeftLangCN){
+            /*if(isLeftLangCN){
                 toCNSpeech(true);
             }else{
                 toENSpeech(true);
-            }
+            }*/
         }else if(order.contains("c")){
             //停止
             if(!isSpeech){

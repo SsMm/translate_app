@@ -30,7 +30,9 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface, Blue
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mBluetoothService = ((BluetoothService.LocalBinder) service).getService();
-            mBluetoothService.connectThread(GlobalParams.BlUETOOTH_DEVICE);
+            if(GlobalParams.BlUETOOTH_DEVICE != null){
+                mBluetoothService.connectThread(GlobalParams.BlUETOOTH_DEVICE);
+            }
         }
 
         @Override
@@ -140,12 +142,12 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface, Blue
             profileManager.onMyDestroy();
             profileManager = null;
         }
-        mContext.unbindService(mServiceConnection);
         if(mBluetoothService != null){
             mBluetoothService.closeSocket();
             mBluetoothService = null;
         }
-
+        mContext.unbindService(mServiceConnection);
+        mContext = null;
     }
 
 }

@@ -8,9 +8,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.zgy.translate.activitys.BluetoothDeviceManagerActivity;
-import com.zgy.translate.managers.sing.BluetoothConedThread;
-import com.zgy.translate.utils.ByteTransform;
 import com.zgy.translate.utils.ConfigUtil;
 
 import java.io.IOException;

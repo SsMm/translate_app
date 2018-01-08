@@ -480,8 +480,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             }
             mAudioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP,
                     AudioManager.ROUTE_BLUETOOTH);*/
-            mAudioManager.stopBluetoothSco();
-            mAudioManager.setBluetoothScoOn(false);
             mAudioManager.setMode(AudioManager.MODE_NORMAL);
             setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
             mAudioManager.setSpeakerphoneOn(false);
@@ -704,6 +702,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 //开始录音
                 isPhone = true;
                 isSpeech = true;
+                mAudioManager.stopBluetoothSco();
+                mAudioManager.setBluetoothScoOn(false);
                 mAudioManager.setMode(AudioManager.MODE_NORMAL);
                 mAudioManager.setMicrophoneMute(true);
                 if(isLeftLangCN){

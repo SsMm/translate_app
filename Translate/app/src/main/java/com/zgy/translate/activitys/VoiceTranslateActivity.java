@@ -110,6 +110,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @BindView(R.id.avt_vs_netCon) ViewStub vs_unableConn; //无网络
     @BindView(R.id.avt_ll_wlv) LinearLayout ll_showWlv; //显示波浪
     @BindView(R.id.avt_wlv) WaveLineView waveLineView;
+    @BindView(R.id.avt_tv_showInputType) TextView tv_showInputType;
     @BindView(R.id.avt_ll_noFindDevice) LinearLayout ll_noFindDevice; //没有找到蓝牙设备
     @BindView(R.id.avt_tv_noFindDeviceText) TextView tv_noFindDeviceText; //
 
@@ -213,8 +214,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
 
         mAudioManager = (AudioManager) getApplicationContext().getSystemService(AUDIO_SERVICE);
+        int mode = mAudioManager.getMode();
+        Log.w("mode------", mode + "");
 
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
+        final BluetoothManager bluetoothManager = (BluetoothManager)getApplicationContext().getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
         if(mBluetoothAdapter == null){
@@ -347,15 +350,28 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             @Override
             public void run() {
                 String trans = null;
-                if(isLeftLangCN){
-                    trans = HttpGet.get(TransManager.getInstance()
-                            .params(result, GlobalConstants.CH, GlobalConstants.EN)
-                            .build());
+                if(isPhone){
+                    if(!isLeftLangCN){
+                        trans = HttpGet.get(TransManager.getInstance()
+                                .params(result, GlobalConstants.CH, GlobalConstants.EN)
+                                .build());
+                    }else{
+                        trans = HttpGet.get(TransManager.getInstance()
+                                .params(result, GlobalConstants.EN, GlobalConstants.CH)
+                                .build());
+                    }
                 }else{
-                    trans = HttpGet.get(TransManager.getInstance()
-                            .params(result, GlobalConstants.EN, GlobalConstants.CH)
-                            .build());
+                    if(isLeftLangCN){
+                        trans = HttpGet.get(TransManager.getInstance()
+                                .params(result, GlobalConstants.CH, GlobalConstants.EN)
+                                .build());
+                    }else{
+                        trans = HttpGet.get(TransManager.getInstance()
+                                .params(result, GlobalConstants.EN, GlobalConstants.CH)
+                                .build());
+                    }
                 }
+
                 if(StringUtil.isEmpty(trans)){
                     ConfigUtil.showToask(VoiceTranslateActivity.this, "找不到翻译结果，请重新再试！");
                     stopSpeech();
@@ -706,7 +722,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 mAudioManager.setBluetoothScoOn(false);
                 mAudioManager.setMode(AudioManager.MODE_NORMAL);
                 mAudioManager.setMicrophoneMute(true);
-                if(isLeftLangCN){
+                if(!isLeftLangCN){
                     //左中
                     toCNSpeech(true);
                 }else{
@@ -1010,6 +1026,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.READ_PHONE_STATE)
                 .subscribe(granted -> {
                     if(!granted){
@@ -1026,10 +1043,25 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     waveLineView.setVisibility(View.VISIBLE);
                     ll_showWlv.setBackgroundColor(getResources().getColor(R.color.colorBlack));
                     ll_showWlv.setVisibility(View.VISIBLE);
+                    if(isPhone){
+                        if(!isLeftLangCN){
+                            tv_showInputType.setText("中文输入...");
+                        }else{
+                            tv_showInputType.setText("English input...");
+                        }
+                    }else{
+                        if(isLeftLangCN){
+                            tv_showInputType.setText("中文输入...");
+                        }else{
+                            tv_showInputType.setText("English input...");
+                        }
+                    }
+                    tv_showInputType.setVisibility(View.VISIBLE);
                     waveLineView.startAnim();
                 }else{
                     waveLineView.stopAnim();
                     waveLineView.setVisibility(View.GONE);
+                    tv_showInputType.setVisibility(View.GONE);
                     ll_showWlv.setVisibility(View.GONE);
                 }
             }

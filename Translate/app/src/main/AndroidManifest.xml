@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.zgy.translate">
 
-    <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
+
     <!-- <uses-permission android:name="android.permission.CAMERA"/> -->
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -64,7 +64,7 @@
 
         <meta-data
             android:name="UMENG_APPKEY"
-            android:value="561cae6ae0f55abd990035bf"></meta-data>
+            android:value="561cae6ae0f55abd990035bf"/>
 
         <!-- baidu 语音识别 -->
         <meta-data

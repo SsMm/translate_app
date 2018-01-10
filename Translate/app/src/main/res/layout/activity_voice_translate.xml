@@ -115,8 +115,16 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:background="@android:color/transparent"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:visibility="visible">
+
+        <TextView
+            android:id="@+id/avt_tv_showInputType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textSize="@dimen/text_16"
+            android:textColor="@color/colorText"/>
 
         <jaygoo.widget.wlv.WaveLineView
             android:id="@+id/avt_wlv"

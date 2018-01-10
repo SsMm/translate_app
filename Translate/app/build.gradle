@@ -9,7 +9,7 @@ android {
     buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "com.zgy.translate"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -60,7 +60,7 @@ android {
         debug {
             debuggable true
             minifyEnabled false
-            signingConfig signingConfigs.debug
+            //signingConfig signingConfigs.debug
         }
     }
 
@@ -83,6 +83,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile project(path: ':lib_imagepicker')
     compile "org.greenrobot:eventbus:${rootProject.ext.eventbusLibVersion}"
     compile "com.google.code.gson:gson:${rootProject.ext.gsonLibVersion}"
     compile "com.github.bumptech.glide:glide:${rootProject.ext.glideLibVersion}"
@@ -98,12 +99,16 @@ dependencies {
     compile "com.tencent.bugly:crashreport_upgrade:${rootProject.ext.crashreportLibVersion}"
     compile "com.meituan.android.walle:library:${rootProject.ext.walleLibVersion}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${rootProject.ext.butterknifeLibVersion}"
+    compile "com.squareup.leakcanary:leakcanary-android:${rootProject.ext.leakcanaryLibVersion}"//debugCompile
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:multidex:1.0.1'
     compile 'com.tencent.bugly:nativecrashreport:latest.release'
     compile 'com.android.support:appcompat-v7:26.0.0-alpha1'
+    compile 'com.android.support:support-v4:26.0.0-alpha1'
     compile 'com.android.support:design:26.0.0-alpha1'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.github.Jay-Goo:WaveLineView:v1.0.3'
-    compile project(path: ':lib_imagepicker')
+    compile 'top.zibin:Luban:1.1.3'
+
+
 }

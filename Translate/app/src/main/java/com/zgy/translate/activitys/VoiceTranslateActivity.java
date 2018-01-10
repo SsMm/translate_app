@@ -164,6 +164,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void initData() {
+        String dir = getApplicationInfo().nativeLibraryDir;
+        Log.w("dir------", dir);
     }
 
     @Override

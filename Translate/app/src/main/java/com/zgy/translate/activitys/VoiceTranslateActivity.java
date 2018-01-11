@@ -58,6 +58,7 @@ import com.zgy.translate.managers.sing.SpeechAsrStartParamManager;
 import com.zgy.translate.managers.sing.TransManager;
 import com.zgy.translate.utils.AudioRecordUtil;
 import com.zgy.translate.utils.ConfigUtil;
+import com.zgy.translate.utils.ErrorTranslation;
 import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
 
@@ -324,6 +325,15 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_FINISH: // 识别结束， 最终识别结果或可能的错误
+                RecogResult recog = RecogResult.parseJson(params);
+                if(recog.hasError()){
+                    int errorCode = recog.getError();
+                    String error = ErrorTranslation.recogError(errorCode);
+                    Log.w("asr error =====", error);
+                    Log.w("asr params =====", params);
+                    ConfigUtil.showToask(this, error);
+                    showVolmn(false);
+                }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_LONG_SPEECH:
                 Log.i("长语音结束", "长语音结束");

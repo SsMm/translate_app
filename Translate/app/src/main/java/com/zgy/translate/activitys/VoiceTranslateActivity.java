@@ -363,7 +363,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             public void run() {
                 String trans = null;
                 if(isPhone){
-                    if(!isLeftLangCN){
+                    if(isLeftLangCN){
                         trans = HttpGet.get(TransManager.getInstance()
                                 .params(result, GlobalConstants.CH, GlobalConstants.EN)
                                 .build());
@@ -373,7 +373,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                                 .build());
                     }
                 }else{
-                    if(isLeftLangCN){
+                    if(!isLeftLangCN){
                         trans = HttpGet.get(TransManager.getInstance()
                                 .params(result, GlobalConstants.CH, GlobalConstants.EN)
                                 .build());
@@ -488,6 +488,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
                 mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                mSpeechSynthesizer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mAudioManager.setSpeakerphoneOn(true);
                 mSpeechSynthesizer.speak(dst);
             }else{
@@ -682,7 +683,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
                         mAudioManager.setBluetoothScoOn(true);
                         mAudioManager.setMicrophoneMute(false);
-                        if(isLeftLangCN){
+                        if(!isLeftLangCN){
                             toCNSpeech(true);
                         }else{
                             toENSpeech(true);
@@ -731,11 +732,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 //开始录音
                 isPhone = true;
                 isSpeech = true;
-                mAudioManager.stopBluetoothSco();
+                /*mAudioManager.stopBluetoothSco();
                 mAudioManager.setBluetoothScoOn(false);
                 mAudioManager.setMode(AudioManager.MODE_NORMAL);
-                mAudioManager.setMicrophoneMute(true);
-                if(!isLeftLangCN){
+                mAudioManager.setMicrophoneMute(true);*/
+                if(isLeftLangCN){
                     //左中
                     toCNSpeech(true);
                 }else{
@@ -1057,13 +1058,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     ll_showWlv.setBackgroundColor(getResources().getColor(R.color.colorBlack));
                     ll_showWlv.setVisibility(View.VISIBLE);
                     if(isPhone){
-                        if(!isLeftLangCN){
+                        if(isLeftLangCN){
                             tv_showInputType.setText("中文输入...");
                         }else{
                             tv_showInputType.setText("English input...");
                         }
                     }else{
-                        if(isLeftLangCN){
+                        if(!isLeftLangCN){
                             tv_showInputType.setText("中文输入...");
                         }else{
                             tv_showInputType.setText("English input...");

@@ -262,9 +262,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         mSpeechSynthesizer.setSpeechSynthesizerListener(this);
         mSpeechSynthesizer.setAppId(GlobalKey.TTS_APP_ID);
         mSpeechSynthesizer.setApiKey(GlobalKey.TTS_APP_KEY, GlobalKey.TTS_SECURITY_KEY);
-        mSpeechSynthesizer.auth(TtsMode.ONLINE); //在线混合
+        mSpeechSynthesizer.auth(TtsMode.ONLINE); //在线模式
         mSpeechSynthesizer.setParam(SpeechSynthesizer.PARAM_SPEAKER, "0");
-        mSpeechSynthesizer.initTts(TtsMode.ONLINE); //初始化在线混合
+        mSpeechSynthesizer.initTts(TtsMode.ONLINE); //初始化在线引擎
     }
 
     @Override
@@ -303,11 +303,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void onEvent(String name, String params, byte[] bytes, int offset, int length) {
         switch (name){
             case SpeechConstant.CALLBACK_EVENT_ASR_READY: // 引擎准备就绪，可以开始说话
-                ConfigUtil.showToask(this, "开始讲话。。。");
+                //ConfigUtil.showToask(this, "开始讲话。。。");
                 showVolmn(true);
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_BEGIN: // 检测到用户的已经开始说话
-                //ConfigUtil.showToask(this, "开始讲话");
+                ConfigUtil.showToask(this, "开始讲话");
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_END: // 检测到用户的已经停止说话
                 ConfigUtil.showToask(this, "停止说话");
@@ -331,7 +331,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     String error = ErrorTranslation.recogError(errorCode);
                     Log.w("asr error =====", error);
                     Log.w("asr params =====", params);
-                    ConfigUtil.showToask(this, error);
+                    ConfigUtil.showToask(this, "识别" + error);
                     showVolmn(false);
                 }
                 break;
@@ -343,7 +343,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     speechToTransAndSynt(inputResult);
                     inputResult = "";
                 }else{
-                    ConfigUtil.showToask(this, "没有检测到输入，请重新输入");
+                    ConfigUtil.showToask(this, "请放慢语速或提高说话音量，再次输入");
                 }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_VOLUME:
@@ -493,7 +493,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             }else{
                 //从听筒出
                 mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+                //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+                mSpeechSynthesizer.setAudioStreamType(AudioManager.STREAM_VOICE_CALL);
                 mAudioManager.setSpeakerphoneOn(false);
                 mSpeechSynthesizer.speak(dst);
                 //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
@@ -509,7 +510,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             mAudioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP,
                     AudioManager.ROUTE_BLUETOOTH);*/
             mAudioManager.setMode(AudioManager.MODE_NORMAL);
-            setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+            //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
             mAudioManager.setSpeakerphoneOn(false);
             mSpeechSynthesizer.speak(dst);
         }
@@ -564,7 +565,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void onError(String utteranceId, SpeechError speechError) {
-        ConfigUtil.showToask(this, "语音合成出错，请重新合成");
+        ConfigUtil.showToask(this, "合成" + speechError.description);
     }
 
     private void close(){

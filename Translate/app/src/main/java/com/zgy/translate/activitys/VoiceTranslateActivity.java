@@ -165,8 +165,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     @Override
     public void initData() {
-        String dir = getApplicationInfo().nativeLibraryDir;
-        Log.w("dir------", dir);
+        //String dir = getApplicationInfo().nativeLibraryDir;
+        //Log.w("dir------", dir);
     }
 
     @Override
@@ -217,8 +217,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         }
 
         mAudioManager = (AudioManager) getApplicationContext().getSystemService(AUDIO_SERVICE);
-        int mode = mAudioManager.getMode();
-        Log.w("mode------", mode + "");
 
         final BluetoothManager bluetoothManager = (BluetoothManager)getApplicationContext().getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();

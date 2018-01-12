@@ -110,7 +110,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @BindView(R.id.avt_tv_showConText) TextView tv_showConText;
     @BindView(R.id.avt_vs_netCon) ViewStub vs_unableConn; //无网络
     @BindView(R.id.avt_ll_wlv) LinearLayout ll_showWlv; //显示波浪
-    @BindView(R.id.avt_wlv) WaveLineView waveLineView;
+    //@BindView(R.id.avt_wlv) WaveLineView waveLineView;
+    @BindView(R.id.avt_iv_microVolume) ImageView iv_microVolume;
     @BindView(R.id.avt_tv_showInputType) TextView tv_showInputType;
     @BindView(R.id.avt_ll_noFindDevice) LinearLayout ll_noFindDevice; //没有找到蓝牙设备
     @BindView(R.id.avt_tv_noFindDeviceText) TextView tv_noFindDeviceText; //
@@ -144,7 +145,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private volatile boolean isClick = false; //false是录完音自动播放，true是点击在此播放
     private boolean isNet = true; //网络连接情况
     private boolean isBluetoothConned = false; //蓝牙连接
-    private boolean isBLEConned = false; //Ble连接
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -270,7 +270,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onResume() {
         super.onResume();
-        waveLineView.onResume();
+        //waveLineView.onResume();
         //获取用户手机输出位置
         UserInfoDTO userInfoDTO;
         if(GlobalParams.userInfoDTO != null){
@@ -293,7 +293,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onPause() {
         super.onPause();
-        waveLineView.onPause();
+        //waveLineView.onPause();
     }
 
     /**
@@ -348,7 +348,18 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_VOLUME:
                 Volume vol = parseVolumeJson(params);
-                waveLineView.setVolume(vol.volumePercent);
+                int percent = vol.volumePercent;
+                if(percent <= 5){
+                    iv_microVolume.setImageResource(R.drawable.microphone1);
+                }else if(percent > 5 && percent <= 10){
+                    iv_microVolume.setImageResource(R.drawable.microphone2);
+                }else if(percent > 10 && percent <= 15){
+                    iv_microVolume.setImageResource(R.drawable.microphone3);
+                }else if(percent > 15 && percent <= 20){
+                    iv_microVolume.setImageResource(R.drawable.microphone4);
+                }else{
+                    iv_microVolume.setImageResource(R.drawable.microphone5);
+                }
                 Log.i("音量", vol.volumePercent + "");
                 break;
         }
@@ -876,10 +887,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             createBlueManager.onMyDestroy();
             createBlueManager = null;
         }
-        if(waveLineView != null){
+        /*if(waveLineView != null){
             waveLineView.release();
             waveLineView = null;
-        }
+        }*/
         animationDrawable = null;
         mBluetoothAdapter = null;
         currPlayImage = null;
@@ -920,11 +931,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 checkDisOrConn(true, "连接蓝牙不是本公司产品，请重新连接");
                 break;
             case BLE_CONNECTED:
-                isBLEConned = true;
                 checkDisOrConn(false, null);
                 break;
             case BLE_DISCONNECTED:
-                isBLEConned = false;
                 showVolmn(false);
                 stopAni();
                 ConfigUtil.showToask(this, "连接失败");
@@ -1056,8 +1065,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             @Override
             public void run() {
                 if(flag){
-                    waveLineView.setVisibility(View.VISIBLE);
-                    ll_showWlv.setBackgroundColor(getResources().getColor(R.color.colorBlack));
+                    //waveLineView.setVisibility(View.VISIBLE);
+                    iv_microVolume.setImageResource(R.drawable.microphone1);
                     ll_showWlv.setVisibility(View.VISIBLE);
                     if(isPhone){
                         if(isLeftLangCN){
@@ -1073,10 +1082,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         }
                     }
                     tv_showInputType.setVisibility(View.VISIBLE);
-                    waveLineView.startAnim();
+                    //waveLineView.startAnim();
                 }else{
-                    waveLineView.stopAnim();
-                    waveLineView.setVisibility(View.GONE);
+                    //waveLineView.stopAnim();
+                    //waveLineView.setVisibility(View.GONE);
                     tv_showInputType.setVisibility(View.GONE);
                     ll_showWlv.setVisibility(View.GONE);
                 }

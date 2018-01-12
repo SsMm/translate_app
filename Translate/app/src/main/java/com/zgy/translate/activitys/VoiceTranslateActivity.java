@@ -487,7 +487,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         if(!isPhone){
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
-                mAudioManager.setMode(AudioManager.MODE_NORMAL);
+                mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 mSpeechSynthesizer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC),
                         AudioManager.FX_KEY_CLICK);

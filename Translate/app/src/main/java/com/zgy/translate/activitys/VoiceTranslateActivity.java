@@ -211,10 +211,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     /**初始化*/
     private void baseInit(){
-        if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
+        /*if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
             ConfigUtil.showToask(this, GlobalConstants.NO_BLE);
             finish();
-        }
+        }*/
 
         mAudioManager = (AudioManager) getApplicationContext().getSystemService(AUDIO_SERVICE);
 
@@ -244,6 +244,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         rv_tran.setAdapter(voiceTranslateAdapter);
 
         iv_phoneVoic.setOnTouchListener(this);
+
+        if(!mBluetoothAdapter.isEnabled()){
+            deviceConState(BLUETOOTH_OFF);
+        }
 
     }
 
@@ -633,10 +637,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void bluetoothOff() {
         isBluetoothConned = false;
         deviceConState(BLUETOOTH_OFF);
-        showVolmn(false);
-        stopSpeech();
-        stopAni();
-        ConfigUtil.showToask(this, "请打开蓝牙,连接耳机,方能使用翻译功能");
     }
 
     @Override
@@ -809,6 +809,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     }
 
     private void stopSpeech(){
+        if(mAsr == null){
+            return;
+        }
         mAsr.send(SpeechConstant.ASR_STOP, "{}", null, 0, 0);
     }
 
@@ -914,9 +917,14 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private void deviceConState(String state){
         switch (state){
             case BLUETOOTH_OFF:
+                showVolmn(false);
+                stopSpeech();
+                stopAni();
+                GlobalParams.BlUETOOTH_DEVICE = null;
                 checkDisOrConn(true, "请打开蓝牙,连接耳机,方能使用翻译功能");
                 break;
             case A2DP_DISCONNECTED:
+                GlobalParams.BlUETOOTH_DEVICE = null;
                 checkDisOrConn(true, "请连接耳机，方能使用翻译功能");
                 break;
             case A2DP_CONNECTED:
@@ -934,8 +942,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             case BLE_DISCONNECTED:
                 showVolmn(false);
                 stopAni();
-                ConfigUtil.showToask(this, "连接失败");
-                checkDisOrConn(true, "断开连接，请等待连接...");
+                //ConfigUtil.showToask(this, "连接失败");
+                //checkDisOrConn(true, "断开连接，请等待连接...");
                 if(isSpeech){
                     stopSpeech();
                 }

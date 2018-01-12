@@ -700,6 +700,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                             toENSpeech(true);
                         }
                         unregisterReceiver(this);
+                    }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
+                        ConfigUtil.showToask(VoiceTranslateActivity.this, "打开耳机失败，请确定耳机是否连接成功");
+                        mAudioManager.stopBluetoothSco();
+                        unregisterReceiver(this);
                     }
                 }
             }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));

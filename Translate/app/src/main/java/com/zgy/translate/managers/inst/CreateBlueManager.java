@@ -147,6 +147,7 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface, Blue
             mBluetoothService.closeSocket();
             mBluetoothService = null;
         }
+
         mContext.unbindService(mServiceConnection);
         mContext = null;
     }

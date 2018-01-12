@@ -245,10 +245,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
         iv_phoneVoic.setOnTouchListener(this);
 
-        if(!mBluetoothAdapter.isEnabled()){
-            deviceConState(BLUETOOTH_OFF);
-        }
-
     }
 
     /**初始化语音识别*/
@@ -288,6 +284,10 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             checkNetState(false);
         }else{
             checkNetState(true);
+        }
+
+        if(!mBluetoothAdapter.isEnabled()){
+            deviceConState(BLUETOOTH_OFF);
         }
 
     }

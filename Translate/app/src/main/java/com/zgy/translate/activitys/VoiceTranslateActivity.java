@@ -982,7 +982,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             iv_showConIcon.setVisibility(View.VISIBLE);
             tv_showConText.setVisibility(View.VISIBLE);
             tv_showConText.setText("连接成功");
-            ConfigUtil.showToask(this, "连接成功");
+            //ConfigUtil.showToask(this, "连接成功");
             checkPoolState();
             executorService.schedule(new Runnable() {
                 @Override
@@ -994,7 +994,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         }
                     });
                 }
-            }, 10000, TimeUnit.MILLISECONDS);
+            }, 5000, TimeUnit.MILLISECONDS);
         }
 
     }

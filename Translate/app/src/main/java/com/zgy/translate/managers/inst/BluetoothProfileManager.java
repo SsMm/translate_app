@@ -78,8 +78,6 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
             flag = 0;
         }
 
-        Log.i("flag--", flag +","+ a2dp +","+ gatt + "，" + gatt_service);
-
         if(flag == 0){
             managerInterface.noProfile();
         }else if(flag == 1){
@@ -92,26 +90,24 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
 
     @Override
     public void onServiceConnected(int profile, BluetoothProfile proxy) {
-        Log.i("profile", profile +"");
         if(profile == BluetoothProfile.HEADSET){
             pro = profile;
             mBluetoothProfile = proxy;
-            Log.i("HEADSET", "HEADSET");
+
         }else if(profile == BluetoothProfile.A2DP){
             pro = profile;
             mBluetoothProfile = proxy;
             getConnectionDevice(SOCKET, proxy);
 
-            Log.i("A2DP", "A2DP");
         }else if(profile == BluetoothProfile.HEALTH){
             pro = profile;
             mBluetoothProfile = proxy;
-            Log.i("HEALTH", "HEALTH");
+
         }else if(profile == BluetoothProfile.GATT){
             pro = profile;
             mBluetoothProfile = proxy;
             getConnectionDevice(GATT, proxy);
-            Log.i("GATT", "GATT");
+
         }
     }
 
@@ -119,17 +115,15 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
     public void onServiceDisconnected(int profile) {
         if(profile == BluetoothProfile.HEADSET){
             mBluetoothHeadset = null;
-            Log.i("mBluetoothHeadset", "没有连接");
+
         }else if(profile == BluetoothProfile.A2DP){
             mBluetoothA2dp = null;
             managerInterface.bluetoothOff();
             Log.i("A2DP", "没有连接A2DP");
         }else if(profile == BluetoothProfile.HEALTH){
             mBluetoothHealth = null;
-            Log.i("HEALTH", "没有连接HEALTH");
         }else if(profile == BluetoothProfile.GATT){
             mBluetoothGatt = null;
-            Log.i("GATT", "没有连接GATT");
         }
     }
 
@@ -139,7 +133,6 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
             case SOCKET:
                 mBluetoothA2dp = (BluetoothA2dp) proxy;
                 for (BluetoothDevice device : mBluetoothA2dp.getConnectedDevices()){
-                    Log.i("mBluetoothA2dp", device.getName() + device.getAddress());
                     /*if(device.getUuids() != null){
                         for (ParcelUuid uuid : device.getUuids()){
                             Log.i("mBluetoothA2dp--uuid", uuid.toString());
@@ -165,10 +158,8 @@ public class BluetoothProfileManager implements BluetoothProfile.ServiceListener
             case GATT:
                 mBluetoothGatt = (BluetoothGatt) proxy;
                 for (BluetoothDevice device : mBluetoothGatt.getConnectedDevices()){
-                    Log.i("mBluetoothGatt", device.getName() + device.getAddress());
                     if(device.getUuids() != null){
                         for (ParcelUuid uuid : device.getUuids()){
-                            Log.i("mBluetoothGatt--uuid", uuid.toString());
                             if(GlobalGattAttributes.DEVICE_SERVICE.equals(uuid.toString())){
                                 fl = true;
                                 break;

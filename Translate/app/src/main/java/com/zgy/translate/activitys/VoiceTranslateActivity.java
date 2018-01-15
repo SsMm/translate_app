@@ -309,14 +309,13 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 showVolmn(true);
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_BEGIN: // 检测到用户的已经开始说话
-                ConfigUtil.showToask(this, "开始讲话");
+                //ConfigUtil.showToask(this, "开始讲话");
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_END: // 检测到用户的已经停止说话
-                ConfigUtil.showToask(this, "停止说话");
+                //ConfigUtil.showToask(this, "停止说话");
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL: // 临时识别结果, 长语音模式需要从此消息中取出结果
                 RecogResult recogResult = RecogResult.parseJson(params);
-                Log.i("speech--PARTIAL", params);
                 String[] results = recogResult.getResultsRecognition();
                 if(recogResult.isFinalResult()){
                     List<String> list = new ArrayList<>();
@@ -331,15 +330,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 if(recog.hasError()){
                     int errorCode = recog.getError();
                     String error = ErrorTranslation.recogError(errorCode);
-                    Log.w("asr error =====", error);
-                    Log.w("asr params =====", params);
                     ConfigUtil.showToask(this, "识别" + error);
                     showVolmn(false);
                 }
                 break;
             case SpeechConstant.CALLBACK_EVENT_ASR_LONG_SPEECH:
-                Log.i("长语音结束", "长语音结束");
-                Log.i("结束后录音结果", inputResult);
                 showVolmn(false);
                 if(!StringUtil.isEmpty(inputResult)){
                     speechToTransAndSynt(inputResult);
@@ -362,7 +357,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 }else{
                     iv_microVolume.setImageResource(R.drawable.microphone5);
                 }
-                Log.i("音量", vol.volumePercent + "");
                 break;
         }
     }
@@ -403,7 +397,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     VoiceTranslateActivity.super.progressDialog.dismiss();
                     return;
                 }
-                Log.i("翻译结果", trans);
                 //翻译后文本
                 String dstT = GsonManager.getInstance()
                         .fromJson(trans, TransResultResponse.class)
@@ -418,8 +411,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     src = URLDecoder.decode(srcT, "utf-8");
                     dst = URLDecoder.decode(dstT, "utf-8");
                     addTranContent(src, dst);
-                    Log.i("翻译前文本", src);
-                    Log.i("合成文本", dst);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -682,7 +673,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             return;
         }
         if(order.contains("o")){
-            Log.i("oooo", "oooo"); //启动
+            //启动
             isPhone = false;
             isSpeech = true;
             mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
@@ -707,25 +698,16 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     }
                 }
             }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
-            //mAudioManager.setMode(AudioManager.MODE_NORMAL);
-            //mAudioManager.setMicrophoneMute(true);
-            /*if(isLeftLangCN){
-                toCNSpeech(true);
-            }else{
-                toENSpeech(true);
-            }*/
+
         }else if(order.contains("c")){
             //停止
             if(!isSpeech){
                 return;
             }
             isSpeech = false;
-            Log.i("ccc", "cccc");
             mAudioManager.stopBluetoothSco();
             mAudioManager.setBluetoothScoOn(false);
             stopSpeech();
-        }else if(order.contains("w")){
-            Log.i("wwww", "wwww");
         }
     }
 
@@ -782,13 +764,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     .createCN()
                     .createVoide()
                     .build()).toString();
-            Log.i("cn-voide-josn", json);
         }else{
              json = new JSONObject(SpeechAsrStartParamManager.getInstance()
                     .createCN()
                     .createBlue(mediaRecorderPath.getAbsolutePath())
                     .build()).toString();
-            Log.i("cn-blue-josn", json);
         }
         mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);
     }
@@ -801,13 +781,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     .createEN()
                     .createVoide()
                     .build()).toString();
-            Log.i("en-voide-josn", json);
         }else{
             json = new JSONObject(SpeechAsrStartParamManager.getInstance()
                     .createEN()
                     .createBlue(mediaRecorderPath.getAbsolutePath())
                     .build()).toString();
-            Log.i("en-blue-josn", json);
         }
         mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);
     }
@@ -982,7 +960,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             iv_showConIcon.setVisibility(View.VISIBLE);
             tv_showConText.setVisibility(View.VISIBLE);
             tv_showConText.setText("连接成功");
-            //ConfigUtil.showToask(this, "连接成功");
+
             checkPoolState();
             executorService.schedule(new Runnable() {
                 @Override
@@ -994,7 +972,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         }
                     });
                 }
-            }, 5000, TimeUnit.MILLISECONDS);
+            }, 2000, TimeUnit.MILLISECONDS);
         }
 
     }

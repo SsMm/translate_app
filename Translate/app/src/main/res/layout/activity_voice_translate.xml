@@ -23,27 +23,40 @@
             android:gravity="center"
             android:orientation="horizontal">
 
+            <ImageView
+                android:layout_width="@dimen/dimen_20"
+                android:layout_height="@dimen/dimen_20"
+                android:layout_marginEnd="@dimen/margin_10"
+                android:src="@mipmap/top_phone"/>
+
             <TextView
                 android:id="@+id/avt_tv_tranLeft"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/text_16"
+                android:textSize="@dimen/text_18"
                 android:textColor="@color/colorText"
                 android:text="@string/tran_cn"/>
 
             <ImageView
-                android:layout_width="@dimen/dimen_50"
-                android:layout_height="@dimen/dimen_25"
-                android:layout_marginBottom="2dp"
-                android:src="@drawable/tran_change"/>
+                android:layout_width="@dimen/dimen_30"
+                android:layout_height="@dimen/dimen_15"
+                android:layout_marginStart="@dimen/margin_20"
+                android:layout_marginEnd="@dimen/margin_20"
+                android:src="@mipmap/tran_change"/>
 
             <TextView
                 android:id="@+id/avt_tv_tranRight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/text_16"
+                android:textSize="@dimen/text_18"
                 android:textColor="@color/colorText"
                 android:text="@string/tran_zn"/>
+
+            <ImageView
+                android:layout_width="@dimen/dimen_20"
+                android:layout_height="@dimen/dimen_20"
+                android:layout_marginStart="@dimen/margin_10"
+                android:src="@mipmap/top_blue"/>
 
         </LinearLayout>
 

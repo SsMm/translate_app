@@ -25,6 +25,7 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface, Blue
     private ComUpdateReceiverManager receiverManager;
     private BluetoothService mBluetoothService;
     private BluetoothProfileManager profileManager;
+    private Intent serviceIntent;
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -49,7 +50,7 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface, Blue
     public void init(){
 
         //初始化服务
-        Intent serviceIntent = new Intent(mContext.getApplicationContext(), BluetoothService.class);
+        serviceIntent = new Intent(mContext.getApplicationContext(), BluetoothService.class);
         mContext.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
         receiverManager = new ComUpdateReceiverManager(mContext);
@@ -69,7 +70,6 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface, Blue
     public void closeSocket(){
         if(mBluetoothService != null){
             mBluetoothService.closeSocket();
-            mBluetoothService = null;
         }
     }
 
@@ -94,7 +94,7 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface, Blue
             profileManager.closeProfileProxy();
             if(GlobalParams.BlUETOOTH_DEVICE != null){
                 if(mBluetoothService == null){
-                    Intent serviceIntent = new Intent(mContext.getApplicationContext(), BluetoothService.class);
+                    serviceIntent = new Intent(mContext.getApplicationContext(), BluetoothService.class);
                     mContext.bindService(serviceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
                     return;
                 }
@@ -143,13 +143,20 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface, Blue
             profileManager.onMyDestroy();
             profileManager = null;
         }
-        if(mBluetoothService != null){
-            mBluetoothService.closeSocket();
-            mBluetoothService = null;
-        }
-
+        stopService();
         mContext.unbindService(mServiceConnection);
         mContext = null;
+    }
+
+    private void stopService(){
+        if(mBluetoothService != null){
+            mBluetoothService.closeSocket();
+            if(serviceIntent != null){
+                mBluetoothService.stopService(serviceIntent);
+                serviceIntent = null;
+            }
+            mBluetoothService = null;
+        }
     }
 
 }

@@ -78,6 +78,11 @@ public class MainActivity extends BaseActivity {
 
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

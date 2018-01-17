@@ -150,6 +150,9 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface{
         int bytes;
         while (true){
             try {
+                if(socket == null || !socket.isConnected()){
+                    return;
+                }
                 int bytesAvailable = is.available();
                 if(bytesAvailable > 0){
                     bytes = is.read(buffer);

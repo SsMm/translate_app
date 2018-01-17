@@ -83,6 +83,11 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

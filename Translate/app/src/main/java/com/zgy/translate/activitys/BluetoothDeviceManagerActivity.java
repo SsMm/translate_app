@@ -520,6 +520,11 @@ public class BluetoothDeviceManagerActivity extends BaseActivity implements Blue
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

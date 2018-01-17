@@ -58,6 +58,11 @@ public class RevisePhoneActivity extends BaseActivity implements CommonBar.Commo
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

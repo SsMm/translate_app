@@ -67,6 +67,11 @@ public class FindPawActivity extends BaseActivity implements CommonBar.CommonBar
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

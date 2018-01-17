@@ -52,6 +52,11 @@ public class PersonalizedActivity extends BaseActivity implements CommonBar.Comm
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

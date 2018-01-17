@@ -399,6 +399,11 @@ public class BleBluetoothDeviceManagerActivity extends BaseActivity implements B
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

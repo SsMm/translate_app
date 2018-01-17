@@ -62,6 +62,11 @@ public class QuestionActivity extends BaseActivity implements CommonBar.CommonBa
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

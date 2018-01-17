@@ -105,6 +105,11 @@ public class MyMsgActivity extends BaseActivity implements CommonBar.CommonBarIn
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

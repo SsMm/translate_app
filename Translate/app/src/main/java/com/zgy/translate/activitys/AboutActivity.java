@@ -42,6 +42,11 @@ public class AboutActivity extends BaseActivity implements CommonBarInterface{
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

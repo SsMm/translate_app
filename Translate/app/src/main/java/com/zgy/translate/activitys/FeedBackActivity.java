@@ -39,6 +39,11 @@ public class FeedBackActivity extends BaseActivity implements CommonBar.CommonBa
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

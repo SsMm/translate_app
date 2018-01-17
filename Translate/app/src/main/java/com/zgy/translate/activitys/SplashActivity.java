@@ -120,6 +120,11 @@ public class SplashActivity extends BaseActivity{
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

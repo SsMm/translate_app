@@ -56,6 +56,11 @@ public class LoginActivity extends BaseActivity implements RequestController.Req
     }
 
     @Override
+    public void blueOff() {
+
+    }
+
+    @Override
     public void disConnected() {
 
     }

@@ -5,6 +5,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +43,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
 
 
     private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothLeScanner mBluetoothLeScanner;
     private BluetoothProfileManager profileManager;
     private BluetoothLeService mBluetoothLeService;
     private BluetoothGattCharacteristic mNotifyCharacteristic;
@@ -75,7 +79,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
 
     public CreateGattManager setParams(BluetoothAdapter bluetoothAdapter){
         mBluetoothAdapter = bluetoothAdapter;
-
+        mBluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         return this;
     }
 
@@ -155,7 +159,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
     private BluetoothAdapter.LeScanCallback mScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            Log.i("device", device.getName() + device.getAddress());
+            /*Log.i("device", device.getName() + device.getAddress());
             if(device.getName() == null){
                 return;
             }
@@ -180,7 +184,51 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
                     final boolean result = mBluetoothLeService.connect(device.getAddress());
                     Log.i(TAG, "Connect request result=" + result);
                 }
+            }*/
+        }
+    };
+
+    private ScanCallback scanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+            BluetoothDevice device = result.getDevice();
+            Log.i("device", device.getName() + device.getAddress());
+            if(device.getName() == null){
+                return;
             }
+            String mac = GlobalParams.BLUETOOTH_MAC;
+            String m = null;
+            if(mac != null){
+                String[] ma = mac.split(":");
+                m = "C0" + ":" + ma[1] + ":" + ma[2] + ":" + ma[3] + ":" + ma[4] + ":" + ma[5];
+                Log.i("ma-----", m);
+            }
+            if(device.getAddress().equals(m) && GlobalConstants.BLUETOOTH_BLE.equals(device.getName())){
+                if(mScanning){
+                    scanLeDevice(false);
+                }
+                if (mBluetoothLeService != null) {
+                    if(autoCloseScanExecutorService != null){
+                        autoCloseScanExecutorService.shutdown();
+                        autoCloseScanExecutorService = null;
+                    }
+                    ConfigUtil.showToask(mContext, "开始连接...");
+                    connDevice = device;
+                    final boolean resu = mBluetoothLeService.connect(device.getAddress());
+                    Log.i(TAG, "Connect request result=" + resu);
+                }
+            }
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            super.onBatchScanResults(results);
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            super.onScanFailed(errorCode);
         }
     };
 
@@ -205,11 +253,11 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
             },SCAN_PERIOD, TimeUnit.MILLISECONDS);*/
 
             mScanning = true;
-            mBluetoothAdapter.startLeScan(mScanCallback);
+            mBluetoothLeScanner.startScan(scanCallback);
             ConfigUtil.showToask(mContext, "开始扫描");
         }else{
             mScanning = false;
-            mBluetoothAdapter.stopLeScan(mScanCallback);
+            mBluetoothLeScanner.stopScan(scanCallback);
             ConfigUtil.showToask(mContext, "扫描完成");
         }
     }
@@ -335,6 +383,7 @@ public class CreateGattManager implements BluetoothProfileManagerInterface, Blue
             autoCloseScanExecutorService = null;
         }
         mBluetoothAdapter = null;
+        mBluetoothLeScanner = null;
         connDevice = null;
     }
 }

@@ -167,7 +167,7 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface{
             } catch (IOException e) {
                 e.printStackTrace();
                 if(e.getMessage().contains("closed")){
-                    ConfigUtil.showToask(mContext, "请检查蓝牙耳机是否开启");
+                    //ConfigUtil.showToask(mContext, "请检查蓝牙耳机是否开启");
                     break;
                 }
             }

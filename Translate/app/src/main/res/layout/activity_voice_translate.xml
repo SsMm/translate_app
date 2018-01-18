@@ -172,20 +172,19 @@
         android:visibility="gone">
 
         <ImageView
+            android:id="@+id/avt_iv_noFindDeviceIcon"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/no_find_device"/>
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/avt_tv_noFindDeviceText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_10"
-            android:lineSpacingExtra="@dimen/dimen_1"
+            android:layout_marginTop="@dimen/dimen_40"
+            android:lineSpacingExtra="3dp"
             android:gravity="center"
             android:textSize="@dimen/text_16"
-            android:textColor="@color/colorBlack"
-            android:text="@string/no_find_device_up"/>
+            android:textColor="@color/colordcdcdc"/>
 
     </LinearLayout>
 

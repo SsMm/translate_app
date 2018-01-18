@@ -6,6 +6,9 @@ package com.zgy.translate.global;
 
 public class GlobalKey {
 
+    //科大讯飞
+    public static final String UTILITY_APP_ID = "5a5dec9f";
+
     //翻译
     public static final String TRANS_APP_ID = "20171211000103990"; //20171229000110420
     public static final String TRANS_SECURITY_KEY = "t4MX3COL6zfah7NgbFT_"; //C1fhOTym7Kt7M5MMZCrQ

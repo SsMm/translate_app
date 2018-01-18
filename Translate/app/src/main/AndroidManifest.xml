@@ -66,21 +66,6 @@
             android:name="UMENG_APPKEY"
             android:value="5a4b61148f4a9d294200008e"/>
 
-        <!-- baidu 语音识别 -->
-        <meta-data
-            android:name="com.baidu.speech.APP_ID"
-            android:value="10308735" />
-        <meta-data
-            android:name="com.baidu.speech.API_KEY"
-            android:value="tgPciIeIhrHVBu6DiNn7YTdD" />
-        <meta-data
-            android:name="com.baidu.speech.SECRET_KEY"
-            android:value="c743fcb3b3d30ddb58b9bd0b816d4e25" />
-
-        <service
-            android:name="com.baidu.speech.VoiceRecognitionService"
-            android:exported="false" />
-
         <!-- 访问私有路径 -->
         <!-- "${applicationId}.fileProvider" -->
         <provider

@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.util.Log;
 
+import com.iflytek.cloud.SpeechUnderstander;
+import com.iflytek.cloud.SpeechUtility;
 import com.imnjh.imagepicker.PickerConfig;
 import com.imnjh.imagepicker.SImagePicker;
 import com.meituan.android.walle.WalleChannelReader;
@@ -71,13 +73,23 @@ public class GlobalInit {
     private void baseInit(){
         //initLeakCanary();
         //initBuglyCrashReport();
+        initUtility();
         initSImagePicker();
         initShareSDK();
-        //initSharePlat();
     }
 
+    /**
+     * 科大讯飞
+     * */
+    private void initUtility(){
+        SpeechUtility.createUtility(appContext, "appid=" + GlobalKey.UTILITY_APP_ID);
+    }
+
+    /**
+     * 友盟
+     * */
     private void initShareSDK(){
-        UMConfigure.init(appContext, "59892f08310c9307b60023d0", null, UMConfigure.DEVICE_TYPE_PHONE, "");
+        UMConfigure.init(appContext, "5a4b61148f4a9d294200008e", null, UMConfigure.DEVICE_TYPE_PHONE, "");
     }
 
     /**
@@ -99,14 +111,6 @@ public class GlobalInit {
     }
 
     /**
-     * 初始化分享平台
-     * */
-    private void initSharePlat(){
-        PlatformConfig.setWeixin("wxdc1e388c3822c80b", "3baf1193c85774b3fd9d18447d76cab0");
-        PlatformConfig.setQQZone("100424468", "c7394704798a158208a74ab60104f0ba");
-    }
-
-    /**
      * 初始化相册
      * */
     private void initSImagePicker(){
@@ -117,30 +121,9 @@ public class GlobalInit {
                 .build());
     }
 
-    private void initAndroidAudioConverter(){
-
-    }
-
-    /**绑定蓝牙接收通知服务*/
-    private void bindBleService(){
-
-    }
 
     public void onDestroy(){
-        //unBindBleService();
-    }
-
-
-    private void unBindBleService(){
-        if(mBluetoothLeService != null){
-            appContext.unbindService(mServiceConnection);
-            mBluetoothLeService = null;
-        }
 
     }
-
-
-
-
 
 }

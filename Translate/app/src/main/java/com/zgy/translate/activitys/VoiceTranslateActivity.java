@@ -15,23 +15,13 @@ import android.provider.ContactsContract;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.baidu.speech.EventListener;
-import com.baidu.speech.EventManager;
-import com.baidu.speech.EventManagerFactory;
-import com.baidu.speech.asr.SpeechConstant;
-import com.baidu.tts.client.SpeechError;
-import com.baidu.tts.client.SpeechSynthesizer;
-import com.baidu.tts.client.SpeechSynthesizerListener;
-import com.baidu.tts.client.TtsMode;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerListener;
@@ -44,15 +34,10 @@ import com.zgy.translate.R;
 import com.zgy.translate.adapters.VoiceTranslateAdapter;
 import com.zgy.translate.adapters.interfaces.VoiceTranslateAdapterInterface;
 import com.zgy.translate.base.BaseActivity;
-import com.zgy.translate.domains.RecogResult;
 import com.zgy.translate.domains.dtos.UserInfoDTO;
 import com.zgy.translate.domains.dtos.VoiceTransDTO;
-import com.zgy.translate.domains.eventbuses.FinishRecorderEB;
-import com.zgy.translate.domains.eventbuses.MonitorRecordAmplitudeEB;
 import com.zgy.translate.domains.response.TransResultResponse;
 import com.zgy.translate.global.GlobalConstants;
-import com.zgy.translate.global.GlobalInit;
-import com.zgy.translate.global.GlobalKey;
 import com.zgy.translate.global.GlobalParams;
 import com.zgy.translate.http.HttpGet;
 import com.zgy.translate.managers.CacheManager;
@@ -61,30 +46,21 @@ import com.zgy.translate.managers.inst.CreateBlueManager;
 import com.zgy.translate.managers.inst.CreateGattManager;
 import com.zgy.translate.managers.GsonManager;
 import com.zgy.translate.managers.inst.inter.CreateGattManagerInterface;
-import com.zgy.translate.managers.sing.SpeechAsrStartParamManager;
 import com.zgy.translate.managers.sing.TransManager;
-import com.zgy.translate.utils.AudioRecordUtil;
 import com.zgy.translate.utils.ConfigUtil;
-import com.zgy.translate.utils.ErrorTranslation;
 import com.zgy.translate.utils.JsonParser;
 import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
 
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -95,11 +71,10 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import jaygoo.widget.wlv.WaveLineView;
 
 
-public class VoiceTranslateActivity extends BaseActivity implements EventListener,
-        VoiceTranslateAdapterInterface, CreateGattManagerInterface, View.OnTouchListener, RecognizerListener{
+public class VoiceTranslateActivity extends BaseActivity implements VoiceTranslateAdapterInterface,
+        CreateGattManagerInterface, View.OnTouchListener, RecognizerListener{
 
     private static final String UTTERANCE_ID = "appolo";
     private static boolean FROM_PHONE_MIC = true; //默认从手机麦克风出
@@ -128,14 +103,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
 
 
-    private EventManager mAsr; //识别
-
     private SpeechRecognizer mIat; //科大讯飞识别
     private com.iflytek.cloud.SpeechSynthesizer mTts; //科大讯飞合成
 
     // 用HashMap存储听写结果
     private HashMap<String, String> mIatResults = new LinkedHashMap<String, String>();
-    private String inputResult = "";
     private AudioManager mAudioManager;
 
     private ScheduledExecutorService executorService;
@@ -246,9 +218,8 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
         showPermission();
 
-        initSpeech2();
+        initSpeech();
         initTTs();
-        //initSpeech();
 
         //与gatt建立联系
         //createGattManager = new CreateGattManager(this, this);
@@ -268,11 +239,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     /**初始化语音识别*/
     private void initSpeech(){
-        mAsr = EventManagerFactory.create(this, "asr");
-        mAsr.registerListener(this);
-    }
-
-    private void initSpeech2(){
         mIat = SpeechRecognizer.createRecognizer(this, initListener);
     }
 
@@ -333,68 +299,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         super.onPause();
     }
 
-    /**
-     * 语音识别回调
-     * */
-    @Override
-    public void onEvent(String name, String params, byte[] bytes, int offset, int length) {
-        switch (name){
-            case SpeechConstant.CALLBACK_EVENT_ASR_READY: // 引擎准备就绪，可以开始说话
-                //ConfigUtil.showToask(this, "开始讲话。。。");
-                showVolmn(true);
-                break;
-            case SpeechConstant.CALLBACK_EVENT_ASR_BEGIN: // 检测到用户的已经开始说话
-                //ConfigUtil.showToask(this, "开始讲话");
-                break;
-            case SpeechConstant.CALLBACK_EVENT_ASR_END: // 检测到用户的已经停止说话
-                //ConfigUtil.showToask(this, "停止说话");
-                break;
-            case SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL: // 临时识别结果, 长语音模式需要从此消息中取出结果
-                RecogResult recogResult = RecogResult.parseJson(params);
-                String[] results = recogResult.getResultsRecognition();
-                if(recogResult.isFinalResult()){
-                    List<String> list = new ArrayList<>();
-                    list.addAll(Arrays.asList(results));
-                    if(list.size() > 0){
-                        inputResult += list.get(0);
-                    }
-                }
-                break;
-            case SpeechConstant.CALLBACK_EVENT_ASR_FINISH: // 识别结束， 最终识别结果或可能的错误
-                RecogResult recog = RecogResult.parseJson(params);
-                if(recog.hasError()){
-                    int errorCode = recog.getError();
-                    String error = ErrorTranslation.recogError(errorCode);
-                    ConfigUtil.showToask(this, "识别" + error);
-                    showVolmn(false);
-                }
-                break;
-            case SpeechConstant.CALLBACK_EVENT_ASR_LONG_SPEECH:
-                showVolmn(false);
-                if(!StringUtil.isEmpty(inputResult)){
-                    speechToTransAndSynt(inputResult);
-                    inputResult = "";
-                }else{
-                    ConfigUtil.showToask(this, "请放慢语速或提高说话音量，再次输入");
-                }
-                break;
-            case SpeechConstant.CALLBACK_EVENT_ASR_VOLUME:
-                Volume vol = parseVolumeJson(params);
-                int percent = vol.volumePercent;
-                if(percent <= 5){
-                    iv_microVolume.setImageResource(R.drawable.microphone1);
-                }else if(percent > 5 && percent <= 10){
-                    iv_microVolume.setImageResource(R.drawable.microphone2);
-                }else if(percent > 10 && percent <= 15){
-                    iv_microVolume.setImageResource(R.drawable.microphone3);
-                }else if(percent > 15 && percent <= 20){
-                    iv_microVolume.setImageResource(R.drawable.microphone4);
-                }else{
-                    iv_microVolume.setImageResource(R.drawable.microphone5);
-                }
-                break;
-        }
-    }
 
     /**
      * 科大讯飞识别
@@ -422,12 +326,17 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     public void onEndOfSpeech() {
         showVolmn(false);
+        if(!isPhone){
+            isSpeech = false;
+            mAudioManager.stopBluetoothSco();
+            mAudioManager.setBluetoothScoOn(false);
+        }
         //ConfigUtil.showToask(VoiceTranslateActivity.this, "停止说话");
     }
 
     @Override
     public void onResult(RecognizerResult recognizerResult, boolean b) {
-        Log.i("rescoidjs--", recognizerResult.getResultString());
+        //Log.i("rescoidjs--", recognizerResult.getResultString());
         printResult(recognizerResult);
     }
 
@@ -539,24 +448,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         });
     }
 
-    private Volume parseVolumeJson(String jsonStr) {
-        Volume vol = new Volume();
-        vol.origalJson = jsonStr;
-        try {
-            JSONObject json = new JSONObject(jsonStr);
-            vol.volumePercent = json.getInt("volume-percent");
-            vol.volume = json.getInt("volume");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return vol;
-    }
-
-    private class Volume {
-        private int volumePercent = -1;
-        private int volume = -1;
-        private String origalJson;
-    }
 
     /**添加翻译内容*/
     private void addTranContent(String src, String dst){
@@ -753,7 +644,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             ConfigUtil.showToask(this, "请从手机控制");
             return;
         }
-        if(order.contains("o")){
+        if(isSpeech){
+            ConfigUtil.showToask(this, "已启动语音功能");
+            return;
+        }
+        if(order.contains("o") || order.contains("c")){
             //启动
             isPhone = false;
             isSpeech = true;
@@ -780,16 +675,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 }
             }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
 
-        }else if(order.contains("c")){
-            //停止
-            if(!isSpeech){
-                return;
-            }
-            isSpeech = false;
-            mAudioManager.stopBluetoothSco();
-            mAudioManager.setBluetoothScoOn(false);
-            stopSpeech();
-            showVolmn(false);
         }
     }
 
@@ -841,19 +726,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     /**中文输入*/
     private void toCNSpeech(boolean flag){
-       /* String  json;
-        if(flag){
-            json = new JSONObject(SpeechAsrStartParamManager.getInstance()
-                    .createCN()
-                    .createVoide()
-                    .build()).toString();
-        }else{
-             json = new JSONObject(SpeechAsrStartParamManager.getInstance()
-                    .createCN()
-                    .createBlue(mediaRecorderPath.getAbsolutePath())
-                    .build()).toString();
-        }
-        mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);*/
        setIatParam();
         // 设置语言
         mIat.setParameter(com.iflytek.cloud.SpeechConstant.LANGUAGE, "zh_cn");
@@ -864,19 +736,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     /**英文输入*/
     private void toENSpeech(boolean flag){
-        /*String  json;
-        if(flag){
-            json = new JSONObject(SpeechAsrStartParamManager.getInstance()
-                    .createEN()
-                    .createVoide()
-                    .build()).toString();
-        }else{
-            json = new JSONObject(SpeechAsrStartParamManager.getInstance()
-                    .createEN()
-                    .createBlue(mediaRecorderPath.getAbsolutePath())
-                    .build()).toString();
-        }
-        mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);*/
         setIatParam();
         mIat.setParameter(com.iflytek.cloud.SpeechConstant.LANGUAGE, "en_us");
         mIat.setParameter(com.iflytek.cloud.SpeechConstant.ACCENT, null);
@@ -910,10 +769,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     }
 
     private void stopSpeech(){
-       /* if(mAsr == null){
-            return;
-        }
-        mAsr.send(SpeechConstant.ASR_STOP, "{}", null, 0, 0);*/
        if(mIat.isListening()){
            mIat.stopListening();
        }
@@ -939,11 +794,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mAsr != null){
-            mAsr.unregisterListener(this);
-            mAsr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
-            mAsr = null;
-        }
         if(mIat != null){
             if(mIat.isListening()){
                 mIat.cancel();

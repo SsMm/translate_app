@@ -11,8 +11,9 @@ import com.umeng.socialize.PlatformConfig;
 public class AppApplication extends TinkerApplication{
 
     {
-        PlatformConfig.setWeixin("wxdc1e388c3822c80b", "3baf1193c85774b3fd9d18447d76cab0");
-        PlatformConfig.setQQZone("100424468", "c7394704798a158208a74ab60104f0ba");
+        PlatformConfig.setWeixin("wxc3b4a8082a6cc59d", "80a20fd7aac8b3fdaa3d53c74494e610");
+        //PlatformConfig.setQQZone("100424468", "c7394704798a158208a74ab60104f0ba");
+        PlatformConfig.setQQZone("1106605767", "OSy2dkP2PLld7rQK");
     }
 
     public AppApplication() {

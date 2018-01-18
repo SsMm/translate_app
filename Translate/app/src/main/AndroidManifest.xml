@@ -53,7 +53,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="tencent100424468" />
+                <data android:scheme="tencent1106605767" />
             </intent-filter>
         </activity>
         <activity
@@ -64,7 +64,7 @@
 
         <meta-data
             android:name="UMENG_APPKEY"
-            android:value="561cae6ae0f55abd990035bf"/>
+            android:value="5a4b61148f4a9d294200008e"/>
 
         <!-- baidu 语音识别 -->
         <meta-data

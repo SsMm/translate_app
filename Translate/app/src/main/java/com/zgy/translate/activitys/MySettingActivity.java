@@ -163,7 +163,7 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
 
     private static final String TEXT = "我有一副超棒的蓝牙耳机，跟专用的翻译APP结合使用，很智能，功能多，操作方便，推荐给你。";
     private static final String TITLE = "蓝牙智能耳机翻译APP";
-    private static final String URL = "http://www.sharesdk.cn";
+    private static final String URL = "https://www.toppers.com.cn/download/app/e1";
 
     /**一键分享*/
     private void showShare() {
@@ -178,7 +178,7 @@ public class MySettingActivity extends BaseActivity implements CommonBar.CommonB
                 .setCallback(new UMShareListener() {
                     @Override
                     public void onStart(SHARE_MEDIA share_media) {
-                        Log.i("onStart", "onStart");
+                        //Log.i("onStart", "onStart");
                     }
 
                     @Override

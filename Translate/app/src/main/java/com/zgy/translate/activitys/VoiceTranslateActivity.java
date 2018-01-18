@@ -668,6 +668,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
                         }
                         unregisterReceiver(this);
                     }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
+                        isSpeech = false;
                         ConfigUtil.showToask(VoiceTranslateActivity.this, "打开耳机失败，请确定耳机是否连接成功");
                         mAudioManager.stopBluetoothSco();
                         unregisterReceiver(this);

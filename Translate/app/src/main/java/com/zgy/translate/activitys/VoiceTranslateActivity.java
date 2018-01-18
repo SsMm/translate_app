@@ -19,6 +19,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -31,6 +32,12 @@ import com.baidu.tts.client.SpeechError;
 import com.baidu.tts.client.SpeechSynthesizer;
 import com.baidu.tts.client.SpeechSynthesizerListener;
 import com.baidu.tts.client.TtsMode;
+import com.iflytek.cloud.ErrorCode;
+import com.iflytek.cloud.InitListener;
+import com.iflytek.cloud.RecognizerListener;
+import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechRecognizer;
+import com.iflytek.cloud.SynthesizerListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zgy.translate.R;
 
@@ -59,6 +66,7 @@ import com.zgy.translate.managers.sing.TransManager;
 import com.zgy.translate.utils.AudioRecordUtil;
 import com.zgy.translate.utils.ConfigUtil;
 import com.zgy.translate.utils.ErrorTranslation;
+import com.zgy.translate.utils.JsonParser;
 import com.zgy.translate.utils.RedirectUtil;
 import com.zgy.translate.utils.StringUtil;
 
@@ -77,6 +85,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -88,8 +98,8 @@ import butterknife.OnClick;
 import jaygoo.widget.wlv.WaveLineView;
 
 
-public class VoiceTranslateActivity extends BaseActivity implements EventListener, SpeechSynthesizerListener,
-        VoiceTranslateAdapterInterface, CreateGattManagerInterface, View.OnTouchListener{
+public class VoiceTranslateActivity extends BaseActivity implements EventListener,
+        VoiceTranslateAdapterInterface, CreateGattManagerInterface, View.OnTouchListener, RecognizerListener{
 
     private static final String UTTERANCE_ID = "appolo";
     private static boolean FROM_PHONE_MIC = true; //默认从手机麦克风出
@@ -110,23 +120,23 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @BindView(R.id.avt_tv_showConText) TextView tv_showConText;
     @BindView(R.id.avt_vs_netCon) ViewStub vs_unableConn; //无网络
     @BindView(R.id.avt_ll_wlv) LinearLayout ll_showWlv; //显示波浪
-    //@BindView(R.id.avt_wlv) WaveLineView waveLineView;
     @BindView(R.id.avt_iv_microVolume) ImageView iv_microVolume;
     @BindView(R.id.avt_tv_showInputType) TextView tv_showInputType;
     @BindView(R.id.avt_ll_noFindDevice) LinearLayout ll_noFindDevice; //没有找到蓝牙设备
     @BindView(R.id.avt_tv_noFindDeviceText) TextView tv_noFindDeviceText; //
+    @BindView(R.id.avt_iv_noFindDeviceIcon) ImageView iv_noFindDeviceIcon;
 
 
 
     private EventManager mAsr; //识别
-    private SpeechSynthesizer mSpeechSynthesizer; //合成
 
+    private SpeechRecognizer mIat; //科大讯飞识别
+    private com.iflytek.cloud.SpeechSynthesizer mTts; //科大讯飞合成
+
+    // 用HashMap存储听写结果
+    private HashMap<String, String> mIatResults = new LinkedHashMap<String, String>();
     private String inputResult = "";
     private AudioManager mAudioManager;
-
-    private FileOutputStream ttsFileOutputStream;
-    private BufferedOutputStream ttsBufferedOutputStream;
-    private File mediaRecorderPath; //存放蓝牙录音和语音合成蓝牙播放文件地址
 
     private ScheduledExecutorService executorService;
 
@@ -167,6 +177,14 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     public void initData() {
         //String dir = getApplicationInfo().nativeLibraryDir;
         //Log.w("dir------", dir);
+    }
+
+    /**
+     * 蓝牙控制
+     * */
+    @Override
+    public void blueOff() {
+        deviceConState(BLUETOOTH_OFF);
     }
 
     @Override
@@ -228,8 +246,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
         showPermission();
 
-        initSpeech();
+        initSpeech2();
         initTTs();
+        //initSpeech();
 
         //与gatt建立联系
         //createGattManager = new CreateGattManager(this, this);
@@ -253,22 +272,39 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         mAsr.registerListener(this);
     }
 
-    /**初始化语音合成*/
+    private void initSpeech2(){
+        mIat = SpeechRecognizer.createRecognizer(this, initListener);
+    }
+
+    private InitListener initListener = new InitListener() {
+        @Override
+        public void onInit(int i) {
+            //Log.i("initlistercoid--", i +"");
+            if(i != ErrorCode.SUCCESS){
+                ConfigUtil.showToask(VoiceTranslateActivity.this, "初始化失败，错误码：" + i );
+            }
+        }
+    };
+
     private void initTTs(){
-        mSpeechSynthesizer = SpeechSynthesizer.getInstance();
-        mSpeechSynthesizer.setContext(this);
-        mSpeechSynthesizer.setSpeechSynthesizerListener(this);
-        mSpeechSynthesizer.setAppId(GlobalKey.TTS_APP_ID);
-        mSpeechSynthesizer.setApiKey(GlobalKey.TTS_APP_KEY, GlobalKey.TTS_SECURITY_KEY);
-        mSpeechSynthesizer.auth(TtsMode.ONLINE); //在线模式
-        mSpeechSynthesizer.setParam(SpeechSynthesizer.PARAM_SPEAKER, "0");
-        mSpeechSynthesizer.initTts(TtsMode.ONLINE); //初始化在线引擎
+        mTts = com.iflytek.cloud.SpeechSynthesizer.createSynthesizer(this, initListener);
+        mTts.setParameter(com.iflytek.cloud.SpeechConstant.PARAMS, null);
+        mTts.setParameter(com.iflytek.cloud.SpeechConstant.ENGINE_TYPE, com.iflytek.cloud.SpeechConstant.TYPE_CLOUD);
+        // 设置在线合成发音人
+        mTts.setParameter(com.iflytek.cloud.SpeechConstant.VOICE_NAME, "xiaoyan");
+        //设置合成语速
+        mTts.setParameter(com.iflytek.cloud.SpeechConstant.SPEED, "40");
+        //设置合成音调
+        mTts.setParameter(com.iflytek.cloud.SpeechConstant.PITCH, "40");
+        //设置合成音量
+        //mTts.setParameter(com.iflytek.cloud.SpeechConstant.VOLUME, "50");
+        // 设置播放合成音频打断音乐播放，默认为true
+        mTts.setParameter(com.iflytek.cloud.SpeechConstant.KEY_REQUEST_FOCUS, "true");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //waveLineView.onResume();
         //获取用户手机输出位置
         UserInfoDTO userInfoDTO;
         if(GlobalParams.userInfoDTO != null){
@@ -295,7 +331,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     @Override
     protected void onPause() {
         super.onPause();
-        //waveLineView.onPause();
     }
 
     /**
@@ -359,6 +394,84 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                 }
                 break;
         }
+    }
+
+    /**
+     * 科大讯飞识别
+     * */
+    @Override
+    public void onVolumeChanged(int percent, byte[] bytes) {
+        if(percent <= 5){
+            iv_microVolume.setImageResource(R.drawable.microphone1);
+        }else if(percent > 5 && percent <= 10){
+            iv_microVolume.setImageResource(R.drawable.microphone2);
+        }else if(percent > 10 && percent <= 15){
+            iv_microVolume.setImageResource(R.drawable.microphone3);
+        }else if(percent > 15 && percent <= 20){
+            iv_microVolume.setImageResource(R.drawable.microphone4);
+        }else{
+            iv_microVolume.setImageResource(R.drawable.microphone5);
+        }
+    }
+
+    @Override
+    public void onBeginOfSpeech() {
+        //ConfigUtil.showToask(VoiceTranslateActivity.this, "开始讲话");
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+        showVolmn(false);
+        //ConfigUtil.showToask(VoiceTranslateActivity.this, "停止说话");
+    }
+
+    @Override
+    public void onResult(RecognizerResult recognizerResult, boolean b) {
+        Log.i("rescoidjs--", recognizerResult.getResultString());
+        printResult(recognizerResult);
+    }
+
+    @Override
+    public void onError(com.iflytek.cloud.SpeechError speechError) {
+        showVolmn(false);
+        if(speechError != null){
+            ConfigUtil.showToask(this, speechError.getPlainDescription(true));
+        }
+    }
+
+    @Override
+    public void onEvent(int i, int i1, int i2, Bundle bundle) {
+
+    }
+
+    private void printResult(RecognizerResult results) {
+        String text = JsonParser.parseIatResult(results.getResultString());
+
+        String sn = null;
+        JSONObject resultJson = null;
+        // 读取json结果中的sn字段
+        try {
+            resultJson = new JSONObject(results.getResultString());
+            sn = resultJson.optString("sn");
+
+            mIatResults.put(sn, text);
+
+            if(!resultJson.getBoolean("ls")){
+                return;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            for (String key : mIatResults.keySet()) {
+                builder.append(mIatResults.get(key));
+            }
+            speechToTransAndSynt(builder.toString());
+            if(mIatResults != null){
+                mIatResults.clear();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**语音识别后自动翻译合成*/
@@ -492,109 +605,78 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
                 mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                mSpeechSynthesizer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC),
                         AudioManager.FX_KEY_CLICK);
                 mAudioManager.setSpeakerphoneOn(true);
-                mSpeechSynthesizer.speak(dst);
+                mTts.setParameter(com.iflytek.cloud.SpeechConstant.STREAM_TYPE, "3");
+                startTTsCode(dst);
             }else{
                 //从听筒出
                 mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-                mSpeechSynthesizer.setAudioStreamType(AudioManager.STREAM_VOICE_CALL);
                 mAudioManager.setSpeakerphoneOn(false);
-                mSpeechSynthesizer.speak(dst);
-                //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
+                mTts.setParameter(com.iflytek.cloud.SpeechConstant.STREAM_TYPE, "0");
+                startTTsCode(dst);
             }
         }else{
             //手机入，耳机出
-            //mSpeechSynthesizer.synthesize(dst, UTTERANCE_ID);
-            /*mAudioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
-            mAudioManager.setSpeakerphoneOn(false);
-            if(!mAudioManager.isBluetoothA2dpOn()){
-                mAudioManager.setBluetoothA2dpOn(true);
-            }
-            mAudioManager.setRouting(AudioManager.MODE_IN_COMMUNICATION, AudioManager.ROUTE_BLUETOOTH_A2DP,
-                    AudioManager.ROUTE_BLUETOOTH);*/
             mAudioManager.setMode(AudioManager.MODE_NORMAL);
-            //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
             mAudioManager.setSpeakerphoneOn(false);
-            mSpeechSynthesizer.speak(dst);
+            mTts.setParameter(com.iflytek.cloud.SpeechConstant.STREAM_TYPE, "3");
+            startTTsCode(dst);
+
         }
     }
 
+    private void startTTsCode(String text){
+        int code = mTts.startSpeaking(text, mTtsListener);
+        if(code != ErrorCode.SUCCESS){
+            ConfigUtil.showToask(this, "合成失败，错误码：" + code);
+        }
+    }
 
     /**
-     * 语音合成回调
-     * */
-    @Override
-    public void onSynthesizeStart(String utteranceId) {
-        //合成过程开始
-        if(UTTERANCE_ID.equals(utteranceId)){
-            Log.i("合成过程开始", "合成过程开始");
-            try {
-                mediaRecorderPath = getPathFile(true);
-                ttsFileOutputStream = new FileOutputStream(mediaRecorderPath);
-                ttsBufferedOutputStream = new BufferedOutputStream(ttsFileOutputStream);
-            } catch (IOException e) {
-                e.printStackTrace();
+     *科大讯飞合成回调
+     **/
+    private SynthesizerListener mTtsListener = new SynthesizerListener() {
+        @Override
+        public void onSpeakBegin() {
+            showPlayAni();
+        }
+
+        @Override
+        public void onBufferProgress(int i, int i1, int i2, String s) {
+
+        }
+
+        @Override
+        public void onSpeakPaused() {
+
+        }
+
+        @Override
+        public void onSpeakResumed() {
+
+        }
+
+        @Override
+        public void onSpeakProgress(int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onCompleted(com.iflytek.cloud.SpeechError speechError) {
+            stopAni();
+            if(speechError != null){
+                ConfigUtil.showToask(VoiceTranslateActivity.this, speechError.getPlainDescription(true));
             }
         }
 
-    }
+        @Override
+        public void onEvent(int i, int i1, int i2, Bundle bundle) {
 
-    @Override
-    public void onSynthesizeDataArrived(String utteranceId, byte[] audioData, int progress) {
-        //合成数据过程中的回调接口，返回合成数据和进度，分多次回调
-        if(UTTERANCE_ID.equals(utteranceId)){
-            Log.i("合成数据过程中的回调接口", "合成数据过程中的回调接口");
-            try {
-                ttsBufferedOutputStream.write(audioData);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
+    };
 
-    }
-
-    @Override
-    public void onSynthesizeFinish(String utteranceId) {
-        //合成正常结束状态
-        if(UTTERANCE_ID.equals(utteranceId)){
-            close();
-            if(!isPhone && !FROM_PHONE_MIC){
-                //从手机听筒出
-                AudioRecordUtil.startPlayFromCall(this, mediaRecorderPath, mAudioManager);
-            }
-        }
-
-    }
-
-    @Override
-    public void onError(String utteranceId, SpeechError speechError) {
-        ConfigUtil.showToask(this, "合成" + speechError.description);
-    }
-
-    private void close(){
-        if(ttsBufferedOutputStream != null){
-            try {
-                ttsBufferedOutputStream.flush();
-                ttsBufferedOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ttsBufferedOutputStream = null;
-        }
-
-        if(ttsFileOutputStream != null){
-            try {
-                ttsFileOutputStream.close();
-                ttsFileOutputStream = null;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     /**
      * 个人设置
@@ -626,7 +708,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
      * */
     @Override
     public void bluetoothOff() {
-        isBluetoothConned = false;
         deviceConState(BLUETOOTH_OFF);
     }
 
@@ -708,6 +789,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             mAudioManager.stopBluetoothSco();
             mAudioManager.setBluetoothScoOn(false);
             stopSpeech();
+            showVolmn(false);
         }
     }
 
@@ -744,6 +826,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             case MotionEvent.ACTION_UP:
                 //结束录音
                 isSpeech = false;
+                showVolmn(false);
                 stopSpeech();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -758,7 +841,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     /**中文输入*/
     private void toCNSpeech(boolean flag){
-        String  json;
+       /* String  json;
         if(flag){
             json = new JSONObject(SpeechAsrStartParamManager.getInstance()
                     .createCN()
@@ -770,12 +853,18 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     .createBlue(mediaRecorderPath.getAbsolutePath())
                     .build()).toString();
         }
-        mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);
+        mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);*/
+       setIatParam();
+        // 设置语言
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.LANGUAGE, "zh_cn");
+        // 设置语言区域
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.ACCENT, "mandarin");
+        startIatResult();
     }
 
     /**英文输入*/
     private void toENSpeech(boolean flag){
-        String  json;
+        /*String  json;
         if(flag){
             json = new JSONObject(SpeechAsrStartParamManager.getInstance()
                     .createEN()
@@ -787,38 +876,47 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                     .createBlue(mediaRecorderPath.getAbsolutePath())
                     .build()).toString();
         }
-        mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);
+        mAsr.send(SpeechConstant.ASR_START, json, null, 0, 0);*/
+        setIatParam();
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.LANGUAGE, "en_us");
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.ACCENT, null);
+        startIatResult();
+    }
+
+    private void setIatParam(){
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.PARAMS, null);
+        // 设置听写引擎
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.ENGINE_TYPE, com.iflytek.cloud.SpeechConstant.TYPE_CLOUD);
+        // 设置返回结果格式
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.RESULT_TYPE, "json");
+
+        // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.VAD_BOS,  "4000");
+
+        // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.VAD_EOS, "1000");
+
+        // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
+        mIat.setParameter(com.iflytek.cloud.SpeechConstant.ASR_PTT,  "1");
+    }
+
+    private void startIatResult(){
+        int ret = mIat.startListening(this);
+        if(ret != ErrorCode.SUCCESS){
+            ConfigUtil.showToask(this, "听写失败：" + ret);
+        }else {
+            showVolmn(true);
+        }
     }
 
     private void stopSpeech(){
-        if(mAsr == null){
+       /* if(mAsr == null){
             return;
         }
-        mAsr.send(SpeechConstant.ASR_STOP, "{}", null, 0, 0);
-    }
-
-    private File getPathFile(boolean flag){
-        File ttsFile;
-        if(flag){ //true是蓝牙播放 false是从蓝牙录音
-            ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.PLAY_PATH);
-            Log.i("ttfile", ttsFile.getAbsolutePath());
-        }else {
-            ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.RECORDER_PATH);
-            Log.i("ttfile", ttsFile.getAbsolutePath());
-        }
-
-        //ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.DEMO_PATH);
-        //Log.i("ttfile", ttsFile.getAbsolutePath());
-        if(ttsFile.exists()){
-            ttsFile.delete();
-        }
-
-        try {
-            ttsFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ttsFile;
+        mAsr.send(SpeechConstant.ASR_STOP, "{}", null, 0, 0);*/
+       if(mIat.isListening()){
+           mIat.stopListening();
+       }
     }
 
     /**
@@ -846,10 +944,17 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             mAsr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
             mAsr = null;
         }
-        if(mSpeechSynthesizer != null){
-            mSpeechSynthesizer.setSpeechSynthesizerListener(null);
-            mSpeechSynthesizer.release();
-            mSpeechSynthesizer = null;
+        if(mIat != null){
+            if(mIat.isListening()){
+                mIat.cancel();
+            }
+            mIat.destroy();
+            mIat = null;
+        }
+        if(mTts != null){
+            mTts.stopSpeaking();
+            mTts.destroy();
+            mTts = null;
         }
         if (executorService != null){
             executorService.shutdown();
@@ -870,10 +975,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             createBlueManager.onMyDestroy();
             createBlueManager = null;
         }
-        /*if(waveLineView != null){
-            waveLineView.release();
-            waveLineView = null;
-        }*/
         animationDrawable = null;
         mBluetoothAdapter = null;
         currPlayImage = null;
@@ -899,11 +1000,12 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
     private void deviceConState(String state){
         switch (state){
             case BLUETOOTH_OFF:
+                isBluetoothConned = false;
                 showVolmn(false);
                 stopSpeech();
                 stopAni();
                 GlobalParams.BlUETOOTH_DEVICE = null;
-                checkDisOrConn(true, "请打开蓝牙,连接耳机,方能使用翻译功能");
+                checkDisOrConn(true, "请先开启系统蓝牙功能\n并连接TOPPERS E1");
                 break;
             case A2DP_DISCONNECTED:
                 GlobalParams.BlUETOOTH_DEVICE = null;
@@ -935,6 +1037,11 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     private void checkDisOrConn(boolean flag, String s){
         if(flag){
+            if(s.contains("TOPPERS E1")){
+                iv_noFindDeviceIcon.setImageResource(R.mipmap.blue_off);
+            }else{
+                iv_noFindDeviceIcon.setImageResource(R.mipmap.no_find_device);
+            }
             ll_noFindDevice.setVisibility(View.VISIBLE);
             tv_noFindDeviceText.setText(s);
             showOrHide(true);
@@ -960,7 +1067,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             iv_showConIcon.setVisibility(View.VISIBLE);
             tv_showConText.setVisibility(View.VISIBLE);
             tv_showConText.setText("连接成功");
-
             checkPoolState();
             executorService.schedule(new Runnable() {
                 @Override
@@ -977,20 +1083,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
     }
 
-    @Override
-    public void onSpeechStart(String s) {
-        showPlayAni();
-    }
-
-    @Override
-    public void onSpeechProgressChanged(String s, int i) {
-
-    }
-
-    @Override
-    public void onSpeechFinish(String s) {
-        stopAni();
-    }
 
     private void showPlayAni(){
         runOnUiThread(new Runnable() {
@@ -1021,7 +1113,9 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
 
                 if(animationDrawable != null && animationDrawable.isRunning()){
                     animationDrawable.stop();
-                    mSpeechSynthesizer.stop();
+                    if(mTts.isSpeaking()){
+                        mTts.stopSpeaking();
+                    }
                     if(currPlayImage != null){
                         currPlayImage.setImageResource(R.drawable.tts_voice_playing3);
                     }
@@ -1053,7 +1147,6 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
             @Override
             public void run() {
                 if(flag){
-                    //waveLineView.setVisibility(View.VISIBLE);
                     iv_microVolume.setImageResource(R.drawable.microphone1);
                     ll_showWlv.setVisibility(View.VISIBLE);
                     if(isPhone){
@@ -1070,10 +1163,7 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
                         }
                     }
                     tv_showInputType.setVisibility(View.VISIBLE);
-                    //waveLineView.startAnim();
                 }else{
-                    //waveLineView.stopAnim();
-                    //waveLineView.setVisibility(View.GONE);
                     tv_showInputType.setVisibility(View.GONE);
                     ll_showWlv.setVisibility(View.GONE);
                 }
@@ -1081,4 +1171,28 @@ public class VoiceTranslateActivity extends BaseActivity implements EventListene
         });
     }
 
+
+    private File getPathFile(boolean flag){
+        File ttsFile;
+        if(flag){ //true是蓝牙播放 false是从蓝牙录音
+            ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.PLAY_PATH);
+            Log.i("ttfile", ttsFile.getAbsolutePath());
+        }else {
+            ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.RECORDER_PATH);
+            Log.i("ttfile", ttsFile.getAbsolutePath());
+        }
+
+        //ttsFile = new File(CacheManager.createTmpDir(this, GlobalParams.FILE_NAME), GlobalParams.DEMO_PATH);
+        //Log.i("ttfile", ttsFile.getAbsolutePath());
+        if(ttsFile.exists()){
+            ttsFile.delete();
+        }
+
+        try {
+            ttsFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ttsFile;
+    }
 }

@@ -160,12 +160,10 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface{
                     try {
                         //result = ByteTransform.bytes2String(buffer);
                         result = new String(buffer);
+                        getBlueInputStream(result);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    Log.i("bytes--", bytes + "");
-                    Log.i("result---", result);
-                    getBlueInputStream(result);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -205,7 +203,6 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface{
             public void run() {
                 if(data != null){
                     gattManagerInterface.gattOrder(data);
-                    Log.i("data---", data);
                 }
             }
         });

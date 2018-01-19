@@ -509,7 +509,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     /**
      * 语音合成
      * */
-    private void createSynthesizer(String dst){
+    private synchronized void createSynthesizer(String dst){
         super.progressDialog.dismiss();
         if(!isPhone){
             //从耳机入，手机出

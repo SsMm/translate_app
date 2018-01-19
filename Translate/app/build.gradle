@@ -60,7 +60,6 @@ android {
         debug {
             debuggable true
             minifyEnabled false
-            //signingConfig signingConfigs.debug
         }
     }
 

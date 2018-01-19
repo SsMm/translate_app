@@ -24,9 +24,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class com.baidu.speech.**{*;}
--keep class com.baidu.tts.**{*;}
--keep class com.baidu.speechsynthesizer.**{*;}
 
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public class * extends com.bumptech.glide.module.AppGlideModule
@@ -39,84 +36,139 @@
 -keepresourcexmlelements manifest/application/meta-data@value=GlideModule
 
 -keep class com.umeng.commonsdk.** {*;}
-  -dontusemixedcaseclassnames
-    -dontshrink
-    -dontoptimize
-    -dontwarn com.google.android.maps.**
-    -dontwarn android.webkit.WebView
-    -dontwarn com.umeng.**
-    -dontwarn com.tencent.weibo.sdk.**
-    -dontwarn com.facebook.**
-    -keep public class javax.**
-    -keep public class android.webkit.**
-    -dontwarn android.support.v4.**
-    -keep enum com.facebook.**
-    -keepattributes Exceptions,InnerClasses,Signature
-    -keepattributes *Annotation*
-    -keepattributes SourceFile,LineNumberTable
+-dontusemixedcaseclassnames
+-dontshrink
+-dontoptimize
+-dontwarn com.google.android.maps.**
+-dontwarn android.webkit.WebView
+-dontwarn com.umeng.**
+-dontwarn com.tencent.weibo.sdk.**
+-dontwarn com.facebook.**
+-keep public class javax.**
+-keep public class android.webkit.**
+-dontwarn android.support.v4.**
+-keep enum com.facebook.**
+-keepattributes Exceptions,InnerClasses,Signature
+-keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
 
-    -keep public interface com.facebook.**
-    -keep public interface com.tencent.**
-    -keep public interface com.umeng.socialize.**
-    -keep public interface com.umeng.socialize.sensor.**
-    -keep public interface com.umeng.scrshot.**
-    -keep class com.android.dingtalk.share.ddsharemodule.** { *; }
-    -keep public class com.umeng.socialize.* {*;}
+-keep public interface com.facebook.**
+-keep public interface com.tencent.**
+-keep public interface com.umeng.socialize.**
+-keep public interface com.umeng.socialize.sensor.**
+-keep public interface com.umeng.scrshot.**
+-keep class com.android.dingtalk.share.ddsharemodule.** { *; }
+-keep public class com.umeng.socialize.* {*;}
 
 
-    -keep class com.facebook.**
-    -keep class com.facebook.** { *; }
-    -keep class com.umeng.scrshot.**
-    -keep public class com.tencent.** {*;}
-    -keep class com.umeng.socialize.sensor.**
-    -keep class com.umeng.socialize.handler.**
-    -keep class com.umeng.socialize.handler.*
-    -keep class com.umeng.weixin.handler.**
-    -keep class com.umeng.weixin.handler.*
-    -keep class com.umeng.qq.handler.**
-    -keep class com.umeng.qq.handler.*
-    -keep class UMMoreHandler{*;}
-    -keep class com.tencent.mm.sdk.modelmsg.WXMediaMessage {*;}
-    -keep class com.tencent.mm.sdk.modelmsg.** implements   com.tencent.mm.sdk.modelmsg.WXMediaMessage$IMediaObject {*;}
-    -keep class im.yixin.sdk.api.YXMessage {*;}
-    -keep class im.yixin.sdk.api.** implements im.yixin.sdk.api.YXMessage$YXMessageData{*;}
-    -keep class com.tencent.mm.sdk.** {
-     *;
+-keep class com.facebook.**
+-keep class com.facebook.** { *; }
+-keep class com.umeng.scrshot.**
+-keep public class com.tencent.** {*;}
+-keep class com.umeng.socialize.sensor.**
+-keep class com.umeng.socialize.handler.**
+-keep class com.umeng.socialize.handler.*
+-keep class com.umeng.weixin.handler.**
+-keep class com.umeng.weixin.handler.*
+-keep class com.umeng.qq.handler.**
+-keep class com.umeng.qq.handler.*
+-keep class UMMoreHandler{*;}
+-keep class com.tencent.mm.sdk.modelmsg.WXMediaMessage {*;}
+-keep class com.tencent.mm.sdk.modelmsg.** implements   com.tencent.mm.sdk.modelmsg.WXMediaMessage$IMediaObject {*;}
+-keep class im.yixin.sdk.api.YXMessage {*;}
+-keep class im.yixin.sdk.api.** implements im.yixin.sdk.api.YXMessage$YXMessageData{*;}
+-keep class com.tencent.mm.sdk.** {
+ *;
+}
+-keep class com.tencent.mm.opensdk.** {
+*;
+}
+-dontwarn twitter4j.**
+-keep class twitter4j.** { *; }
+
+-keep class com.tencent.** {*;}
+-dontwarn com.tencent.**
+-keep public class com.umeng.com.umeng.soexample.R$*{
+public static final int *;
+}
+-keep public class com.linkedin.android.mobilesdk.R$*{
+public static final int *;
     }
-    -keep class com.tencent.mm.opensdk.** {
+-keepclassmembers enum * {
+public static **[] values();
+public static ** valueOf(java.lang.String);
+}
+
+-keep class com.tencent.open.TDialog$*
+-keep class com.tencent.open.TDialog$* {*;}
+-keep class com.tencent.open.PKDialog
+-keep class com.tencent.open.PKDialog {*;}
+-keep class com.tencent.open.PKDialog$*
+-keep class com.tencent.open.PKDialog$* {*;}
+
+-keep class com.sina.** {*;}
+-dontwarn com.sina.**
+-keep class  com.alipay.share.sdk.** {
    *;
-    }
-    -dontwarn twitter4j.**
-    -keep class twitter4j.** { *; }
+}
+-keepnames class * implements android.os.Parcelable {
+public static final ** CREATOR;
+}
 
-    -keep class com.tencent.** {*;}
-    -dontwarn com.tencent.**
-    -keep public class com.umeng.com.umeng.soexample.R$*{
-    public static final int *;
-    }
-    -keep public class com.linkedin.android.mobilesdk.R$*{
-    public static final int *;
-        }
-    -keepclassmembers enum * {
-    public static **[] values();
-    public static ** valueOf(java.lang.String);
-    }
+-keep class com.linkedin.** { *; }
+-keepattributes Signature
 
-    -keep class com.tencent.open.TDialog$*
-    -keep class com.tencent.open.TDialog$* {*;}
-    -keep class com.tencent.open.PKDialog
-    -keep class com.tencent.open.PKDialog {*;}
-    -keep class com.tencent.open.PKDialog$*
-    -keep class com.tencent.open.PKDialog$* {*;}
+-keep class com.iflytek.**{*;}
+-keepattributes Signature
 
-    -keep class com.sina.** {*;}
-    -dontwarn com.sina.**
-    -keep class  com.alipay.share.sdk.** {
-       *;
-    }
-    -keepnames class * implements android.os.Parcelable {
-    public static final ** CREATOR;
-    }
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}
+-keep class android.support.**{*;}
 
-    -keep class com.linkedin.** { *; }
-    -keepattributes Signature
+# Platform calls Class.forName on types which do not exist on Android to determine platform.
+-dontnote retrofit2.Platform
+# Platform used when running on Java 8 VMs. Will not be used at runtime.
+-dontwarn retrofit2.Platform$Java8
+# Retain generic type information for use by reflection by converters and adapters.
+-keepattributes Signature
+# Retain declared checked exceptions for use by a Proxy instance.
+-keepattributes Exceptions
+
+#-dontwarn okio.**
+
+-dontwarn java.lang.invoke.*
+-dontwarn **$$Lambda$*
+
+-keep class com.google.gson.** { *; }
+-dontwarn com.google.gson.**
+-keep class sun.misc.Unsafe { *; }
+-keepattributes *Annotation*
+-keep class com.zgy.translate.domains.** { *; }
+# Explicitly preserve all serialization members. The Serializable interface
+# is only a marker interface, so it wouldn't save them.
+-keepclassmembers class * implements java.io.Serializable {
+static final long serialVersionUID;
+private static final java.io.ObjectStreamField[] serialPersistentFields;
+private void writeObject(java.io.ObjectOutputStream);
+ private void readObject(java.io.ObjectInputStream);
+ java.lang.Object writeReplace();
+java.lang.Object readResolve();
+}
+-keep public class * implements java.io.Serializable {*;}
+
+-dontwarn android.webkit.WebView
+-keep public class android.webkit.**
+
+-keepclassmembers class ** {
+    @org.greenrobot.eventbus.Subscribe <methods>;
+}
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
+
+# Only required if you use AsyncExecutor
+-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
+    <init>(java.lang.Throwable);
+}
+
+-keep public class com.zgy.translate.R$*{
+public static final int *;
+}

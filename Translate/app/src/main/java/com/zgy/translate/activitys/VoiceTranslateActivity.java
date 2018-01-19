@@ -100,6 +100,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     @BindView(R.id.avt_ll_noFindDevice) LinearLayout ll_noFindDevice; //没有找到蓝牙设备
     @BindView(R.id.avt_tv_noFindDeviceText) TextView tv_noFindDeviceText; //
     @BindView(R.id.avt_iv_noFindDeviceIcon) ImageView iv_noFindDeviceIcon;
+    @BindView(R.id.avt_iv_guide) ImageView iv_guide; //引导用户使用
 
 
 
@@ -127,6 +128,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     private volatile boolean isClick = false; //false是录完音自动播放，true是点击在此播放
     private boolean isNet = true; //网络连接情况
     private boolean isBluetoothConned = false; //蓝牙连接
+    private int i = 0; //引导点击次数
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -292,6 +294,23 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
             deviceConState(BLUETOOTH_OFF);
         }
 
+        if(UserMessageManager.readLoginUser(this) == null){
+            iv_guide.setBackground(getResources().getDrawable(R.mipmap.first_1));
+            iv_guide.setVisibility(View.VISIBLE);
+            iv_guide.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    i++;
+                    if(i != 2){
+                        iv_guide.setBackground(getResources().getDrawable(R.mipmap.first_2));
+                    }else {
+                        iv_guide.setVisibility(View.GONE);
+                        UserMessageManager.saveLoginUser(VoiceTranslateActivity.this, "1");
+                        i = 0;
+                    }
+                }
+            });
+        }
     }
 
     @Override

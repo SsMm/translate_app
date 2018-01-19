@@ -43,14 +43,9 @@ public class GlobalInit {
     private static GlobalInit globalInit;
     private AppApplication appApplication;
     private Context appContext;
-    private final boolean isDebug = false;
 
-    public static BluetoothLeService mBluetoothLeService;
-    public static ServiceConnection mServiceConnection;
 
-    public static List<BluetoothLeConnectionDTO> leConnectionDTOList = new ArrayList<>(); //ble蓝牙连接集合
     public static List<BluetoothSocketDTO> bluetoothSocketDTOList = new ArrayList<>(); //传统蓝牙连接集合
-    public static Map<BluetoothDevice, Boolean> askBlueMap = new HashMap<>();
 
 
     public static GlobalInit getInstance() {
@@ -107,7 +102,7 @@ public class GlobalInit {
         //String channel = WalleChannelReader.getChannel(appContext);
         //Bugly.setAppChannel(appContext, channel);
         //UMConfigure.init(appContext, "", channel, UMConfigure.DEVICE_TYPE_PHONE, null);
-        Bugly.init(appContext, "ac5bd004b5", isDebug);
+        Bugly.init(appContext, "ac5bd004b5", false);
     }
 
     /**

@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.zgy.translate.controllers.ActivityController;
 import com.zgy.translate.domains.dtos.UserInfoDTO;
 import com.zgy.translate.utils.SharedPreferencesUtil;
+import com.zgy.translate.utils.StringUtil;
 
 /**
  * Created by zhou on 2017/5/23.
@@ -24,7 +25,7 @@ public class UserMessageManager {
      * 保存当前登录用户
      * */
     public static void saveLoginUser(Context context, String data){
-        SharedPreferencesUtil.saveShare(context, USER_ID, data, USER);
+        SharedPreferencesUtil.saveShare(context, USER_ID, "1", USER);
     }
 
     /**
@@ -32,7 +33,7 @@ public class UserMessageManager {
      * */
     public static String readLoginUser(Context context){
         String result = SharedPreferencesUtil.readShare(context, USER_ID, USER);
-        if(TextUtils.isEmpty(result)){
+        if(StringUtil.isEmpty(result)){
             return null;
         }else{
             return result;

@@ -125,7 +125,6 @@ public class RequestController {
             requestMap.put(KEY_PHONE, request.getPhone());
         }
 
-        Log.i("remap--", requestMap.size() + "");
         switch (tag){
            case SEND_CODE:
                callResponse = apiServiceInterface.send_code(requestMap);

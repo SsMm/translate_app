@@ -55,7 +55,7 @@ public class OkhttpHttp {
         HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
             @Override
             public void log(String message) {
-                Log.i("message",message);
+                //Log.i("message",message);
             }
         });
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);

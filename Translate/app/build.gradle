@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.jakewharton.butterknife'
-//apply from: 'tinker-support.gradle'
+apply from: 'tinker-support.gradle'
 //apply from: 'multiple-channel.gradle'
 
 android {

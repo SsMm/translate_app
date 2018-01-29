@@ -67,7 +67,7 @@ public class GlobalInit {
 
     private void baseInit(){
         //initLeakCanary();
-        //initBuglyCrashReport();
+        initBuglyCrashReport();
         initUtility();
         initSImagePicker();
         initShareSDK();

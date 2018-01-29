@@ -25,6 +25,8 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
+import me.drakeet.support.toast.ToastCompat;
+
 /**
  * Created by zhouguangyue on 2017/7/26.
  */
@@ -36,7 +38,12 @@ public class ConfigUtil {
      * Toask
      * */
     public static void showToask(Context context, String content){
-        Toast.makeText(context.getApplicationContext(),content,Toast.LENGTH_LONG).show();
+        if(Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1){
+            ToastCompat.makeText(context.getApplicationContext(), content, Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(context.getApplicationContext(),content,Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     /**progress*/

@@ -179,8 +179,7 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.SYSTEM_ALERT_WINDOW)
+                Manifest.permission.ACCESS_COARSE_LOCATION)
                 .subscribe(granted -> {
                     if(!granted){
                         ConfigUtil.showToask(this, "请在手机设置中打开相应权限！");

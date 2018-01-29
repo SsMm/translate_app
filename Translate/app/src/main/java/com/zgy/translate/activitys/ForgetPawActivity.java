@@ -33,6 +33,7 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
     @BindView(R.id.afpp_tv_sendCode) TextView tv_sendCode;
 
     private boolean isSend = false;
+    private CountDownTimer countDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,7 +146,7 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
     }
 
     private void codeTime() {
-        CountDownTimer countDownTimer = new CountDownTimer(60 * 1000, 1000) {
+         countDownTimer = new CountDownTimer(60 * 1000, 1000) {
             @Override
             public void onTick(long l) {
                 long time = l / 1000;
@@ -157,12 +158,17 @@ public class ForgetPawActivity extends BaseActivity implements CommonBar.CommonB
                 isSend = false;
                 tv_sendCode.setText("发送验证码");
             }
-        }.start();
+        };
+        countDownTimer.start();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(countDownTimer != null){
+            countDownTimer.cancel();
+            countDownTimer = null;
+        }
         RequestController.getInstance().removeParams();
     }
 

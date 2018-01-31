@@ -785,6 +785,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
             ConfigUtil.showToask(this, "听写失败：" + ret);
         }else {
             showVolmn(true);
+            stopAni();
         }
     }
 
@@ -844,6 +845,10 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
         if(createBlueManager != null){
             createBlueManager.onMyDestroy();
             createBlueManager = null;
+        }
+        if(mAudioManager != null){
+            mAudioManager.setMode(AudioManager.MODE_NORMAL);
+            mAudioManager = null;
         }
         animationDrawable = null;
         mBluetoothAdapter = null;

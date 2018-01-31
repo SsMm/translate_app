@@ -318,6 +318,13 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
         super.onPause();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mAudioManager != null){
+            mAudioManager.setMode(AudioManager.MODE_NORMAL);
+        }
+    }
 
     /**
      * 科大讯飞识别

@@ -74,7 +74,9 @@ public class CreateBlueManager implements BluetoothProfileManagerInterface{
     @Override
     public void getA2DPProfileFinish(boolean result) {
         if(result){
-            profileManager.closeProfileProxy();
+            if(profileManager != null){
+                profileManager.closeProfileProxy();
+            }
             if(GlobalParams.BlUETOOTH_DEVICE != null){
                 connectThread(GlobalParams.BlUETOOTH_DEVICE);
             }else{

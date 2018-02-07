@@ -352,11 +352,13 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     @Override
     public void onEndOfSpeech() {
         showVolmn(false);
+        isSpeech = false;
         if(!isPhone){
-            isSpeech = false;
             mAudioManager.stopBluetoothSco();
             mAudioManager.setBluetoothScoOn(false);
         }
+        stopSpeech();
+
         //ConfigUtil.showToask(VoiceTranslateActivity.this, "停止说话");
     }
 
@@ -522,8 +524,8 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
             //从耳机入，手机出
             if(FROM_PHONE_MIC){ //从麦克风出
                 mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC),
-                        AudioManager.FX_KEY_CLICK);
+                /*mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC),
+                        AudioManager.FX_KEY_CLICK);*/
                 mAudioManager.setSpeakerphoneOn(true);
                 mTts.setParameter(com.iflytek.cloud.SpeechConstant.STREAM_TYPE, "3");
                 startTTsCode(dst);
@@ -744,6 +746,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
             case MotionEvent.ACTION_MOVE:
                 break;
             default:
+                isSpeech = false;
                 showVolmn(false);
                 stopSpeech();
                 break;

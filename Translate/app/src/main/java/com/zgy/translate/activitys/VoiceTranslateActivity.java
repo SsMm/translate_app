@@ -122,6 +122,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     private CreateGattManager createGattManager;
     private CreateBlueManager createBlueManager;
     private BluetoothAdapter mBluetoothAdapter;
+    private BroadcastReceiver scoReceiver;
     private volatile AnimationDrawable animationDrawable;
     private volatile ImageView currPlayImage;
 
@@ -356,6 +357,10 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
         if(!isPhone){
             mAudioManager.stopBluetoothSco();
             mAudioManager.setBluetoothScoOn(false);
+        }
+        if(scoReceiver != null){
+            unregisterReceiver(scoReceiver);
+            scoReceiver = null;
         }
         stopSpeech();
 
@@ -682,29 +687,40 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
             isSpeech = true;
             mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             mAudioManager.startBluetoothSco();
-            registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
-                    if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
-                        mAudioManager.setBluetoothScoOn(true);
-                        mAudioManager.setMicrophoneMute(false);
-                        if(!isLeftLangCN){
-                            toCNSpeech(true);
-                        }else{
-                            toENSpeech(true);
-                        }
-                        unregisterReceiver(this);
-                    }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
-                        isSpeech = false;
-                        ConfigUtil.showToask(VoiceTranslateActivity.this, "打开耳机失败，请尝试重新连接耳机蓝牙！");
-                        mAudioManager.stopBluetoothSco();
-                        unregisterReceiver(this);
+            initSCOReceiver();
+        }
+    }
+
+    private void initSCOReceiver(){
+        scoReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, -1);
+                if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
+                    mAudioManager.setBluetoothScoOn(true);
+                    //mAudioManager.setMicrophoneMute(false);
+                    if(!isLeftLangCN){
+                        toCNSpeech(true);
+                    }else{
+                        toENSpeech(true);
+                    }
+                    //unregisterReceiver(this);
+                }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
+                    isSpeech = false;
+                    showVolmn(false);
+                    stopSpeech();
+                    ConfigUtil.showToask(VoiceTranslateActivity.this, "打开耳机失败，请尝试重新连接耳机蓝牙！");
+                    mAudioManager.stopBluetoothSco();
+                    mAudioManager.setBluetoothScoOn(false);
+                    //unregisterReceiver(this);
+                    if(scoReceiver != null){
+                        unregisterReceiver(scoReceiver);
+                        scoReceiver = null;
                     }
                 }
-            }, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
-
-        }
+            }
+        };
+        registerReceiver(scoReceiver, new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED));
     }
 
     /**
@@ -859,6 +875,10 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
         if(mAudioManager != null){
             mAudioManager.setMode(AudioManager.MODE_NORMAL);
             mAudioManager = null;
+        }
+        if(scoReceiver != null){
+            unregisterReceiver(scoReceiver);
+            scoReceiver = null;
         }
         animationDrawable = null;
         mBluetoothAdapter = null;

@@ -58,7 +58,7 @@ public class ConfigUtil {
         //设置ProgressDialog 的进度条是否不明确
         weakReference.get().setIndeterminate(false);
         //设置ProgressDialog 是否可以按退回按键取消
-        weakReference.get().setCancelable(false);
+        weakReference.get().setCancelable(true);
         return weakReference.get();
     }
 

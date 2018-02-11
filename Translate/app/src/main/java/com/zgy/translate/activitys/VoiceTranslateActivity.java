@@ -354,7 +354,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     public void onEndOfSpeech() {
         showVolmn(false);
         isSpeech = false;
-        if(!isPhone){
+        if(!isPhone && mAudioManager.isBluetoothScoOn()){
             mAudioManager.stopBluetoothSco();
             mAudioManager.setBluetoothScoOn(false);
         }
@@ -375,9 +375,25 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
 
     @Override
     public void onError(com.iflytek.cloud.SpeechError speechError) {
-        showVolmn(false);
+        stopSpeech();
         if(speechError != null){
-            ConfigUtil.showToask(this, speechError.getPlainDescription(true));
+            if(speechError.getPlainDescription(true).contains("20006")){
+                if(!isPhone){
+                    mAudioManager.stopBluetoothSco();
+                    mAudioManager.setBluetoothScoOn(false);
+                }
+                unregisterSCO();
+                if(!isLeftLangCN){
+                    toCNSpeech(true);
+                }else{
+                    toENSpeech(true);
+                }
+            }else{
+                isSpeech = false;
+                showVolmn(false);
+                ConfigUtil.showToask(this, speechError.getPlainDescription(true));
+            }
+
         }
     }
 
@@ -1076,6 +1092,12 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
         });
     }
 
+    private void unregisterSCO(){
+        if(scoReceiver != null){
+            unregisterReceiver(scoReceiver);
+            scoReceiver = null;
+        }
+    }
 
     private File getPathFile(boolean flag){
         File ttsFile;

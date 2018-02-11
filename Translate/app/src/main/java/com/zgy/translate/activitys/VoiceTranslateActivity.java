@@ -130,6 +130,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     private boolean isNet = true; //网络连接情况
     private boolean isBluetoothConned = false; //蓝牙连接
     private int i = 0; //引导点击次数
+    private boolean isBlueSpeech = false; //耳机录音失败标识
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -381,6 +382,7 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
                 if(!isPhone){
                     mAudioManager.stopBluetoothSco();
                     mAudioManager.setBluetoothScoOn(false);
+                    isBlueSpeech = true;
                 }
                 unregisterSCO();
                 if(!isLeftLangCN){
@@ -701,9 +703,18 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
             //启动
             isPhone = false;
             isSpeech = true;
-            mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            mAudioManager.startBluetoothSco();
-            initSCOReceiver();
+            if(!isBlueSpeech){
+                mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                mAudioManager.startBluetoothSco();
+                initSCOReceiver();
+            }else{
+                if(!isLeftLangCN){
+                    toCNSpeech(true);
+                }else{
+                    toENSpeech(true);
+                }
+            }
+
         }
     }
 

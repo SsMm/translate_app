@@ -358,15 +358,10 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
         showVolmn(false);
         isSpeech = false;
         if(!isPhone && mAudioManager.isBluetoothScoOn()){
-            mAudioManager.stopBluetoothSco();
             mAudioManager.setBluetoothScoOn(false);
-        }
-        if(scoReceiver != null){
-            unregisterReceiver(scoReceiver);
-            scoReceiver = null;
+            mAudioManager.stopBluetoothSco();
         }
         stopSpeech();
-
         //ConfigUtil.showToask(VoiceTranslateActivity.this, "停止说话");
     }
 
@@ -382,11 +377,10 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
         if(speechError != null){
             if(speechError.getPlainDescription(true).contains("20006")){
                 if(!isPhone){
-                    mAudioManager.stopBluetoothSco();
                     mAudioManager.setBluetoothScoOn(false);
+                    mAudioManager.stopBluetoothSco();
                     isBlueSpeech = true;
                 }
-                unregisterSCO();
                 if(!isLeftLangCN){
                     toCNSpeech(true);
                 }else{
@@ -567,6 +561,10 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
             }
         }else{
             //手机入，耳机出
+            if(mAudioManager.isBluetoothScoOn()){
+                mAudioManager.setBluetoothScoOn(false);
+                mAudioManager.stopBluetoothSco();
+            }
             mAudioManager.setMode(AudioManager.MODE_NORMAL);
             mAudioManager.setSpeakerphoneOn(false);
             mTts.setParameter(com.iflytek.cloud.SpeechConstant.STREAM_TYPE, "3");
@@ -732,22 +730,21 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
                 if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
                     mAudioManager.setBluetoothScoOn(true);
                     //mAudioManager.setMicrophoneMute(false);
-                    mIat.setParameter(SpeechConstant.BLUETOOTH, "1");
+                    //mIat.setParameter(SpeechConstant.BLUETOOTH, "1");
                     if(!isLeftLangCN){
                         toCNSpeech(true);
                     }else{
                         toENSpeech(true);
                     }
-                }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
-                    isSpeech = false;
-                    showVolmn(false);
-                    stopSpeech();
-                    ConfigUtil.showToask(VoiceTranslateActivity.this, "打开耳机失败，请尝试重新连接耳机蓝牙！");
-                    if(mAudioManager.isBluetoothScoOn()){
-                        mAudioManager.stopBluetoothSco();
-                        mAudioManager.setBluetoothScoOn(false);
-                    }
                     unregisterSCO();
+                }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
+                    //ConfigUtil.showToask(VoiceTranslateActivity.this, "正在开启录音，请稍等...");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    mAudioManager.startBluetoothSco();
                 }
             }
         };

@@ -1066,7 +1066,8 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE)
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.BROADCAST_STICKY)
                 .subscribe(granted -> {
                     if(!granted){
                         ConfigUtil.showToask(this, "请在手机设置中打开相应权限！");

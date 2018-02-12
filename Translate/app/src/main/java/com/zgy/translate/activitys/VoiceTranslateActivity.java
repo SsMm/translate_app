@@ -26,6 +26,8 @@ import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerListener;
 import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechEvent;
 import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.SynthesizerListener;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -400,8 +402,12 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     }
 
     @Override
-    public void onEvent(int i, int i1, int i2, Bundle bundle) {
-
+    public void onEvent(int eventType, int i1, int i2, Bundle obj) {
+        if (SpeechEvent.EVENT_SESSION_ID == eventType) {
+            String sid = obj.getString(SpeechEvent.KEY_EVENT_SESSION_ID);
+            Log.d("event---", "session id =" + sid);
+            ConfigUtil.showToask(this, "session id =" + sid);
+        }
     }
 
     private void printResult(RecognizerResult results) {
@@ -726,24 +732,22 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
                 if(AudioManager.SCO_AUDIO_STATE_CONNECTED == state){
                     mAudioManager.setBluetoothScoOn(true);
                     //mAudioManager.setMicrophoneMute(false);
+                    mIat.setParameter(SpeechConstant.BLUETOOTH, "1");
                     if(!isLeftLangCN){
                         toCNSpeech(true);
                     }else{
                         toENSpeech(true);
                     }
-                    //unregisterReceiver(this);
                 }else if(AudioManager.SCO_AUDIO_STATE_DISCONNECTED == state){
                     isSpeech = false;
                     showVolmn(false);
                     stopSpeech();
                     ConfigUtil.showToask(VoiceTranslateActivity.this, "打开耳机失败，请尝试重新连接耳机蓝牙！");
-                    mAudioManager.stopBluetoothSco();
-                    mAudioManager.setBluetoothScoOn(false);
-                    //unregisterReceiver(this);
-                    if(scoReceiver != null){
-                        unregisterReceiver(scoReceiver);
-                        scoReceiver = null;
+                    if(mAudioManager.isBluetoothScoOn()){
+                        mAudioManager.stopBluetoothSco();
+                        mAudioManager.setBluetoothScoOn(false);
                     }
+                    unregisterSCO();
                 }
             }
         };
@@ -816,20 +820,20 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
     }
 
     private void setIatParam(){
-        mIat.setParameter(com.iflytek.cloud.SpeechConstant.PARAMS, null);
+        mIat.setParameter(SpeechConstant.PARAMS, null);
         // 设置听写引擎
-        mIat.setParameter(com.iflytek.cloud.SpeechConstant.ENGINE_TYPE, com.iflytek.cloud.SpeechConstant.TYPE_CLOUD);
+        mIat.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
         // 设置返回结果格式
-        mIat.setParameter(com.iflytek.cloud.SpeechConstant.RESULT_TYPE, "json");
+        mIat.setParameter(SpeechConstant.RESULT_TYPE, "json");
 
         // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理
-        mIat.setParameter(com.iflytek.cloud.SpeechConstant.VAD_BOS,  "4000");
+        mIat.setParameter(SpeechConstant.VAD_BOS,  "10000");
 
         // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音
-        mIat.setParameter(com.iflytek.cloud.SpeechConstant.VAD_EOS, "1000");
+        mIat.setParameter(SpeechConstant.VAD_EOS, "10000");
 
         // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
-        mIat.setParameter(com.iflytek.cloud.SpeechConstant.ASR_PTT,  "1");
+        mIat.setParameter(SpeechConstant.ASR_PTT,  "1");
     }
 
     private void startIatResult(){

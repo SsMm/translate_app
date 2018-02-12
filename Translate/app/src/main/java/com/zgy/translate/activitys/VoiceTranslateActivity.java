@@ -403,11 +403,11 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
 
     @Override
     public void onEvent(int eventType, int i1, int i2, Bundle obj) {
-        if (SpeechEvent.EVENT_SESSION_ID == eventType) {
+        /*if (SpeechEvent.EVENT_SESSION_ID == eventType) {
             String sid = obj.getString(SpeechEvent.KEY_EVENT_SESSION_ID);
             Log.d("event---", "session id =" + sid);
             ConfigUtil.showToask(this, "session id =" + sid);
-        }
+        }*/
     }
 
     private void printResult(RecognizerResult results) {

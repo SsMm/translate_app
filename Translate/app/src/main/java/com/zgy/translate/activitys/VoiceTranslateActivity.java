@@ -561,10 +561,9 @@ public class VoiceTranslateActivity extends BaseActivity implements VoiceTransla
             }
         }else{
             //手机入，耳机出
-            if(mAudioManager.isBluetoothScoOn()){
-                mAudioManager.setBluetoothScoOn(false);
-                mAudioManager.stopBluetoothSco();
-            }
+
+            mAudioManager.stopBluetoothSco();
+
             mAudioManager.setMode(AudioManager.MODE_NORMAL);
             mAudioManager.setSpeakerphoneOn(false);
             mTts.setParameter(com.iflytek.cloud.SpeechConstant.STREAM_TYPE, "3");
